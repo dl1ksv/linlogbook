@@ -1,0 +1,198 @@
+<ui version="4.0" >
+ <class>CreateDatabaseFields</class>
+ <widget class="QDialog" name="CreateDatabaseFields" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>744</width>
+    <height>431</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Create Database Fields</string>
+  </property>
+  <widget class="QWidget" name="layoutWidget" >
+   <property name="geometry" >
+    <rect>
+     <x>50</x>
+     <y>370</y>
+     <width>623</width>
+     <height>28</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" >
+    <property name="spacing" >
+     <number>6</number>
+    </property>
+    <property name="leftMargin" >
+     <number>0</number>
+    </property>
+    <property name="topMargin" >
+     <number>0</number>
+    </property>
+    <property name="rightMargin" >
+     <number>0</number>
+    </property>
+    <property name="bottomMargin" >
+     <number>0</number>
+    </property>
+    <item>
+     <spacer>
+      <property name="orientation" >
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" >
+       <size>
+        <width>272</width>
+        <height>26</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item>
+     <widget class="QDialogButtonBox" name="buttonBox" >
+      <property name="orientation" >
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="standardButtons" >
+       <set>QDialogButtonBox::Cancel|QDialogButtonBox::NoButton|QDialogButtonBox::Ok</set>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <spacer>
+      <property name="orientation" >
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" >
+       <size>
+        <width>181</width>
+        <height>26</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QTableView" name="adifTable" >
+   <property name="geometry" >
+    <rect>
+     <x>22</x>
+     <y>11</y>
+     <width>221</width>
+     <height>331</height>
+    </rect>
+   </property>
+   <property name="sizePolicy" >
+    <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="insertField" >
+   <property name="geometry" >
+    <rect>
+     <x>260</x>
+     <y>120</y>
+     <width>51</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="toolTip" >
+    <string>Insert Field in QSO Table</string>
+   </property>
+   <property name="text" >
+    <string>>></string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="deleteField" >
+   <property name="geometry" >
+    <rect>
+     <x>260</x>
+     <y>210</y>
+     <width>51</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="toolTip" >
+    <string>Delete Field from QSO Table</string>
+   </property>
+   <property name="text" >
+    <string>&lt;&lt;</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="moveDown" >
+   <property name="geometry" >
+    <rect>
+     <x>540</x>
+     <y>320</y>
+     <width>41</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>v</string>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="moveUp" >
+   <property name="geometry" >
+    <rect>
+     <x>420</x>
+     <y>320</y>
+     <width>51</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="text" >
+    <string>^</string>
+   </property>
+  </widget>
+  <widget class="QTableView" name="qsoTableFields" >
+   <property name="geometry" >
+    <rect>
+     <x>340</x>
+     <y>20</y>
+     <width>361</width>
+     <height>291</height>
+    </rect>
+   </property>
+  </widget>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>CreateDatabaseFields</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>248</x>
+     <y>254</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>CreateDatabaseFields</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>316</x>
+     <y>260</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>
