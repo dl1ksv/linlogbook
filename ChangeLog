@@ -1,0 +1,62 @@
+LinLogBook 0.??
+
+Regexp for time value changed, leading zero now required, corresponding to adif spezification 
+
+LinLogBook 0.4
+As in the meantime the ADIF specification  distinguishes between the different ways  ( bureau, eqs, lotw )  sending qsl, LinLogBook is able to keep track of these ways.
+Modified File menu, now depending on the different qsl_sent fileds selected in the database definition.
+
+LinLogBook 0.3.1
+
+Now the menu item 'Server' will be enabled if database is automatically opened on startup.
+Some error messages give more informations.
+
+Important! Sometimes changes were not written back into the database, so the changes were lost. This bug is now fixed.
+
+LinLogBook 0.3
+
+Printer module for labeling  qsl cards.
+Make menu selection depending on the context.
+
+LinLogBook 0.2.1
+
+Fixed some bugs in import /export when containing the character '
+The list of qsos will now be ordered by QSO_DATE (, TIME_ON or TIME_OFF ). The later depends on the fields you defined in your linlogbook.
+Due to problems with some features of qt, this requires to create a view.
+If you are going to update see the README or the documentation how to do.
+
+LinLogBook 0.2
+
+Importfunction for cty.dat
+Displaying Continent, Country, WAZ Zone and ITU Zone for a callsign. The Informations are taken from the imported cty.dat file.
+
+Changed design of table qsos. The references to reference tables ( of enumeration types) are now explicitly set to type integer. 
+
+Implemented the possibility to get statistics by defining views and selects.
+The file Statistics.sql creates two statistics and can serve as example for own implementations.
+
+
+LinLogBook 0.1.2
+
+Some minor bugfixes
+Filename for saving database definitions is now selectable
+Selective export for eqsl upload
+Define default settings for a qso record. These settings will be applied if they are not entered by the user. At the moment settings for enumerations and numerical datatypes - for instane Tx Power - can be choosen 
+ 
+LinLogBook 0.1.1
+
+Improved Widgetmanagement, LinLog should now behave well on Mac OSX ( 10.4).
+
+The size of the edit/search region and the diplay region can now be changed dynamically.
+
+The port , the LinLog server listens on, is now selectable in the setup menu.
+
+If no qso date or time is set, saving a qso record fills in the actual qso date and time ( time of your pc clock ! ).
+
+Fixed , that LinLog did not display the first retrieved record. Not until a second record was retrieved, the display was correct.
+
+LinLogBook 0.1
+
+Basic features introduced,
+Defining different logbook structures
+Inserting, searching, editing, importing /exporting adif files 

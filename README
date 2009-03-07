@@ -1,0 +1,20 @@
+LinLogBook is a highly configurable logbook program.
+
+To build LinLogBook, untar the tar archiv and switch to the LinLog directory.
+
+run:
+qmake -unix -o Makefile linlog.pro
+make
+The executable linlog is build in the bin subdirectory. Move the binary into prefered location , probably /usr/local/bin
+It is recommended that you create a working directory for LinLog. For instance create .LinLog in your homedirectory and copy the file BaseTables.sql into this working directory.
+Now you can start linlog and choose your personal setup.
+
+See the documentation in the doc directory for more information.
+
+Begining with version 0.2 LinLogBook has a simple interface to calculate statistics by the means of using sql commands.
+The file Statistics.sql contains two examples. For more details see the documentation.
+
+Important!!
+
+If you upgrade from 0.2 modify the file updateBaseTables-0.2-0.2.1.sql by removing the % sign in front of the line that fits to your logbook definition. Then run this file from the edit Menu -> update BaseTables.
+If you don't so , you won't see your qso entries when starting LinLogBook 0.2.1. But the entries are not lost. You will see these data again as soon as you run the update script and restarting LinLogBook.
