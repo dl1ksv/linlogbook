@@ -335,7 +335,7 @@ void LinLogBook::createQSOTable()
 {
   QSqlQuery qy;
 
-  qy.exec ( QLatin1String ( "select * from LinLogBookFields" ) );
+  qy.exec ( QLatin1String ( "select * from LinLogFields" ) );
   qy.setForwardOnly ( true );
   QString statement ( QLatin1String ( "CREATE TABLE qsos ( Id INTEGER PRIMARY KEY AUTOINCREMENT," ) );
   bool first;
@@ -517,25 +517,25 @@ void LinLogBook::importAdifFile()
               Status = adifName;
               break;
             case insertRecord:
-              {
-                QString statement ( QLatin1String ( "insert into qsos (" ) );
+            {
+              QString statement ( QLatin1String ( "insert into qsos (" ) );
 
-                statement.append ( paramNameList );
-                statement.append ( QLatin1String ( ") values(" ) );
-                statement.append ( paramValueList );
-                statement.append ( QLatin1String ( ");" ) );
-                QSqlQuery qy ( statement );
-                if ( qy.isActive() )
-                  count++;
-                else
-                  qDebug ( "Error in insert" );
-              }
-              pos++;
-              actLine = actLine.mid ( pos );
-              paramNameList.clear();
-              paramValueList.clear();
-              Status = Record;
-              break;
+              statement.append ( paramNameList );
+              statement.append ( QLatin1String ( ") values(" ) );
+              statement.append ( paramValueList );
+              statement.append ( QLatin1String ( ");" ) );
+              QSqlQuery qy ( statement );
+              if ( qy.isActive() )
+                count++;
+              else
+                qDebug ( "Error in insert" );
+            }
+            pos++;
+            actLine = actLine.mid ( pos );
+            paramNameList.clear();
+            paramValueList.clear();
+            Status = Record;
+            break;
             default:
               actLine.clear();
               break;
@@ -712,7 +712,7 @@ void LinLogBook::saveInput()
         editQso->setData ( I , QVariant ( QTime::currentTime().toString ( QLatin1String ( "HHmm" ) ) ), Qt::EditRole );
     }
 
-    if ( ok = editQso->submitAll() )
+    if ( ( ok = editQso->submitAll() ) )
     {
       qsoTable->select();
       clearInput();
@@ -820,7 +820,7 @@ void LinLogBook::prepareViews()
   databaseFields.clear();
   fieldsTypes.clear();
   linlogFields.clear();
-  qy.exec ( QLatin1String ( "select * from LinLogBookFields" ) );
+  qy.exec ( QLatin1String ( "select * from LinLogFields" ) );
   qy.setForwardOnly ( true );
   while ( qy.next() )
   {
@@ -947,7 +947,6 @@ int LinLogBook::prepareItem ( QString s, QString *s1, QString *s2 )
     qDebug ( "Falscher Aufbau" );
     return -1;
   }
-  paramValue = actLine.left ( valueLength );
   pos++;
   actLine = actLine.mid ( pos );
   pos = actLine.indexOf ( QRegExp ( QLatin1String ( ":|>" ) ) );
