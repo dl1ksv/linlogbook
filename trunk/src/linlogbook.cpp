@@ -772,10 +772,17 @@ void LinLogBook::takeEntry ( QModelIndex i )
 }
 void LinLogBook::deleteEntry()
 {
-  bool ok = editQso->removeRow ( editQsoRecord->currentIndex().row() );
-  ok = editQso->submitAll();
-  qsoTable->select();
-  clearInput();
+  int i=editQsoRecord->currentIndex().row();
+  if ( i >= 0 )
+  {
+    bool ok = editQso->removeRow ( editQsoRecord->currentIndex().row() );
+    ok = editQso->submitAll();
+    qsoTable->select();
+    clearInput();
+  }
+  else
+    QMessageBox::warning ( 0, tr ( "Delete" ), tr ( "No entry selected\n" )  , QMessageBox::Ok );
+
 }
 void LinLogBook::deleteAllEntries()
 {
