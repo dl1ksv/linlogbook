@@ -55,6 +55,7 @@ LinLogBook::LinLogBook ( QWidget* parent, Qt::WFlags fl )
 {
   setupUi ( this );
   setWindowTitle ( QLatin1String ( VERSION ) );
+  setWindowIcon ( QIcon ( ":/images/linlogbook.png" ) );
   readSettings();
   dbStatus = -1;
   editQso = 0;
