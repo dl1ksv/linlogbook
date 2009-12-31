@@ -1,0 +1,1 @@
+CREATE TABLE qslcards(Id INTEGER PRIMARY KEY,card blob);
