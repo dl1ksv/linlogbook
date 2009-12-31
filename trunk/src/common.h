@@ -16,39 +16,24 @@
  *   along with this program; if not, write to the                         *
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
- ***************************************************************************/
-#ifndef QSOSERVERTHREAD_H
-#define QSOSERVERTHREAD_H
+ ***************************************************************************//*
+ * File:   common.h
+ * Author: schroer
+ *
+ * Created on 13. Dezember 2009, 17:52
+ */
 
-#include <QThread>
-#include <QTcpSocket>
-#include "common.h"
-/**
- @author Volker Schroer <dl1ksv@gmx.de>
-*/
+#ifndef _COMMON_H
+#define	_COMMON_H
 
-class QTcpSocket;
+    struct CallSignInfo {
+        QString mainPrefix;
+        QString wazZone;
+        QString ituZone;
+        QString countryName;
+        QString continent;
+        bool worked;
+    };
 
-class QsoServerThread : public QThread
-{
-		Q_OBJECT
-	public:
-//  QsoServerThread ( int socketId, QObject *parent = 0 );
-		QsoServerThread ( QTcpSocket *, QObject *parent = 0 );
-		void run();
-		void answerRequest ( CallSignInfo );
-	private:
-		int socketId;
-		QTcpSocket *tcpSocket;
+#endif	/* _COMMON_H */
 
-	private slots:
-		void readData();
-		void save();
-		CallSignInfo getCallSignInfo ( QString callSign );
-	signals:
-		void error ( QTcpSocket::SocketError socketError );
-		void qsoElement ( QString );
-		void saveQsoData();
-};
-
-#endif

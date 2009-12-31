@@ -20,6 +20,9 @@
 #include "qsoserverthread.h"
 #include <QDataStream>
 #include <QSqlQuery>
+#include <QRegExp>
+#include <QVariant>
+
 QsoServerThread::QsoServerThread ( QTcpSocket *p, QObject *parent )
 		: QThread ( parent )
 {
@@ -67,7 +70,7 @@ void QsoServerThread::save()
 	quit();
 	tcpSocket->deleteLater();
 }
-void QsoServerThread::answerRequest ( LinLogBook::CallSignInfo info )
+void QsoServerThread::answerRequest ( CallSignInfo info )
 {
 
 char c;
@@ -88,12 +91,12 @@ tcpSocket->write(&c,1);
 		tcpSocket->write(QString( tr("no" )).toLatin1(),2);
 tcpSocket->write(&c,1);
 }
-LinLogBook::CallSignInfo QsoServerThread::getCallSignInfo ( QString callSign )
+CallSignInfo QsoServerThread::getCallSignInfo ( QString callSign )
 {
 	QString s;
 	bool ok;
 	QSqlQuery qy;
-	LinLogBook::CallSignInfo info;
+	CallSignInfo info;
 	info.mainPrefix.clear();
 	info.wazZone.clear();
 	info.ituZone.clear();

@@ -1,8 +1,9 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <author>Volker Schroer</author>
  <class>MainWindow</class>
- <widget class="QMainWindow" name="MainWindow" >
-  <property name="geometry" >
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
@@ -10,95 +11,98 @@
     <height>626</height>
    </rect>
   </property>
-  <property name="sizePolicy" >
-   <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
   </property>
-  <property name="minimumSize" >
+  <property name="minimumSize">
    <size>
     <width>600</width>
     <height>400</height>
    </size>
   </property>
-  <property name="sizeIncrement" >
+  <property name="sizeIncrement">
    <size>
     <width>15</width>
     <height>10</height>
    </size>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>LinLogBook</string>
   </property>
-  <property name="windowIcon" >
+  <property name="windowIcon">
    <iconset>
     <normaloff/>
    </iconset>
   </property>
-  <property name="animated" >
+  <property name="animated">
    <bool>true</bool>
   </property>
-  <widget class="QWidget" name="centralwidget" >
-   <property name="sizePolicy" >
-    <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+  <widget class="QWidget" name="centralwidget">
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
-   <property name="minimumSize" >
+   <property name="minimumSize">
     <size>
      <width>600</width>
      <height>350</height>
     </size>
    </property>
-   <layout class="QGridLayout" >
-    <item row="0" column="0" >
-     <widget class="QSplitter" name="splitter" >
-      <property name="orientation" >
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="QSplitter" name="splitter">
+      <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
-      <widget class="QWidget" name="layoutWidget" >
-       <layout class="QVBoxLayout" >
+      <property name="childrenCollapsible">
+       <bool>false</bool>
+      </property>
+      <widget class="QWidget" name="layoutWidget">
+       <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <layout class="QHBoxLayout" >
+         <layout class="QHBoxLayout">
           <item>
-           <widget class="QLabel" name="label" >
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+           <widget class="QLabel" name="label">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="minimumSize" >
+            <property name="minimumSize">
              <size>
               <width>50</width>
               <height>20</height>
              </size>
             </property>
-            <property name="text" >
+            <property name="text">
              <string>Callsign</string>
             </property>
-            <property name="textFormat" >
+            <property name="textFormat">
              <enum>Qt::PlainText</enum>
             </property>
-            <property name="scaledContents" >
+            <property name="scaledContents">
              <bool>false</bool>
             </property>
-            <property name="alignment" >
+            <property name="alignment">
              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
             </property>
-            <property name="indent" >
+            <property name="indent">
              <number>0</number>
             </property>
-            <property name="textInteractionFlags" >
+            <property name="textInteractionFlags">
              <set>Qt::NoTextInteraction</set>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="findCallsign" >
-            <property name="maximumSize" >
+           <widget class="QLineEdit" name="findCallsign">
+            <property name="maximumSize">
              <size>
               <width>150</width>
               <height>16777215</height>
@@ -108,10 +112,10 @@
           </item>
           <item>
            <spacer>
-            <property name="orientation" >
+            <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
-            <property name="sizeHint" stdset="0" >
+            <property name="sizeHint" stdset="0">
              <size>
               <width>451</width>
               <height>20</height>
@@ -122,26 +126,26 @@
          </layout>
         </item>
         <item>
-         <widget class="EditQsoView" name="editQsoRecord" >
-          <property name="sizePolicy" >
-           <sizepolicy vsizetype="MinimumExpanding" hsizetype="Expanding" >
+         <widget class="EditQsoView" name="editQsoRecord">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
             <horstretch>1</horstretch>
             <verstretch>1</verstretch>
            </sizepolicy>
           </property>
-          <property name="minimumSize" >
+          <property name="minimumSize">
            <size>
             <width>500</width>
-            <height>50</height>
+            <height>80</height>
            </size>
           </property>
-          <property name="sizeIncrement" >
+          <property name="sizeIncrement">
            <size>
             <width>10</width>
             <height>1</height>
            </size>
           </property>
-          <property name="baseSize" >
+          <property name="baseSize">
            <size>
             <width>0</width>
             <height>0</height>
@@ -150,129 +154,148 @@
          </widget>
         </item>
         <item>
-         <layout class="QHBoxLayout" >
+         <layout class="QHBoxLayout">
           <item>
-           <widget class="QLabel" name="mainPrefix" >
-            <property name="minimumSize" >
+           <widget class="QLabel" name="mainPrefix">
+            <property name="minimumSize">
              <size>
               <width>110</width>
               <height>0</height>
              </size>
             </property>
-            <property name="contextMenuPolicy" >
+            <property name="contextMenuPolicy">
              <enum>Qt::NoContextMenu</enum>
             </property>
-            <property name="frameShape" >
+            <property name="frameShape">
              <enum>QFrame::Box</enum>
             </property>
-            <property name="frameShadow" >
+            <property name="frameShadow">
              <enum>QFrame::Raised</enum>
             </property>
-            <property name="text" >
+            <property name="text">
              <string>Main Prefix:</string>
             </property>
-            <property name="textFormat" >
+            <property name="textFormat">
              <enum>Qt::PlainText</enum>
             </property>
-            <property name="textInteractionFlags" >
+            <property name="textInteractionFlags">
              <set>Qt::NoTextInteraction</set>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="continent" >
-            <property name="minimumSize" >
+           <widget class="QLabel" name="continent">
+            <property name="minimumSize">
              <size>
               <width>90</width>
               <height>0</height>
              </size>
             </property>
-            <property name="frameShape" >
+            <property name="frameShape">
              <enum>QFrame::Box</enum>
             </property>
-            <property name="frameShadow" >
+            <property name="frameShadow">
              <enum>QFrame::Raised</enum>
             </property>
-            <property name="text" >
+            <property name="text">
              <string>Continent: </string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="countryName" >
-            <property name="minimumSize" >
+           <widget class="QLabel" name="countryName">
+            <property name="minimumSize">
              <size>
               <width>280</width>
               <height>0</height>
              </size>
             </property>
-            <property name="frameShape" >
+            <property name="frameShape">
              <enum>QFrame::Box</enum>
             </property>
-            <property name="frameShadow" >
+            <property name="frameShadow">
              <enum>QFrame::Raised</enum>
             </property>
-            <property name="text" >
+            <property name="text">
              <string>Country Name:</string>
             </property>
-            <property name="textFormat" >
+            <property name="textFormat">
              <enum>Qt::PlainText</enum>
             </property>
-            <property name="textInteractionFlags" >
+            <property name="textInteractionFlags">
              <set>Qt::NoTextInteraction</set>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="wazZone" >
-            <property name="minimumSize" >
+           <widget class="QLabel" name="wazZone">
+            <property name="minimumSize">
              <size>
               <width>85</width>
               <height>0</height>
              </size>
             </property>
-            <property name="frameShape" >
+            <property name="frameShape">
              <enum>QFrame::Box</enum>
             </property>
-            <property name="frameShadow" >
+            <property name="frameShadow">
              <enum>QFrame::Raised</enum>
             </property>
-            <property name="text" >
+            <property name="text">
              <string>WAZ Zone:</string>
             </property>
-            <property name="textFormat" >
+            <property name="textFormat">
              <enum>Qt::PlainText</enum>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QLabel" name="ituZone" >
-            <property name="minimumSize" >
+           <widget class="QLabel" name="ituZone">
+            <property name="minimumSize">
              <size>
               <width>91</width>
               <height>0</height>
              </size>
             </property>
-            <property name="frameShape" >
+            <property name="frameShape">
              <enum>QFrame::Box</enum>
             </property>
-            <property name="frameShadow" >
+            <property name="frameShadow">
              <enum>QFrame::Raised</enum>
             </property>
-            <property name="text" >
+            <property name="text">
              <string>ITU Zone:</string>
             </property>
-            <property name="textFormat" >
+            <property name="textFormat">
              <enum>Qt::PlainText</enum>
             </property>
            </widget>
           </item>
           <item>
+           <widget class="QLabel" name="distanceValue">
+            <property name="minimumSize">
+             <size>
+              <width>110</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="frameShape">
+             <enum>QFrame::Box</enum>
+            </property>
+            <property name="frameShadow">
+             <enum>QFrame::Raised</enum>
+            </property>
+            <property name="text">
+             <string>Distance: </string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <spacer>
-            <property name="orientation" >
+            <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
-            <property name="sizeHint" stdset="0" >
+            <property name="sizeHint" stdset="0">
              <size>
               <width>21</width>
               <height>20</height>
@@ -283,90 +306,90 @@
          </layout>
         </item>
         <item>
-         <layout class="QHBoxLayout" >
+         <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
-           <widget class="QPushButton" name="clearRecord" >
-            <property name="enabled" >
+           <widget class="QPushButton" name="clearRecord">
+            <property name="enabled">
              <bool>false</bool>
             </property>
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="minimumSize" >
+            <property name="minimumSize">
              <size>
               <width>40</width>
               <height>20</height>
              </size>
             </property>
-            <property name="sizeIncrement" >
+            <property name="sizeIncrement">
              <size>
               <width>0</width>
               <height>0</height>
              </size>
             </property>
-            <property name="baseSize" >
+            <property name="baseSize">
              <size>
               <width>40</width>
               <height>20</height>
              </size>
             </property>
-            <property name="text" >
+            <property name="text">
              <string>Clear</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="saveRecord" >
-            <property name="enabled" >
+           <widget class="QPushButton" name="saveRecord">
+            <property name="enabled">
              <bool>false</bool>
             </property>
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="minimumSize" >
+            <property name="minimumSize">
              <size>
               <width>50</width>
               <height>20</height>
              </size>
             </property>
-            <property name="maximumSize" >
+            <property name="maximumSize">
              <size>
               <width>16777215</width>
               <height>16777215</height>
              </size>
             </property>
-            <property name="sizeIncrement" >
+            <property name="sizeIncrement">
              <size>
               <width>0</width>
               <height>0</height>
              </size>
             </property>
-            <property name="baseSize" >
+            <property name="baseSize">
              <size>
               <width>50</width>
               <height>20</height>
              </size>
             </property>
-            <property name="text" >
+            <property name="text">
              <string>&amp;Save</string>
             </property>
-            <property name="shortcut" >
+            <property name="shortcut">
              <string>Alt+S</string>
             </property>
            </widget>
           </item>
           <item>
            <spacer>
-            <property name="orientation" >
+            <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
-            <property name="sizeHint" stdset="0" >
+            <property name="sizeHint" stdset="0">
              <size>
               <width>30</width>
               <height>20</height>
@@ -375,61 +398,61 @@
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="deleteRecord" >
-            <property name="enabled" >
+           <widget class="QPushButton" name="deleteRecord">
+            <property name="enabled">
              <bool>false</bool>
             </property>
-            <property name="sizePolicy" >
-             <sizepolicy vsizetype="Fixed" hsizetype="Preferred" >
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
               <horstretch>5</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="maximumSize" >
+            <property name="maximumSize">
              <size>
               <width>80</width>
               <height>16777215</height>
              </size>
             </property>
-            <property name="baseSize" >
+            <property name="baseSize">
              <size>
               <width>50</width>
               <height>20</height>
              </size>
             </property>
-            <property name="text" >
+            <property name="text">
              <string>Delete</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QPushButton" name="deleteAll" >
-            <property name="enabled" >
+           <widget class="QPushButton" name="deleteAll">
+            <property name="enabled">
              <bool>false</bool>
             </property>
-            <property name="minimumSize" >
+            <property name="minimumSize">
              <size>
               <width>100</width>
               <height>0</height>
              </size>
             </property>
-            <property name="baseSize" >
+            <property name="baseSize">
              <size>
               <width>100</width>
               <height>0</height>
              </size>
             </property>
-            <property name="text" >
+            <property name="text">
              <string>Delete All Entries</string>
             </property>
            </widget>
           </item>
           <item>
            <spacer>
-            <property name="orientation" >
+            <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
-            <property name="sizeHint" stdset="0" >
+            <property name="sizeHint" stdset="0">
              <size>
               <width>30</width>
               <height>20</height>
@@ -438,86 +461,56 @@
            </spacer>
           </item>
           <item>
-           <widget class="QGroupBox" name="groupBox" >
-            <property name="minimumSize" >
-             <size>
-              <width>260</width>
-              <height>45</height>
-             </size>
+           <widget class="QLabel" name="label_2">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
             </property>
-            <property name="baseSize" >
-             <size>
-              <width>240</width>
-              <height>45</height>
-             </size>
+            <property name="text">
+             <string>Default Band</string>
             </property>
-            <property name="title" >
-             <string>Defaults</string>
-            </property>
-            <property name="flat" >
-             <bool>false</bool>
-            </property>
-            <widget class="QWidget" name="layoutWidget_1" >
-             <property name="geometry" >
-              <rect>
-               <x>3</x>
-               <y>10</y>
-               <width>251</width>
-               <height>29</height>
-              </rect>
-             </property>
-             <layout class="QHBoxLayout" >
-              <property name="spacing" >
-               <number>1</number>
-              </property>
-              <property name="topMargin" >
-               <number>1</number>
-              </property>
-              <property name="bottomMargin" >
-               <number>1</number>
-              </property>
-              <item>
-               <widget class="QLabel" name="label_2" >
-                <property name="sizePolicy" >
-                 <sizepolicy vsizetype="Fixed" hsizetype="MinimumExpanding" >
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text" >
-                 <string>Band</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QComboBox" name="defaultBand" />
-              </item>
-              <item>
-               <widget class="QLabel" name="label_3" >
-                <property name="sizePolicy" >
-                 <sizepolicy vsizetype="Fixed" hsizetype="MinimumExpanding" >
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="text" >
-                 <string>Mode</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QComboBox" name="defaultMode" />
-              </item>
-             </layout>
-            </widget>
            </widget>
           </item>
           <item>
-           <spacer>
-            <property name="orientation" >
+           <widget class="QComboBox" name="defaultBand"/>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
-            <property name="sizeHint" stdset="0" >
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_3">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Default Mode</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="defaultMode"/>
+          </item>
+          <item>
+           <spacer>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
              <size>
               <width>40</width>
               <height>20</height>
@@ -529,366 +522,393 @@
         </item>
        </layout>
       </widget>
-      <widget class="QTableView" name="qsoList" >
-       <property name="sizePolicy" >
-        <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
-         <horstretch>2</horstretch>
-         <verstretch>1</verstretch>
-        </sizepolicy>
+      <widget class="QTabWidget" name="differentViews">
+       <property name="currentIndex">
+        <number>0</number>
        </property>
-       <property name="minimumSize" >
-        <size>
-         <width>0</width>
-         <height>200</height>
-        </size>
-       </property>
-       <property name="sizeIncrement" >
-        <size>
-         <width>10</width>
-         <height>10</height>
-        </size>
-       </property>
-       <property name="baseSize" >
-        <size>
-         <width>580</width>
-         <height>150</height>
-        </size>
-       </property>
-       <property name="sortingEnabled" >
-        <bool>true</bool>
-       </property>
+       <widget class="QWidget" name="widget">
+        <attribute name="title">
+         <string>Overview</string>
+        </attribute>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <item>
+          <widget class="QTableView" name="qsoList">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <horstretch>2</horstretch>
+             <verstretch>1</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>200</height>
+            </size>
+           </property>
+           <property name="sizeIncrement">
+            <size>
+             <width>10</width>
+             <height>10</height>
+            </size>
+           </property>
+           <property name="baseSize">
+            <size>
+             <width>580</width>
+             <height>150</height>
+            </size>
+           </property>
+           <property name="sortingEnabled">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tab2">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <attribute name="title">
+         <string>Details</string>
+        </attribute>
+        <layout class="QGridLayout" name="gridLayout_2">
+         <item row="0" column="0">
+          <widget class="DetailView" name="detailView" native="true"/>
+         </item>
+        </layout>
+       </widget>
       </widget>
      </widget>
     </item>
    </layout>
   </widget>
-  <widget class="QMenuBar" name="menubar" >
-   <property name="geometry" >
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
      <width>892</width>
-     <height>29</height>
+     <height>25</height>
     </rect>
    </property>
-   <property name="defaultUp" >
+   <property name="defaultUp">
     <bool>false</bool>
    </property>
-   <widget class="QMenu" name="menuAbout" >
-    <property name="title" >
+   <widget class="QMenu" name="menuAbout">
+    <property name="title">
      <string>About</string>
     </property>
-    <addaction name="actionAboutLinLogBook" />
-    <addaction name="actionAboutctydat" />
-    <addaction name="actionAboutQT" />
+    <addaction name="actionAboutLinLogBook"/>
+    <addaction name="actionAboutctydat"/>
+    <addaction name="actionAboutQT"/>
    </widget>
-   <widget class="QMenu" name="menuFile" >
-    <property name="statusTip" >
+   <widget class="QMenu" name="menuFile">
+    <property name="statusTip">
      <string>Opens / creates Database</string>
     </property>
-    <property name="title" >
+    <property name="title">
      <string>File</string>
     </property>
-    <addaction name="actionOpenDatabase" />
-    <addaction name="actionNewDatabase" />
-    <addaction name="separator" />
-    <addaction name="actionExportforEQSLUpload" />
-    <addaction name="actionExportforLotWUpload" />
-    <addaction name="separator" />
-    <addaction name="actionPrintQSLCard" />
-    <addaction name="separator" />
-    <addaction name="actionImportAdifFile" />
-    <addaction name="actionExportAdifFile" />
-    <addaction name="separator" />
-    <addaction name="actionImportCtyDat" />
-    <addaction name="separator" />
-    <addaction name="actionSaveDatabaseDefinition" />
-    <addaction name="actionSaveViews" />
-    <addaction name="separator" />
-    <addaction name="actionQuit" />
+    <addaction name="actionOpenDatabase"/>
+    <addaction name="actionNewDatabase"/>
+    <addaction name="separator"/>
+    <addaction name="actionExportforEQSLUpload"/>
+    <addaction name="actionExportforLotWUpload"/>
+    <addaction name="separator"/>
+    <addaction name="actionPrintQSLCard"/>
+    <addaction name="separator"/>
+    <addaction name="actionImportAdifFile"/>
+    <addaction name="actionExportAdifFile"/>
+    <addaction name="separator"/>
+    <addaction name="actionImportCtyDat"/>
+    <addaction name="separator"/>
+    <addaction name="actionSaveDatabaseDefinition"/>
+    <addaction name="actionSaveViews"/>
+    <addaction name="separator"/>
+    <addaction name="actionQuit"/>
    </widget>
-   <widget class="QMenu" name="menuSettings" >
-    <property name="geometry" >
+   <widget class="QMenu" name="menuSettings">
+    <property name="geometry">
      <rect>
       <x>161</x>
       <y>112</y>
-      <width>176</width>
-      <height>192</height>
+      <width>160</width>
+      <height>176</height>
      </rect>
     </property>
-    <property name="layoutDirection" >
+    <property name="layoutDirection">
      <enum>Qt::LeftToRight</enum>
     </property>
-    <property name="title" >
+    <property name="title">
      <string>Edit</string>
     </property>
-    <addaction name="actionCreateBaseTables" />
-    <addaction name="actionDefineDatabaseFields" />
-    <addaction name="actionCreateQSOTable" />
-    <addaction name="separator" />
-    <addaction name="actionUpdateBaseTables" />
-    <addaction name="separator" />
-    <addaction name="actionQSLCardSetup" />
-    <addaction name="separator" />
-    <addaction name="actionGeneralSettings" />
+    <addaction name="actionCreateBaseTables"/>
+    <addaction name="actionDefineDatabaseFields"/>
+    <addaction name="actionCreateQSOTable"/>
+    <addaction name="separator"/>
+    <addaction name="actionUpdateBaseTables"/>
+    <addaction name="separator"/>
+    <addaction name="actionQSLCardSetup"/>
+    <addaction name="separator"/>
+    <addaction name="actionGeneralSettings"/>
    </widget>
-   <widget class="QMenu" name="menuServer" >
-    <property name="enabled" >
+   <widget class="QMenu" name="menuServer">
+    <property name="enabled">
      <bool>false</bool>
     </property>
-    <property name="title" >
+    <property name="title">
      <string>Server</string>
     </property>
-    <addaction name="actionStartServer" />
-    <addaction name="actionStopServer" />
+    <addaction name="actionStartServer"/>
+    <addaction name="actionStopServer"/>
    </widget>
-   <widget class="QMenu" name="menuStatistics" >
-    <property name="enabled" >
+   <widget class="QMenu" name="menuStatistics">
+    <property name="enabled">
      <bool>false</bool>
     </property>
-    <property name="title" >
+    <property name="title">
      <string>Statistics</string>
     </property>
    </widget>
-   <addaction name="menuFile" />
-   <addaction name="menuSettings" />
-   <addaction name="menuStatistics" />
-   <addaction name="menuServer" />
-   <addaction name="menuAbout" />
+   <addaction name="menuFile"/>
+   <addaction name="menuSettings"/>
+   <addaction name="menuStatistics"/>
+   <addaction name="menuServer"/>
+   <addaction name="menuAbout"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar" />
-  <action name="actionOpenDatabase" >
-   <property name="text" >
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionOpenDatabase">
+   <property name="text">
     <string>Open Database</string>
    </property>
-   <property name="toolTip" >
+   <property name="toolTip">
     <string>Opens an existing Database</string>
    </property>
-   <property name="statusTip" >
+   <property name="statusTip">
     <string>Opens an existing Database</string>
    </property>
   </action>
-  <action name="actionGeneralSettings" >
-   <property name="text" >
+  <action name="actionGeneralSettings">
+   <property name="text">
     <string>Preferences</string>
    </property>
-   <property name="statusTip" >
+   <property name="statusTip">
     <string>Make general settings</string>
    </property>
-   <property name="menuRole" >
+   <property name="menuRole">
     <enum>QAction::NoRole</enum>
    </property>
   </action>
-  <action name="actionDefineDatabaseFields" >
-   <property name="enabled" >
+  <action name="actionDefineDatabaseFields">
+   <property name="enabled">
     <bool>false</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>Define Database Fields</string>
    </property>
-   <property name="statusTip" >
+   <property name="statusTip">
     <string>Define Database Fields you want to use</string>
    </property>
   </action>
-  <action name="actionImportAdifFile" >
-   <property name="enabled" >
+  <action name="actionImportAdifFile">
+   <property name="enabled">
     <bool>false</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>Import Adif File</string>
    </property>
-   <property name="statusTip" >
+   <property name="statusTip">
     <string>Import Data from an existig Adif File</string>
    </property>
   </action>
-  <action name="actionExportAdifFile" >
-   <property name="enabled" >
+  <action name="actionExportAdifFile">
+   <property name="enabled">
     <bool>false</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>Export Adif File</string>
    </property>
-   <property name="toolTip" >
+   <property name="toolTip">
     <string>Export Data to File in Adif File</string>
    </property>
-   <property name="statusTip" >
+   <property name="statusTip">
     <string>Export Data to File in ADIF Format</string>
    </property>
   </action>
-  <action name="actionAboutLinLogBook" >
-   <property name="text" >
+  <action name="actionAboutLinLogBook">
+   <property name="text">
     <string>About LinLogBook</string>
    </property>
   </action>
-  <action name="actionNewDatabase" >
-   <property name="text" >
+  <action name="actionNewDatabase">
+   <property name="text">
     <string>New Database</string>
    </property>
-   <property name="toolTip" >
+   <property name="toolTip">
     <string>Creates a new Database</string>
    </property>
   </action>
-  <action name="actionCreateBaseTables" >
-   <property name="enabled" >
+  <action name="actionCreateBaseTables">
+   <property name="enabled">
     <bool>false</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>Create Base Tables</string>
    </property>
   </action>
-  <action name="actionQuit" >
-   <property name="text" >
+  <action name="actionQuit">
+   <property name="text">
     <string>Quit</string>
    </property>
   </action>
-  <action name="actionCreateQSOTable" >
-   <property name="enabled" >
+  <action name="actionCreateQSOTable">
+   <property name="enabled">
     <bool>false</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>Create QSO Table</string>
    </property>
   </action>
-  <action name="actionStartServer" >
-   <property name="enabled" >
+  <action name="actionStartServer">
+   <property name="enabled">
     <bool>true</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>Start Server</string>
    </property>
-   <property name="toolTip" >
+   <property name="toolTip">
     <string>Starts LinLogBook as Server</string>
    </property>
   </action>
-  <action name="actionStopServer" >
-   <property name="enabled" >
+  <action name="actionStopServer">
+   <property name="enabled">
     <bool>false</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>Stop Server</string>
    </property>
-   <property name="toolTip" >
+   <property name="toolTip">
     <string>Stop LinLogBook Server</string>
    </property>
   </action>
-  <action name="actionGenerateAdif" >
-   <property name="enabled" >
+  <action name="actionGenerateAdif">
+   <property name="enabled">
     <bool>false</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>Generate ADIF File  of unconfirmed qsos</string>
    </property>
-   <property name="toolTip" >
+   <property name="toolTip">
     <string>Generate ADIF File  of unconfirmed qsos and mark qsos as confirmed</string>
    </property>
   </action>
-  <action name="actionSaveDatabaseDefinition" >
-   <property name="enabled" >
+  <action name="actionSaveDatabaseDefinition">
+   <property name="enabled">
     <bool>false</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>Save Database Definition</string>
    </property>
-   <property name="toolTip" >
+   <property name="toolTip">
     <string>Save Database Definition to File</string>
    </property>
   </action>
-  <action name="actionExport_QSO_Data_for_ADIF_Upload" >
-   <property name="text" >
+  <action name="actionExport_QSO_Data_for_ADIF_Upload">
+   <property name="text">
     <string>Export QSO Data for ADIF Upload</string>
    </property>
   </action>
-  <action name="actionExportforEQSLUpload" >
-   <property name="enabled" >
+  <action name="actionExportforEQSLUpload">
+   <property name="enabled">
     <bool>false</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>Export for EQSL Upload</string>
    </property>
-   <property name="toolTip" >
+   <property name="toolTip">
     <string>Export QSO Data  for EQSL Upload</string>
    </property>
-   <property name="visible" >
+   <property name="visible">
     <bool>false</bool>
    </property>
   </action>
-  <action name="actionUpdateBaseTables" >
-   <property name="enabled" >
+  <action name="actionUpdateBaseTables">
+   <property name="enabled">
     <bool>false</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>Update Base Tables</string>
    </property>
   </action>
-  <action name="actionImportCtyDat" >
-   <property name="enabled" >
+  <action name="actionImportCtyDat">
+   <property name="enabled">
     <bool>false</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>Import cty.dat</string>
    </property>
   </action>
-  <action name="actionShowStatistic" >
-   <property name="text" >
+  <action name="actionShowStatistic">
+   <property name="text">
     <string>Show Statistic</string>
    </property>
-   <property name="toolTip" >
+   <property name="toolTip">
     <string>Counts qsos for Country Band Modes</string>
    </property>
   </action>
-  <action name="actionAboutctydat" >
-   <property name="text" >
+  <action name="actionAboutctydat">
+   <property name="text">
     <string>About cty.dat</string>
    </property>
   </action>
-  <action name="actionAboutQT" >
-   <property name="text" >
+  <action name="actionAboutQT">
+   <property name="text">
     <string>About QT</string>
    </property>
   </action>
-  <action name="actionDefine_Database_Tables" >
-   <property name="text" >
+  <action name="actionDefine_Database_Tables">
+   <property name="text">
     <string>Define Database Tables</string>
    </property>
   </action>
-  <action name="actionSaveViews" >
-   <property name="enabled" >
+  <action name="actionSaveViews">
+   <property name="enabled">
     <bool>false</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>Save Views</string>
    </property>
   </action>
-  <action name="actionPrintQSLCard" >
-   <property name="enabled" >
+  <action name="actionPrintQSLCard">
+   <property name="enabled">
     <bool>false</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>Print QSL Card</string>
    </property>
-   <property name="visible" >
+   <property name="visible">
     <bool>false</bool>
    </property>
   </action>
-  <action name="actionQSLCardSetup" >
-   <property name="enabled" >
+  <action name="actionQSLCardSetup">
+   <property name="enabled">
     <bool>false</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>QSL Card Setup</string>
    </property>
   </action>
-  <action name="actionExportforLotWUpload" >
-   <property name="enabled" >
+  <action name="actionExportforLotWUpload">
+   <property name="enabled">
     <bool>false</bool>
    </property>
-   <property name="text" >
+   <property name="text">
     <string>Export for LotW</string>
    </property>
-   <property name="toolTip" >
+   <property name="toolTip">
     <string>Exports Data in ADIF format for LotW upload</string>
    </property>
-   <property name="visible" >
+   <property name="visible">
     <bool>false</bool>
    </property>
   </action>
@@ -899,13 +919,18 @@
    <extends>QTableView</extends>
    <header>editqsoview.h</header>
   </customwidget>
+  <customwidget>
+   <class>DetailView</class>
+   <extends>QWidget</extends>
+   <header>detailview.h</header>
+   <container>1</container>
+  </customwidget>
  </customwidgets>
  <tabstops>
   <tabstop>findCallsign</tabstop>
   <tabstop>saveRecord</tabstop>
   <tabstop>deleteRecord</tabstop>
   <tabstop>clearRecord</tabstop>
-  <tabstop>qsoList</tabstop>
  </tabstops>
  <resources/>
  <connections/>

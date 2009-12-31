@@ -39,7 +39,6 @@ void setQsoFieldTypes ( QStringList );
 protected:
 EditQsoDelegate *editQsoDelegate;
 void keyPressEvent ( QKeyEvent * event );
-//bool event(QEvent * event);
 int numberOfColumns;
 signals:
 void qsoDataComplete();

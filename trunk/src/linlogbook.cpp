@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#define VERSION "LinLogBook 0.4"
+#define VERSION "LinLogBook 0.5"
 
 #include "linlogbook.h"
 #include "setup.h"
@@ -46,97 +46,102 @@
 #include <QProgressDialog>
 #include <QProgressBar>
 #include <QPrinter>
-#include <QPrintDialog>
 #include <QPainter>
+#include <math.h>
+#include <QPrintDialog>
 
-QString dateFormat = QLatin1String ( "dd.MM.yyyy" );
-LinLogBook::LinLogBook ( QWidget* parent, Qt::WFlags fl )
-    : QMainWindow ( parent, fl )
+QString dateFormat = QLatin1String("dd.MM.yyyy");
+
+LinLogBook::LinLogBook(QWidget* parent, Qt::WFlags fl)
+: QMainWindow(parent, fl)
 {
-  setupUi ( this );
-  setWindowTitle ( QLatin1String ( VERSION ) );
-  setWindowIcon ( QIcon ( ":/images/linlogbook.png" ) );
+  setupUi(this);
+  setWindowTitle(QLatin1String(VERSION));
+  setWindowIcon(QIcon(":/images/linlogbook.png"));
   readSettings();
   dbStatus = -1;
   editQso = 0;
   qsoTable = 0;
   qsoServer = 0;
   bool ok = false;
-  if ( reopenDb && !dbName.isEmpty() )
-    ok = openSelectedDb ( dbName );
-  if ( !ok )
-    dbNameMessage.setText ( tr ( "No Database" ) );
+  if (reopenDb && !dbName.isEmpty())
+    ok = openSelectedDb(dbName);
+  if (!ok)
+    dbNameMessage.setText(tr("No Database"));
   else
     enableMenuEntries();
-  statusBar()->addWidget ( &dbNameMessage );
-  serverStatus.setText ( tr ( "Server is not running" ) );
-  statusBar()->addPermanentWidget ( &serverStatus );
+  statusBar()->addWidget(&dbNameMessage);
+  serverStatus.setText(tr("Server is not running"));
+  statusBar()->addPermanentWidget(&serverStatus);
 
   /** File **/
-  connect ( actionNewDatabase, SIGNAL ( triggered() ), this, SLOT ( newDB() ) );
-  connect ( actionOpenDatabase, SIGNAL ( triggered() ), this, SLOT ( openDB() ) );
-  connect ( actionSaveDatabaseDefinition, SIGNAL ( triggered() ), this, SLOT ( saveDatabaseDefinion() ) );
-  connect ( actionSaveViews, SIGNAL ( triggered() ), this, SLOT ( saveViews() ) );
-  connect ( actionImportCtyDat, SIGNAL ( triggered() ), this , SLOT ( importCtyDat() ) );
-  connect ( actionImportAdifFile, SIGNAL ( triggered() ), this, SLOT ( importAdifFile() ) );
-  connect ( actionExportAdifFile, SIGNAL ( triggered() ), this, SLOT ( exportAdifFile() ) );
-  connect ( actionExportforEQSLUpload, SIGNAL ( triggered() ), this, SLOT ( exportForEQSLUpload() ) );
-  connect ( actionExportforLotWUpload, SIGNAL ( triggered() ), this, SLOT ( exportForLotWUpload() ) );
-  connect ( actionPrintQSLCard, SIGNAL ( triggered() ), this, SLOT ( printQSLCard() ) );
-// Preferences
-  connect ( actionGeneralSettings, SIGNAL ( triggered() ), this, SLOT ( setup() ) );
+  connect(actionNewDatabase, SIGNAL(triggered()), this, SLOT(newDB()));
+  connect(actionOpenDatabase, SIGNAL(triggered()), this, SLOT(openDB()));
+  connect(actionSaveDatabaseDefinition, SIGNAL(triggered()), this, SLOT(saveDatabaseDefinion()));
+  connect(actionSaveViews, SIGNAL(triggered()), this, SLOT(saveViews()));
+  connect(actionImportCtyDat, SIGNAL(triggered()), this, SLOT(importCtyDat()));
+  connect(actionImportAdifFile, SIGNAL(triggered()), this, SLOT(importAdifFile()));
+  connect(actionExportAdifFile, SIGNAL(triggered()), this, SLOT(exportAdifFile()));
+  connect(actionExportforEQSLUpload, SIGNAL(triggered()), this, SLOT(exportForEQSLUpload()));
+  connect(actionExportforLotWUpload, SIGNAL(triggered()), this, SLOT(exportForLotWUpload()));
+  connect(actionPrintQSLCard, SIGNAL(triggered()), this, SLOT(printQSLCard()));
+  // Preferences
+  connect(actionGeneralSettings, SIGNAL(triggered()), this, SLOT(setup()));
 
-  connect ( actionQuit, SIGNAL ( triggered() ), this , SLOT ( close() ) );
+  connect(actionQuit, SIGNAL(triggered()), this, SLOT(close()));
   /** Statistic **/
-  connect ( menuStatistics, SIGNAL ( triggered ( QAction * ) ), this , SLOT ( showStatistic ( QAction * ) ) );
+  connect(menuStatistics, SIGNAL(triggered(QAction *)), this, SLOT(showStatistic(QAction *)));
   /**Edit **/
-  connect ( actionDefineDatabaseFields, SIGNAL ( triggered() ), this, SLOT ( defineQsoTableFields() ) );
-  connect ( actionCreateBaseTables, SIGNAL ( triggered() ), this, SLOT ( createBaseTables() ) );
-  connect ( actionCreateQSOTable, SIGNAL ( triggered() ), this , SLOT ( createQSOTable() ) );
-  connect ( actionUpdateBaseTables, SIGNAL ( triggered() ), this , SLOT ( updateBaseTables() ) );
-  connect ( actionQSLCardSetup, SIGNAL ( triggered() ), this, SLOT ( qslCardSetup() ) );
+  connect(actionDefineDatabaseFields, SIGNAL(triggered()), this, SLOT(defineQsoTableFields()));
+  connect(actionCreateBaseTables, SIGNAL(triggered()), this, SLOT(createBaseTables()));
+  connect(actionCreateQSOTable, SIGNAL(triggered()), this, SLOT(createQSOTable()));
+  connect(actionUpdateBaseTables, SIGNAL(triggered()), this, SLOT(updateBaseTables()));
+  connect(actionQSLCardSetup, SIGNAL(triggered()), this, SLOT(qslCardSetup()));
   /** Server **/
-  connect ( actionStartServer, SIGNAL ( triggered() ), this, SLOT ( startServer() ) );
-  connect ( actionStopServer, SIGNAL ( triggered() ), this, SLOT ( stopServer() ) );
+  connect(actionStartServer, SIGNAL(triggered()), this, SLOT(startServer()));
+  connect(actionStopServer, SIGNAL(triggered()), this, SLOT(stopServer()));
   /** About **/
-  connect ( actionAboutLinLogBook, SIGNAL ( triggered() ), this, SLOT ( aboutLinLogBook() ) );
-  connect ( actionAboutctydat, SIGNAL ( triggered() ), this, SLOT ( aboutCtydat() ) );
-  connect ( actionAboutQT, SIGNAL ( triggered() ), this, SLOT ( aboutQT() ) );
+  connect(actionAboutLinLogBook, SIGNAL(triggered()), this, SLOT(aboutLinLogBook()));
+  connect(actionAboutctydat, SIGNAL(triggered()), this, SLOT(aboutCtydat()));
+  connect(actionAboutQT, SIGNAL(triggered()), this, SLOT(aboutQT()));
 
 
   /** Callsign search **/
-  connect ( findCallsign, SIGNAL ( returnPressed () ), this , SLOT ( searchCallsign() ) );
+  connect(findCallsign, SIGNAL(returnPressed()), this, SLOT(searchCallsign()));
   /** Buttons **/
-  connect ( clearRecord, SIGNAL ( clicked() ), this , SLOT ( clearInput() ) );
-  connect ( saveRecord, SIGNAL ( clicked() ), this , SLOT ( saveInput() ) );
-  connect ( deleteRecord, SIGNAL ( clicked() ), this , SLOT ( deleteEntry() ) );
-  connect ( deleteAll, SIGNAL ( clicked() ), this , SLOT ( deleteAllEntries() ) );
+  connect(clearRecord, SIGNAL(clicked()), this, SLOT(clearInput()));
+  connect(saveRecord, SIGNAL(clicked()), this, SLOT(saveInput()));
+  connect(deleteRecord, SIGNAL(clicked()), this, SLOT(deleteEntry()));
+  connect(deleteAll, SIGNAL(clicked()), this, SLOT(deleteAllEntries()));
   /** qsoList **/
-  connect ( qsoList, SIGNAL ( clicked ( QModelIndex ) ), this, SLOT ( takeEntry ( QModelIndex ) ) );
+  connect(qsoList, SIGNAL(clicked(QModelIndex)), this, SLOT(takeEntry(QModelIndex)));
   /** Default Settings for Loging **/
-  connect ( defaultBand, SIGNAL ( activated ( int ) ), this , SLOT ( setDefaultBand ( int ) ) );
-  connect ( defaultMode, SIGNAL ( activated ( int ) ), this , SLOT ( setDefaultMode ( int ) ) );
-
+  connect(defaultBand, SIGNAL(activated(int)), this, SLOT(setDefaultBand(int)));
+  connect(defaultMode, SIGNAL(activated(int)), this, SLOT(setDefaultMode(int)));
+  /** For detailview selection **/
+  connect(differentViews, SIGNAL(currentChanged(int)), this, SLOT(viewChanged(int)));
+  connect(editQsoRecord, SIGNAL(clicked(QModelIndex)), this, SLOT(saveIndex(QModelIndex)));
 }
 
 LinLogBook::~LinLogBook()
-{}
+{
+}
 
 /*$SPECIALIZATION$*/
 
 void LinLogBook::setup()
 {
   Setup *s = new Setup();
-  s->setmyCallsign ( myCall );
-  s->setmyName ( myName );
-  s->setmyCity ( myCity );
-  s->setmyLocator ( myLocator );
-  s->setReopen ( reopenDb );
-  s->setDateFormat ( dateFormat );
-  s->setPortNumber ( portNumber );
-  if ( ! myLinLogBookDirectory.isNull() )
-    s->setDBDirectory ( myLinLogBookDirectory );
-  if ( s->exec() == QDialog::Accepted )
+  s->setmyCallsign(myCall);
+  s->setmyName(myName);
+  s->setmyCity(myCity);
+  s->setmyLocator(myLocator);
+  s->setReopen(reopenDb);
+  s->setDateFormat(dateFormat);
+  s->setPortNumber(portNumber);
+  if (!myLinLogBookDirectory.isNull())
+    s->setDBDirectory(myLinLogBookDirectory);
+  if (s->exec() == QDialog::Accepted)
   {
     myLocator = s->getmyLocator();
     myCall = s->getmyCallsign();
@@ -145,111 +150,115 @@ void LinLogBook::setup()
     myLinLogBookDirectory = s->getDBDirectory();
     reopenDb = s->reopenLastDB();
     dateFormat = s->getDateFormat();
-//hostName=s->getHostName();
+    //hostName=s->getHostName();
     portNumber = s->getPortNumber();
     saveSettings();
   }
   delete s;
 }
+
 void LinLogBook::readSettings()
 {
-  QSettings settings ( QLatin1String ( "DL1KSV" ), QLatin1String ( "LinLogBook" ) );
-  myCall = settings.value ( QLatin1String ( "myCall" ) ).toString();
-  myName = settings.value ( QLatin1String ( "myName" ) ).toString();
-  myCity = settings.value ( QLatin1String ( "myCity" ) ).toString();
-  myLocator = settings.value ( QLatin1String ( "myLocator" ) ).toString();
-  myLinLogBookDirectory = settings.value ( QLatin1String ( "LinLogBookDirectory" ) ).toString();
-  reopenDb = settings.value ( QLatin1String ( "reopenDb" ), QVariant ( false ) ).toBool();
-  dbName = settings.value ( QLatin1String ( "lastUsedDb" ) ).toString();
-  dateFormat = settings.value ( QLatin1String ( "dateFormat" ) ).toString();
-  if ( dateFormat.isEmpty() )
-    dateFormat = QLatin1String ( "dd.MM.yyyy" );
-  portNumber = settings.value ( QLatin1String ( "portNumber" ), 8080 ).toInt();
-  splitter->restoreState ( settings.value ( QLatin1String ( "splitterSizes" ) ).toByteArray() );
+  QSettings settings(QLatin1String("DL1KSV"), QLatin1String("LinLogBook"));
+  myCall = settings.value(QLatin1String("myCall")).toString();
+  myName = settings.value(QLatin1String("myName")).toString();
+  myCity = settings.value(QLatin1String("myCity")).toString();
+  myLocator = settings.value(QLatin1String("myLocator")).toString();
+  myLinLogBookDirectory = settings.value(QLatin1String("LinLogBookDirectory")).toString();
+  reopenDb = settings.value(QLatin1String("reopenDb"), QVariant(false)).toBool();
+  dbName = settings.value(QLatin1String("lastUsedDb")).toString();
+  dateFormat = settings.value(QLatin1String("dateFormat")).toString();
+  if (dateFormat.isEmpty())
+    dateFormat = QLatin1String("dd.MM.yyyy");
+  portNumber = settings.value(QLatin1String("portNumber"), 8080).toInt();
+  splitter->restoreState(settings.value(QLatin1String("splitterSizes")).toByteArray());
 }
+
 void LinLogBook::saveSettings()
 {
-  QSettings settings ( QLatin1String ( "DL1KSV" ), QLatin1String ( "LinLogBook" ) );
-  settings.setValue ( QLatin1String ( "myCall" ), myCall );
-  settings.setValue ( QLatin1String ( "myName" ), myName );
-  settings.setValue ( QLatin1String ( "myCity" ), myCity );
-  settings.setValue ( QLatin1String ( "myLocator" ), myLocator );
-  settings.setValue ( QLatin1String ( "LinLogBookDirectory" ), myLinLogBookDirectory );
-  settings.setValue ( QLatin1String ( "reopenDb" ), reopenDb );
-  settings.setValue ( QLatin1String ( "lastUsedDb" ), dbName );
-  settings.setValue ( QLatin1String ( "dateFormat" ), dateFormat );
-  settings.setValue ( QLatin1String ( "portNumer" ), portNumber );
-  settings.setValue ( QLatin1String ( "splitterSizes" ), splitter->saveState() );
+  QSettings settings(QLatin1String("DL1KSV"), QLatin1String("LinLogBook"));
+  settings.setValue(QLatin1String("myCall"), myCall);
+  settings.setValue(QLatin1String("myName"), myName);
+  settings.setValue(QLatin1String("myCity"), myCity);
+  settings.setValue(QLatin1String("myLocator"), myLocator);
+  settings.setValue(QLatin1String("LinLogBookDirectory"), myLinLogBookDirectory);
+  settings.setValue(QLatin1String("reopenDb"), reopenDb);
+  settings.setValue(QLatin1String("lastUsedDb"), dbName);
+  settings.setValue(QLatin1String("dateFormat"), dateFormat);
+  settings.setValue(QLatin1String("portNumer"), portNumber);
+  settings.setValue(QLatin1String("splitterSizes"), splitter->saveState());
 }
+
 void LinLogBook::newDB()
 {
   QString dbname;
   bool ok;
-  QDir dir ( myLinLogBookDirectory );
+  QDir dir(myLinLogBookDirectory);
   QString s = QDir::homePath();
-  ok = dir.cd ( s );
-  if ( !dir.exists() )
-    ok = dir.mkpath ( myLinLogBookDirectory );
-  ok = dir.cd ( myLinLogBookDirectory );
+  ok = dir.cd(s);
+  if (!dir.exists())
+    ok = dir.mkpath(myLinLogBookDirectory);
+  ok = dir.cd(myLinLogBookDirectory);
   ok = dir.makeAbsolute();
   s = dir.path();
-  QFileDialog dbOpenDialog ( this, tr ( "Create a new Database" ), s , tr ( "DB files (*.dblog)" ) );
-  if ( dbOpenDialog.exec() == QDialog::Accepted )
+  QFileDialog dbOpenDialog(this, tr("Create a new Database"), s, tr("DB files (*.dblog)"));
+  if (dbOpenDialog.exec() == QDialog::Accepted)
   {
-    dbname = dbOpenDialog.selectedFiles().at ( 0 ) ;
-    if ( QFile ( dbname ).exists() )
+    dbname = dbOpenDialog.selectedFiles().at(0);
+    if (QFile(dbname).exists())
     {
-      if ( QMessageBox::question ( 0, tr ( "Delete Database" ), tr ( "Database %1  already exits.\nRecreate this database ?" ).arg ( dbname ) , QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel ) == QMessageBox::Ok )
-        QFile::remove ( dbname );
+      if (QMessageBox::question(0, tr("Delete Database"), tr("Database %1  already exits.\nRecreate this database ?").arg(dbname), QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel) == QMessageBox::Ok)
+        QFile::remove(dbname);
       else
         return;
     }
-    else if ( !dbname.endsWith ( QLatin1String ( ".dblog" ), Qt::CaseInsensitive ) )
-      dbname.append ( QLatin1String ( ".dblog" ) );
+    else if (!dbname.endsWith(QLatin1String(".dblog"), Qt::CaseInsensitive))
+      dbname.append(QLatin1String(".dblog"));
 
-    QSqlDatabase db = QSqlDatabase::addDatabase ( QLatin1String ( "QSQLITE" ) );
-    db.setDatabaseName ( dbname );
-    if ( ! db.open() )
-      QMessageBox::warning ( 0, tr ( "New Database" ), tr ( "Could not create Database %1 \n" ).arg ( dbname ) + db.lastError().text(), QMessageBox::Ok );
+    QSqlDatabase db = QSqlDatabase::addDatabase(QLatin1String("QSQLITE"));
+    db.setDatabaseName(dbname);
+    if (!db.open())
+      QMessageBox::warning(0, tr("New Database"), tr("Could not create Database %1 \n").arg(dbname) + db.lastError().text(), QMessageBox::Ok);
     else
     {
-      dbNameMessage.setText ( tr ( "Database %1" ).arg ( dbname ) );
+      dbNameMessage.setText(tr("Database %1").arg(dbname));
       QSqlQuery qy;
-      bool ok = qy.exec ( QLatin1String ( "create table dbStatus (status int UNIQUE )" ) );
-      if ( !ok )
+      bool ok = qy.exec(QLatin1String("create table dbStatus (status int UNIQUE )"));
+      if (!ok)
       {
-        QMessageBox::critical ( 0, tr ( "New Database" ), tr ( "Could not create Statustable for Database: %1" ).arg ( dbname ) , QMessageBox::Ok );
+        QMessageBox::critical(0, tr("New Database"), tr("Could not create Statustable for Database: %1").arg(dbname), QMessageBox::Ok);
         return;
       }
-      ok = qy.exec ( QLatin1String ( "insert into dbStatus values(0)" ) );
-      if ( !ok )
-        QMessageBox::critical ( 0, tr ( "New Database" ), tr ( "Could not insert Statusvalue into dbStatus. Database: %1" ).arg ( dbname ) , QMessageBox::Ok );
+      ok = qy.exec(QLatin1String("insert into dbStatus values(0)"));
+      if (!ok)
+        QMessageBox::critical(0, tr("New Database"), tr("Could not insert Statusvalue into dbStatus. Database: %1").arg(dbname), QMessageBox::Ok);
       else
       {
         dbStatus = 0;
-        QMessageBox::warning ( 0, tr ( "New Database" ), tr ( "Successfully created Database %1" ).arg ( dbname ) , QMessageBox::Ok );
+        QMessageBox::warning(0, tr("New Database"), tr("Successfully created Database %1").arg(dbname), QMessageBox::Ok);
       }
     }
     enableMenuEntries();
   }
 }
+
 void LinLogBook::openDB()
 {
   bool ok;
-  QDir dir ( myLinLogBookDirectory );
+  QDir dir(myLinLogBookDirectory);
   QString s = QDir::homePath();
-  ok = dir.cd ( s );
-  if ( !dir.exists() )
-    ok = dir.mkpath ( myLinLogBookDirectory );
-  ok = dir.cd ( myLinLogBookDirectory );
+  ok = dir.cd(s);
+  if (!dir.exists())
+    ok = dir.mkpath(myLinLogBookDirectory);
+  ok = dir.cd(myLinLogBookDirectory);
   ok = dir.makeAbsolute();
   s = dir.path();
-  QFileDialog dbOpenDialog ( this, tr ( "Open an existing Database" ), s, tr ( "DB files (*.dblog)" ) );
-  dbOpenDialog.setAcceptMode ( QFileDialog::AcceptOpen );
-  if ( dbOpenDialog.exec() == QDialog::Accepted )
+  QFileDialog dbOpenDialog(this, tr("Open an existing Database"), s, tr("DB files (*.dblog)"));
+  dbOpenDialog.setAcceptMode(QFileDialog::AcceptOpen);
+  if (dbOpenDialog.exec() == QDialog::Accepted)
   {
-    dbName = dbOpenDialog.selectedFiles().at ( 0 );
-    if ( !openSelectedDb ( dbName ) )
+    dbName = dbOpenDialog.selectedFiles().at(0);
+    if (!openSelectedDb(dbName))
       dbName.clear();
     else
       enableMenuEntries();
@@ -260,44 +269,45 @@ void LinLogBook::openDB()
 void LinLogBook::defineQsoTableFields()
 {
   CreateDatabaseFields *cr = new CreateDatabaseFields();
-  if ( cr->exec() == QDialog::Accepted )
+  if (cr->exec() == QDialog::Accepted)
   {
     QSqlQuery qy;
-    qy.exec ( QLatin1String ( "update dbStatus set status= 2" ) );
+    qy.exec(QLatin1String("update dbStatus set status= 2"));
     dbStatus = 2;
-    actionCreateQSOTable->setEnabled ( true );
-    QMessageBox::information ( 0, tr ( "Define Database Fields" ), tr ( " Databasefields successfully defined " ) );
+    actionCreateQSOTable->setEnabled(true);
+    QMessageBox::information(0, tr("Define Database Fields"), tr(" Databasefields successfully defined "));
     enableMenuEntries();
   }
   delete cr;
 }
-bool LinLogBook::execFile ( QFile *ExecFile , QProgressBar *Bar )
+
+bool LinLogBook::execFile(QFile *ExecFile, QProgressBar *Bar)
 {
   QSqlQuery qy;
   int count = 0;
   int errorcount = 0;
-  QTextStream line ( ExecFile );
-// s will get the complete sql- statement, to be executed
-  if ( Bar != 0 )
+  QTextStream line(ExecFile);
+  // s will get the complete sql- statement, to be executed
+  if (Bar != 0)
     Bar->show();
-  while ( !line.atEnd() )
+  while (!line.atEnd())
   {
     QString s;
     QString actLine = line.readLine();
-    while ( !actLine.isEmpty() )
+    while (!actLine.isEmpty())
     {
-      int pos = actLine.indexOf ( QLatin1Char ( ';' ) );
-      if ( pos > 0 )
+      int pos = actLine.indexOf(QLatin1Char(';'));
+      if (pos > 0)
       {
         count++;
-        s = actLine.left ( pos );
-        actLine = actLine.mid ( pos );
-        if ( !s.isEmpty() )
+        s = actLine.left(pos);
+        actLine = actLine.mid(pos);
+        if (!s.isEmpty())
         {
-          qy.exec ( s );
-          if ( !qy.isActive() )
+          qy.exec(s);
+          if (!qy.isActive())
           {
-            QMessageBox::information ( 0, tr ( "Execute SQL- Statements" ), tr ( "Couldn't execute SQL- Statement from file %1\nStatement was\n %2" ).arg ( ExecFile->fileName() ).arg ( s ) );
+            QMessageBox::information(0, tr("Execute SQL- Statements"), tr("Couldn't execute SQL- Statement from file %1\nStatement was\n %2").arg(ExecFile->fileName()).arg(s));
             errorcount++;
           }
           s.clear();
@@ -311,423 +321,437 @@ bool LinLogBook::execFile ( QFile *ExecFile , QProgressBar *Bar )
     }
     qApp->processEvents();
   }
-  if ( Bar != 0 )
+  if (Bar != 0)
     Bar->hide();
   qy.clear();
-  QMessageBox::information ( 0, tr ( "Execute SQL- Statements" ), tr ( "%1 SQL- Statements processed\n %2 without errors \n %3 with errors" ) .arg ( count ).arg ( count - errorcount ).arg ( errorcount ) );
+  QMessageBox::information(0, tr("Execute SQL- Statements"), tr("%1 SQL- Statements processed\n %2 without errors \n %3 with errors") .arg(count).arg(count - errorcount).arg(errorcount));
 
-  if ( ( count - errorcount ) > 0 )
+  if ((count - errorcount) > 0)
     return true;
   else
     return false;
 
 }
-void LinLogBook::closeEvent ( QCloseEvent * )
+
+void LinLogBook::closeEvent(QCloseEvent *)
 {
-  if ( qsoTable != 0 )
+  if (qsoTable != 0)
     delete qsoTable;
-  if ( editQso != 0 )
+  if (editQso != 0)
     delete editQso;
   QSqlDatabase db = QSqlDatabase::database();
   db.close();
   saveSettings();
 }
+
 void LinLogBook::createQSOTable()
 {
   QSqlQuery qy;
 
-  qy.exec ( QLatin1String ( "select * from LinLogFields" ) );
-  qy.setForwardOnly ( true );
-  QString statement ( QLatin1String ( "CREATE TABLE qsos ( Id INTEGER PRIMARY KEY AUTOINCREMENT," ) );
+  qy.exec(QLatin1String("select * from LinLogFields"));
+  qy.setForwardOnly(true);
+  QString statement(QLatin1String("CREATE TABLE qsos ( Id INTEGER PRIMARY KEY AUTOINCREMENT,"));
   bool first;
   first = true;
-  while ( qy.next() )
+  while (qy.next())
   {
-    databaseFields << qy.value ( 0 ).toString();
-    fieldsTypes << qy.value ( 1 ).toString();
-    linlogFields << qy.value ( 2 ).toString();
-    if ( !first )
-      statement.append ( QLatin1String ( "," ) );
+    databaseFields << qy.value(0).toString();
+    fieldsTypes << qy.value(1).toString();
+    linlogFields << qy.value(2).toString();
+    if (!first)
+      statement.append(QLatin1String(","));
     first = false;
-    statement.append ( qy.value ( 0 ).toString() );
+    statement.append(qy.value(0).toString());
 
-    if ( ( qy.value ( 1 ).toString() == QLatin1String ( "E" ) ) || ( qy.value ( 1 ).toString() == QLatin1String ( "N" ) ) ) // Default values for foreign keys
+    if ((qy.value(1).toString() == QLatin1String("E")) || (qy.value(1).toString() == QLatin1String("N"))) // Default values for foreign keys
     {
-      if ( qy.value ( 3 ).isValid() )
-        statement.append ( QString ( QLatin1String ( " INTEGER DEFAULT %1 " ) ).arg ( qy.value ( 3 ).toInt() ) );
+      if (qy.value(3).isValid())
+        statement.append(QString(QLatin1String(" INTEGER DEFAULT %1 ")).arg(qy.value(3).toInt()));
       else
-        statement.append ( QLatin1String ( " INTEGER " ) );
+        statement.append(QLatin1String(" INTEGER "));
     }
   }
-  statement.append ( QLatin1String ( ");" ) );
-  bool ok = qy.exec ( statement );
-  if ( ok )
+  statement.append(QLatin1String(");"));
+  bool ok = qy.exec(statement);
+  if (ok)
   {
-// Now setup the view for sorting
-    statement = QLatin1String ( "create view orderedqsos as select * from qsos" );
-    if ( databaseFields.contains ( QLatin1String ( "QSO_DATE" ), Qt::CaseInsensitive ) )
+    // Now setup the view for sorting
+    statement = QLatin1String("create view orderedqsos as select * from qsos");
+    if (databaseFields.contains(QLatin1String("QSO_DATE"), Qt::CaseInsensitive))
     {
-      statement.append ( QLatin1String ( " order by QSO_DATE DESC" ) );
-      if ( databaseFields.contains ( QLatin1String ( "TIME_ON" ), Qt::CaseInsensitive ) )
-        statement.append ( QLatin1String ( ",TIME_ON DESC" ) );
+      statement.append(QLatin1String(" order by QSO_DATE DESC"));
+      if (databaseFields.contains(QLatin1String("TIME_ON"), Qt::CaseInsensitive))
+        statement.append(QLatin1String(",TIME_ON DESC"));
       else
-        if ( databaseFields.contains ( QLatin1String ( "TIME_OFF" ), Qt::CaseInsensitive ) )
-          statement.append ( QLatin1String ( ",TIME_OFF DESC" ) );
+        if (databaseFields.contains(QLatin1String("TIME_OFF"), Qt::CaseInsensitive))
+        statement.append(QLatin1String(",TIME_OFF DESC"));
 
     }
-    if ( !qy.exec ( statement ) )
+    if (!qy.exec(statement))
     {
-      QMessageBox::warning ( 0, tr ( "Create View for ordering" ), tr ( "Error, Could not create  View orderedqsos for odering the qso table\n " ) + statement , QMessageBox::Ok );
+      QMessageBox::warning(0, tr("Create View for ordering"), tr("Error, Could not create  View orderedqsos for odering the qso table\n ") + statement, QMessageBox::Ok);
       return;
     }
     else
-      if ( qy.exec ( QLatin1String ( "update dbStatus set status=3" ) ) )
-      {
-        dbStatus = 3;
-        QMessageBox::information ( 0, tr ( "Create QSO table" ), tr ( " QSO Table successfully created " ) , QMessageBox::Ok );
-      }
+      if (qy.exec(QLatin1String("update dbStatus set status=3")))
+    {
+      dbStatus = 3;
+      QMessageBox::information(0, tr("Create QSO table"), tr(" QSO Table successfully created "), QMessageBox::Ok);
+    }
     prepareViews();
     enableMenuEntries();
   }
   else
-    QMessageBox::warning ( 0, tr ( "Create QSO table" ), tr ( "Error, Could not create  QSO Table\n " ) + statement , QMessageBox::Ok );
+    QMessageBox::warning(0, tr("Create QSO table"), tr("Error, Could not create  QSO Table\n ") + statement, QMessageBox::Ok);
 }
+
 void LinLogBook::importAdifFile()
 {
   bool ok;
 
   State Status;
   int pos, valueLength;
-  if ( dbStatus < 3 )
+  if (dbStatus < 3)
   {
-    QMessageBox::critical ( 0, tr ( "Import Adif File" ), tr ( "No open Database or no qso table defined.\nPlease open Database first and/or define qso table!" ) );
+    QMessageBox::critical(0, tr("Import Adif File"), tr("No open Database or no qso table defined.\nPlease open Database first and/or define qso table!"));
     return;
   }
   QString dbname;
-  QDir dir ;
+  QDir dir;
   QString adifFileName;
   QString s = QDir::homePath();
-  ok = dir.cd ( s );
+  ok = dir.cd(s);
   ok = dir.makeAbsolute();
   s = dir.path();
-  QFileDialog AdifOpenDialog ( this, tr ( "Import Adif File" ), s, tr ( "Adif files (*.adi)" ) );
-  if ( AdifOpenDialog.exec() == QDialog::Accepted )
+  QFileDialog AdifOpenDialog(this, tr("Import Adif File"), s, tr("Adif files (*.adi)"));
+  if (AdifOpenDialog.exec() == QDialog::Accepted)
   {
-    adifFileName = AdifOpenDialog.selectedFiles().at ( 0 ) ;
+    adifFileName = AdifOpenDialog.selectedFiles().at(0);
 
-    QFile importFile ( adifFileName );
-    if ( !importFile.open ( QIODevice::ReadOnly | QIODevice::Text ) )
-      QMessageBox::information ( 0, tr ( "Import Adif File" ), tr ( "Could not open file: " ) + adifFileName );
+    QFile importFile(adifFileName);
+    if (!importFile.open(QIODevice::ReadOnly | QIODevice::Text))
+      QMessageBox::information(0, tr("Import Adif File"), tr("Could not open file: ") + adifFileName);
     else
     {
-      QProgressDialog progress ( this );
+      QProgressDialog progress(this);
 
-      progress.setLabelText ( tr ( "Importing Adif file %1" ).arg ( adifFileName ) );
-      progress.setRange ( 0, importFile.size() );
+      progress.setLabelText(tr("Importing Adif file %1").arg(adifFileName));
+      progress.setRange(0, importFile.size());
       int bytesRead = 0;
       int count = 0;
-      QTextStream line ( &importFile );
+      QTextStream line(&importFile);
       Status = undef;
       QString paramNameList, paramValueList, paramName, paramValue;
       paramNameList.clear();
       paramValueList.clear();
-      while ( !line.atEnd() )
+      while (!line.atEnd())
       {
         QString actLine = line.readLine();
         bytesRead += actLine.length();
-        while ( !actLine.isEmpty() )
+        while (!actLine.isEmpty())
         {
-          switch ( Status )
+          switch (Status)
           {
-            case undef:
-              if ( !actLine.startsWith ( QLatin1Char ( '<' ) ) )
-                Status = Header;
-              else
-                Status = Record;
-              break;
-            case Header: // Read until EOH
-              pos = actLine.indexOf ( QLatin1String ( "<EOH>" ), Qt::CaseInsensitive );
-              if ( pos < 0 )
-                actLine.clear();
-              else
-              {
-                pos += 5;
-                actLine = actLine.mid ( pos );
-                Status = Record;
-              }
-              break;
-            case Record:
-              pos = actLine.indexOf ( QLatin1Char ( '<' ) );
-              if ( pos < 0 )
-                actLine.clear();
-              else
-              {
-                pos++;
-                actLine = actLine.mid ( pos );
-                Status = adifName;
-              }
-              break;
-            case adifName:
-              pos = actLine.indexOf ( QRegExp ( QLatin1String ( ":|>" ) ) );
-              paramName = actLine.left ( pos );
-              if ( paramName.toUpper() == QLatin1String ( "EOR" ) )
-                Status = insertRecord;
-              else
-              {
-                if ( pos < 0 )
-                  qDebug ( "Falscher Aufbau" );
-                pos++;
-                actLine = actLine.mid ( pos );
-                pos = actLine.indexOf ( QRegExp ( QLatin1String ( ":|>" ) ) );
-                valueLength = actLine.left ( pos ).toInt();
-                actLine = actLine.mid ( pos );
-                pos = actLine.indexOf ( QLatin1Char ( '>' ) );
-                pos++;
-                actLine = actLine.mid ( pos );
-                Status = readValue;
-              }
-              break;
-            case readValue:
-              paramValue = actLine.left ( valueLength );
-              pos = valueLength + 1;
-              actLine = actLine.mid ( pos );
-// Check , if supported by LinLogBook
-              if ( databaseFields.contains ( paramName ) )
-              {
-                if ( !paramNameList.isEmpty() )
-                {
-                  paramNameList.append ( QLatin1Char ( ',' ) );
-                  paramValueList.append ( QLatin1Char ( ',' ) );
-                }
-                paramNameList.append ( paramName );
-                paramValueList.append ( QLatin1Char ( '\'' ) );
-// Check, if there is foreign key
-                if ( foreignKey ( paramName ) )
-                  paramValueList.append ( getKey ( paramName , paramValue ) );
-                else if ( dateType ( paramName ) )
-                {
-                  // Make ISO Date
-                  paramValue.insert ( 4, QLatin1Char ( '-' ) );
-                  paramValue.insert ( 7, QLatin1Char ( '-' ) );
-                  paramValueList.append ( paramValue );
-                }
-                else
-                  paramValueList.append ( paramValue );
-                paramValueList.append ( QLatin1Char ( '\'' ) );
-              }
-              Status = adifName;
-              break;
-            case insertRecord:
+          case undef:
+            if (!actLine.startsWith(QLatin1Char('<')))
+              Status = Header;
+            else
+              Status = Record;
+            break;
+          case Header: // Read until EOH
+            pos = actLine.indexOf(QLatin1String("<EOH>"), Qt::CaseInsensitive);
+            if (pos < 0)
+              actLine.clear();
+            else
             {
-              QString statement ( QLatin1String ( "insert into qsos (" ) );
-
-              statement.append ( paramNameList );
-              statement.append ( QLatin1String ( ") values(" ) );
-              statement.append ( paramValueList );
-              statement.append ( QLatin1String ( ");" ) );
-              QSqlQuery qy ( statement );
-              if ( qy.isActive() )
-                count++;
-              else
-                qDebug ( "Error in insert" );
+              pos += 5;
+              actLine = actLine.mid(pos);
+              Status = Record;
             }
+            break;
+          case Record:
+            pos = actLine.indexOf(QLatin1Char('<'));
+            if (pos < 0)
+              actLine.clear();
+            else
+            {
+              pos++;
+              actLine = actLine.mid(pos);
+              Status = adifName;
+            }
+            break;
+          case adifName:
+            pos = actLine.indexOf(QRegExp(QLatin1String(":|>")));
+            paramName = actLine.left(pos);
+            if (paramName.toUpper() == QLatin1String("EOR"))
+              Status = insertRecord;
+            else
+            {
+              if (pos < 0)
+                qDebug("Falscher Aufbau");
+              pos++;
+              actLine = actLine.mid(pos);
+              pos = actLine.indexOf(QRegExp(QLatin1String(":|>")));
+              valueLength = actLine.left(pos).toInt();
+              actLine = actLine.mid(pos);
+              pos = actLine.indexOf(QLatin1Char('>'));
+              pos++;
+              actLine = actLine.mid(pos);
+              Status = readValue;
+            }
+            break;
+          case readValue:
+            paramValue = actLine.left(valueLength);
+            pos = valueLength + 1;
+            actLine = actLine.mid(pos);
+            // Check , if supported by LinLogBook
+            if (databaseFields.contains(paramName))
+            {
+              if (!paramNameList.isEmpty())
+              {
+                paramNameList.append(QLatin1Char(','));
+                paramValueList.append(QLatin1Char(','));
+              }
+              paramNameList.append(paramName);
+              paramValueList.append(QLatin1Char('\''));
+              // Check, if there is foreign key
+              if (foreignKey(paramName))
+                paramValueList.append(getKey(paramName, paramValue));
+              else if (dateType(paramName))
+              {
+                // Make ISO Date
+                paramValue.insert(4, QLatin1Char('-'));
+                paramValue.insert(7, QLatin1Char('-'));
+                paramValueList.append(paramValue);
+              }
+              else
+                paramValueList.append(paramValue);
+              paramValueList.append(QLatin1Char('\''));
+            }
+            Status = adifName;
+            break;
+          case insertRecord:
+          {
+            QString statement(QLatin1String("insert into qsos ("));
+
+            statement.append(paramNameList);
+            statement.append(QLatin1String(") values("));
+            statement.append(paramValueList);
+            statement.append(QLatin1String(");"));
+            QSqlQuery qy(statement);
+            if (qy.isActive())
+              count++;
+            else
+              qDebug("Error in insert");
+          }
             pos++;
-            actLine = actLine.mid ( pos );
+            actLine = actLine.mid(pos);
             paramNameList.clear();
             paramValueList.clear();
             Status = Record;
             break;
-            default:
-              actLine.clear();
-              break;
+          default:
+            actLine.clear();
+            break;
 
           }
         }
-        progress.setValue ( bytesRead );
+        progress.setValue(bytesRead);
         qApp->processEvents();
-        if ( progress.wasCanceled() )
+        if (progress.wasCanceled())
           break;
       }
       QString s1;
-      s1.setNum ( count );
-      s1.append ( tr ( " records imported" ) );
+      s1.setNum(count);
+      s1.append(tr(" records imported"));
       importFile.close();
-      QMessageBox::information ( 0, tr ( "Import Adif File" ), s1 );
+      QMessageBox::information(0, tr("Import Adif File"), s1);
       prepareViews();
-      qsoList->showRow ( count );
+      qsoList->showRow(count);
     }
   }
 }
 
 void LinLogBook::exportAdifFile()
 {
-  QDir dir ;
+  QDir dir;
   QFile exportFile;
   QString adifFileName;
   QString s = QDir::homePath();
-  bool ok = dir.cd ( s );
+  bool ok = dir.cd(s);
   ok = dir.makeAbsolute();
   s = dir.path();
-  QFileDialog fileOpenDialog ( this, tr ( "Export Data to Adif File" ), s , tr ( "Adif Files (*.adi)" ) );
-  if ( fileOpenDialog.exec() == QDialog::Accepted )
+  QFileDialog fileOpenDialog(this, tr("Export Data to Adif File"), s, tr("Adif Files (*.adi)"));
+  if (fileOpenDialog.exec() == QDialog::Accepted)
   {
-    adifFileName = fileOpenDialog.selectedFiles().at ( 0 ) ;
-    exportFile.setFileName ( adifFileName );
-    if ( exportFile.exists() )
+    adifFileName = fileOpenDialog.selectedFiles().at(0);
+    exportFile.setFileName(adifFileName);
+    if (exportFile.exists())
     {
-      if ( QMessageBox::question ( 0, tr ( "Export Data to Adif File" ), tr ( "File " ) + adifFileName + tr ( " already exits.\nOverwrite ?" ), QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel ) == QMessageBox::Cancel )
+      if (QMessageBox::question(0, tr("Export Data to Adif File"), tr("File ") + adifFileName + tr(" already exits.\nOverwrite ?"), QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel) == QMessageBox::Cancel)
         return;
     }
     else
     {
-      adifFileName.append ( QLatin1String ( ".adi" ) );
-      exportFile.setFileName ( adifFileName );
+      adifFileName.append(QLatin1String(".adi"));
+      exportFile.setFileName(adifFileName);
     }
   }
   else
     return;
-  if ( !exportFile.open ( QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate ) )
+  if (!exportFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
   {
-    QMessageBox::critical ( 0, tr ( "Export Data to Adif File" ), tr ( "Could not open file: " ) + adifFileName );
+    QMessageBox::critical(0, tr("Export Data to Adif File"), tr("Could not open file: ") + adifFileName);
     return;
   }
 
-  s = QLatin1String ( "select " ) + databaseFields.join ( QLatin1String ( "," ) ) + QLatin1String ( " from qsos" );
-  if ( databaseFields.contains ( QLatin1String ( "QSO_DATE" ), Qt::CaseInsensitive ) )
+  s = QLatin1String("select ") + databaseFields.join(QLatin1String(",")) + QLatin1String(" from qsos");
+  if (databaseFields.contains(QLatin1String("QSO_DATE"), Qt::CaseInsensitive))
   {
-    s.append ( QLatin1String ( " order by QSO_DATE ASC" ) );
-    if ( databaseFields.contains ( QLatin1String ( "TIME_ON" ), Qt::CaseInsensitive ) )
-      s.append ( QLatin1String ( ",TIME_ON ASC" ) );
+    s.append(QLatin1String(" order by QSO_DATE ASC"));
+    if (databaseFields.contains(QLatin1String("TIME_ON"), Qt::CaseInsensitive))
+      s.append(QLatin1String(",TIME_ON ASC"));
     else
-      if ( databaseFields.contains ( QLatin1String ( "TIME_OFF" ), Qt::CaseInsensitive ) )
-        s.append ( QLatin1String ( ",TIME_OFF ASC" ) );
+      if (databaseFields.contains(QLatin1String("TIME_OFF"), Qt::CaseInsensitive))
+      s.append(QLatin1String(",TIME_OFF ASC"));
 
   }
-  QSqlQuery qy ( s );
+  QSqlQuery qy(s);
 
-  int count = writeAdif ( qy, &exportFile );
+  int count = writeAdif(qy, &exportFile);
   exportFile.close();
-  QMessageBox::information ( 0, tr ( "Export in dataADIF Format " ), tr ( " %1 records written  to file %2" ).arg ( count ).arg ( exportFile.fileName() ) );
+  QMessageBox::information(0, tr("Export in dataADIF Format "), tr(" %1 records written  to file %2").arg(count).arg(exportFile.fileName()));
 }
+
 void LinLogBook::clearInput()
 {
   int cind, col;
   QString s;
-  editQso->setFilter ( QLatin1String ( "CALL like '-1'" ) );
+  editQso->setFilter(QLatin1String("CALL like '-1'"));
 
   editQso->select();
-  editQso->insertRow ( 0 );
+  editQso->insertRow(0);
 
   cind = defaultBand->currentIndex();
-  if ( cind >= 0 )
+  if (cind >= 0)
   {
     s = defaultBand->currentText();
-    col = databaseFields.indexOf ( QRegExp ( QLatin1String ( "BAND" ) ) ) + 1;
-    if ( col > 0 )
+    col = databaseFields.indexOf(QRegExp(QLatin1String("BAND"))) + 1;
+    if (col > 0)
     {
-      QModelIndex I = editQso->index ( 0, col );
-      editQso->setData ( I , QVariant ( defaultBand->itemData ( cind ).toInt() ), Qt::EditRole );
-      editQso->setData ( I , QVariant ( s ), Qt::DisplayRole );
+      QModelIndex I = editQso->index(0, col);
+      editQso->setData(I, QVariant(defaultBand->itemData(cind).toInt()), Qt::EditRole);
+      editQso->setData(I, QVariant(s), Qt::DisplayRole);
     }
   }
   cind = defaultMode->currentIndex();
-  if ( cind >= 0 )
+  if (cind >= 0)
   {
     s = defaultMode->currentText();
-    col = databaseFields.indexOf ( QRegExp ( QLatin1String ( "MODE" ) ) ) + 1;
-    if ( col > 0 )
+    col = databaseFields.indexOf(QRegExp(QLatin1String("MODE"))) + 1;
+    if (col > 0)
     {
-      QModelIndex I = editQso->index ( 0, col );
-      editQso->setData ( I , QVariant ( defaultMode->itemData ( cind ).toInt() ), Qt::EditRole );
-      editQso->setData ( I , QVariant ( s ), Qt::DisplayRole );
+      QModelIndex I = editQso->index(0, col);
+      editQso->setData(I, QVariant(defaultMode->itemData(cind).toInt()), Qt::EditRole);
+      editQso->setData(I, QVariant(s), Qt::DisplayRole);
     }
   }
 
-  QModelIndex i = editQsoRecord->model()->index ( 0, 1 );
+  QModelIndex i = editQsoRecord->model()->index(0, 1);
 
-  editQsoRecord->scrollTo ( i, QAbstractItemView::EnsureVisible );
-  ( editQsoRecord->selectionModel() )->setCurrentIndex ( i, QItemSelectionModel::NoUpdate );
+  editQsoRecord->scrollTo(i, QAbstractItemView::EnsureVisible);
+  (editQsoRecord->selectionModel())->setCurrentIndex(i, QItemSelectionModel::NoUpdate);
   editQsoRecord->setFocus();
 }
+
 void LinLogBook::searchCallsign()
 {
-  if ( editQso <= 0 )
+  int column;
+  if (editQso <= 0)
     return;
-  QString s = QLatin1String ( "CALL like '" ) + findCallsign->text() + QLatin1String ( "%'" );
-  editQso->setFilter ( s );
+  QString s = QLatin1String("CALL like '") + findCallsign->text() + QLatin1String("%'");
+  editQso->setFilter(s);
   bool ok = editQso->select();
-  if ( !ok )
+  if (!ok)
     return;
   int rows = editQso->rowCount();
-  if ( rows == 0 )
+  QSqlRecord r = editQso->record(0);
+  if (rows == 0)
   {
-    QSqlRecord r = editQso->record ( 0 );
-    editQso->insertRow ( 0 );
-    int column;
-    column = r.indexOf ( QLatin1String ( "CALL" ) );
-    if ( column > 0 )
-      editQso->setData ( editQso->index ( 0, column ), findCallsign->text().toUpper() );
-    column = r.indexOf ( QLatin1String ( "QSO_DATE" ) );
-    if ( column > 0 )
+    editQso->insertRow(0);
+    column = r.indexOf(QLatin1String("CALL"));
+    if (column > 0)
+      editQso->setData(editQso->index(0, column), findCallsign->text().toUpper());
+    column = r.indexOf(QLatin1String("QSO_DATE"));
+    if (column > 0)
     {
-      QString s = QDate::currentDate().toString ( Qt::LocaleDate );
-      editQso->setData ( editQso->index ( 0, column ), s );
+      QString s = QDate::currentDate().toString(Qt::LocaleDate);
+      editQso->setData(editQso->index(0, column), s);
     }
-    column = r.indexOf ( QLatin1String ( "TIME_ON" ) );
-    if ( column > 0 )
-      editQso->setData ( editQso->index ( 0, column ), QDateTime::currentDateTime().toUTC().time().toString ( dateFormat ) );
-
+    column = r.indexOf(QLatin1String("TIME_ON"));
+    if (column > 0)
+      editQso->setData(editQso->index(0, column), QDateTime::currentDateTime().toUTC().time().toString(dateFormat));
   }
+  else if (rows == 1)
+  {
+    column = r.indexOf(QLatin1String("GRIDSQUARE"));
+    if (column > 0)
+      s = r.value(column).toString();
+    else
+      s.clear();
+  }
+  else
+    s.clear();
   editQsoRecord->show();
-  displayCallSignInfo ( findCallsign->text().toUpper() );
+  displayCallSignInfo(findCallsign->text().toUpper(), s);
 }
+
 void LinLogBook::saveInput()
 {
   bool ok;
-  if ( editQso <= 0 )
+  if (editQso <= 0)
     return;
   int rows = editQso->rowCount();
-  if ( rows == 0 )
+  if (rows == 0)
     return;
   else
   {
-    QModelIndex i = editQsoRecord->model()->index ( 0, 1 );
+    QModelIndex i = editQsoRecord->model()->index(0, 1);
 
-    editQsoRecord->scrollTo ( i, QAbstractItemView::EnsureVisible );
-    ( editQsoRecord->selectionModel() )->setCurrentIndex ( i, QItemSelectionModel::NoUpdate );
+    editQsoRecord->scrollTo(i, QAbstractItemView::EnsureVisible);
+    (editQsoRecord->selectionModel())->setCurrentIndex(i, QItemSelectionModel::NoUpdate);
     editQsoRecord->setFocus(); // To avoid segfault if enter was not pressed before
-//Check if QSO_DATE is set
-    int col = databaseFields.indexOf ( QRegExp ( QLatin1String ( "QSO_DATE" ) ) ) + 1;
-    if ( col >= 1 )
+    //Check if QSO_DATE is set
+    int col = databaseFields.indexOf(QRegExp(QLatin1String("QSO_DATE"))) + 1;
+    if (col >= 1)
     {
-      QModelIndex I = editQso->index ( 0, col );
-      if ( editQso->data ( I, Qt::DisplayRole ).toString().isEmpty() )
-        editQso->setData ( I , QVariant ( QDate::currentDate().toString ( dateFormat ) ), Qt::EditRole );
+      QModelIndex I = editQso->index(0, col);
+      if (editQso->data(I, Qt::DisplayRole).toString().isEmpty())
+        editQso->setData(I, QVariant(QDate::currentDate().toString(dateFormat)), Qt::EditRole);
     }
-//Check if TIME_* is set
-    col = databaseFields.indexOf ( QRegExp ( QLatin1String ( "TIME_.+" ) ) ) + 1;
-    if ( col >= 1 )
+    //Check if TIME_* is set
+    col = databaseFields.indexOf(QRegExp(QLatin1String("TIME_.+"))) + 1;
+    if (col >= 1)
     {
-      QModelIndex I = editQso->index ( 0, col );
-      if ( editQso->data ( I, Qt::DisplayRole ).toString().isEmpty() )
-        editQso->setData ( I , QVariant ( QTime::currentTime().toString ( QLatin1String ( "HHmm" ) ) ), Qt::EditRole );
+      QModelIndex I = editQso->index(0, col);
+      if (editQso->data(I, Qt::DisplayRole).toString().isEmpty())
+        editQso->setData(I, QVariant(QTime::currentTime().toString(QLatin1String("HHmm"))), Qt::EditRole);
     }
 
-    if ( ( ok = editQso->submitAll() ) )
+    if ((ok = editQso->submitAll()))
     {
       qsoTable->select();
       clearInput();
       int count = qsoTable->rowCount(); //There should be at least one record in the table, but if just the first record was inserted
       //this record will not be shown ( Error in qt ?? )
       //After reasigning the table the record is now found
-// But we have to define the whole table again
-      if ( count == 0 )
+      // But we have to define the whole table again
+      if (count == 0)
       {
-//    qsoTable->setTable ( QLatin1String ( "qsos" ) );
-        qsoTable->setTable ( QLatin1String ( "orderedqsos" ) );
-        qsoTable->setDependency ( databaseFields, fieldsTypes );
-        for ( int k = 0;k < linlogFields.size();k++ )
-          qsoTable->setHeaderData ( k + 1, Qt::Horizontal, linlogFields[k] );
+        qsoTable->setTable(QLatin1String("orderedqsos"));
+        qsoTable->setDependency(databaseFields, fieldsTypes);
+        for (int k = 0; k < linlogFields.size(); k++)
+          qsoTable->setHeaderData(k + 1, Qt::Horizontal, linlogFields[k]);
         qsoTable->select();
         count = qsoTable->rowCount();
 
@@ -736,250 +760,268 @@ void LinLogBook::saveInput()
     else
     {
       QSqlDatabase db = QSqlDatabase::database();
-      QMessageBox::warning ( 0, tr ( "Save Record" ), tr ( "Could not save the record\nReason : " ) + db.lastError().text() , QMessageBox::Ok );
+      QMessageBox::warning(0, tr("Save Record"), tr("Could not save the record\nReason : ") + db.lastError().text(), QMessageBox::Ok);
     }
   }
 }
-bool LinLogBook::foreignKey ( QString s )
+
+bool LinLogBook::foreignKey(QString s)
 {
-  int key = databaseFields.indexOf ( QRegExp ( s ) );
-  if ( key < 0 )
+  int key = databaseFields.indexOf(QRegExp(s));
+  if (key < 0)
     return false;
-  if ( fieldsTypes[key] == QLatin1String ( "E" ) )
+  if (fieldsTypes[key] == QLatin1String("E"))
     return true;
   else
     return false;
 }
-QString LinLogBook::getKey ( QString table, QString value )
+
+QString LinLogBook::getKey(QString table, QString value)
 {
   QSqlQuery qy;
-  QString s = QLatin1String ( "select Id from " ) + table + QLatin1String ( " where lower(" ) + table + QLatin1String ( "value) = '" ) + value.toLower() + QLatin1String ( "'" );
-  bool ok = qy.exec ( s );
+  QString s = QLatin1String("select Id from ") + table + QLatin1String(" where lower(") + table + QLatin1String("value) = '") + value.toLower() + QLatin1String("'");
+  bool ok = qy.exec(s);
   ok = qy.first();
-  if ( ok )
-    return qy.value ( 0 ).toString();
+  if (ok)
+    return qy.value(0).toString();
   else
-    return QLatin1String ( "" );
+    return QLatin1String("");
 }
-void LinLogBook::takeEntry ( QModelIndex i )
+
+void LinLogBook::takeEntry(QModelIndex i)
 {
-  QString s = QString ( QLatin1String ( "qsos.Id = '%1" ) ).arg ( qsoTable->data ( qsoTable->index ( i.row(), 0 ), Qt::DisplayRole ).toInt() ) + QLatin1String ( "'" );
-  editQso->setFilter ( s );
-  if ( editQso->select() )
+  int col;
+  int selectedRow = i.row();
+  QString s = QString(QLatin1String("qsos.Id = '%1")).arg(qsoTable->data(qsoTable->index(selectedRow, 0), Qt::DisplayRole).toInt()) + QLatin1String("'");
+  editQso->setFilter(s);
+  if (editQso->select())
     editQsoRecord->show();
-  int col = qsoTable->record().indexOf ( QLatin1String ( "CALL" ) );
-  if ( col >= 0 )
-    displayCallSignInfo ( qsoTable->data ( qsoTable->index ( i.row(), col ), Qt::DisplayRole ).toString() );
+  selectedRecord = qsoTable->record(selectedRow);
+  col = qsoTable->record().indexOf(QLatin1String("GRIDSQUARE"));
+  s.clear();
+  if (col >= 0)
+    s = qsoTable->data(qsoTable->index(selectedRow, col), Qt::DisplayRole).toString();
+  col = qsoTable->record().indexOf(QLatin1String("CALL"));
+  if (col >= 0)
+    displayCallSignInfo(qsoTable->data(qsoTable->index(selectedRow, col), Qt::DisplayRole).toString(), s);
 }
+
 void LinLogBook::deleteEntry()
 {
-  int i=editQsoRecord->currentIndex().row();
-  if ( i >= 0 )
+  int i = editQsoRecord->currentIndex().row();
+  if (i >= 0)
   {
-    bool ok = editQso->removeRow ( editQsoRecord->currentIndex().row() );
+    bool ok = editQso->removeRow(editQsoRecord->currentIndex().row());
     ok = editQso->submitAll();
     qsoTable->select();
     clearInput();
   }
   else
-    QMessageBox::warning ( 0, tr ( "Delete" ), tr ( "No entry selected\n" )  , QMessageBox::Ok );
+    QMessageBox::warning(0, tr("Delete"), tr("No entry selected\n"), QMessageBox::Ok);
 
 }
+
 void LinLogBook::deleteAllEntries()
 {
   QSqlQuery qy;
 
-  if ( editQso <= 0 )
+  if (editQso <= 0)
     return;
   int rows = editQso->rowCount();
-  if ( rows <= 0 )
+  if (rows <= 0)
     return;
-  if ( rows > 1 )
+  if (rows > 1)
   {
-    if ( QMessageBox::question ( 0, tr ( "Delete QSO Entry" ), tr ( "Delete all %1  entries ?" ).arg ( rows ), QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel ) == QMessageBox::Cancel )
+    if (QMessageBox::question(0, tr("Delete QSO Entry"), tr("Delete all %1  entries ?").arg(rows), QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel) == QMessageBox::Cancel)
       return;
   }
 
   bool ok;
-  for ( int i = 0;i < rows;i++ )
-    ok = editQso->removeRow ( i );
+  for (int i = 0; i < rows; i++)
+    ok = editQso->removeRow(i);
   ok = editQso->submitAll();
   qsoTable->select();
   clearInput();
 }
-bool LinLogBook::dateType ( QString s )
+
+bool LinLogBook::dateType(QString s)
 {
-  int key = databaseFields.indexOf ( QRegExp ( s ) );
-  if ( key < 0 )
+  int key = databaseFields.indexOf(QRegExp(s));
+  if (key < 0)
     return false;
-  if ( fieldsTypes[key] == QLatin1String ( "D" ) )
+  if (fieldsTypes[key] == QLatin1String("D"))
     return true;
   else
     return false;
 }
+
 void LinLogBook::prepareViews()
 {
 
   QSqlQuery qy;
   int defaultBandSet, defaultModeSet, i, j;
 
-// Look for Header,Type, and ADIF Field
+  // Look for Header,Type, and ADIF Field
 
   databaseFields.clear();
   fieldsTypes.clear();
   linlogFields.clear();
-  qy.exec ( QLatin1String ( "select * from LinLogFields" ) );
-  qy.setForwardOnly ( true );
-  while ( qy.next() )
+  qy.exec(QLatin1String("select * from LinLogFields"));
+  qy.setForwardOnly(true);
+  while (qy.next())
   {
-    databaseFields << qy.value ( 0 ).toString();
-    if ( qy.value ( 0 ).toString() == QLatin1String ( "BAND" ) )
-      defaultBandSet = qy.value ( 3 ).toInt();
-    if ( qy.value ( 0 ).toString() == QLatin1String ( "MODE" ) )
-      defaultModeSet = qy.value ( 3 ).toInt();
-    fieldsTypes << qy.value ( 1 ).toString();
-    linlogFields <<  qy.value ( 2 ).toString();
+    databaseFields << qy.value(0).toString();
+    if (qy.value(0).toString() == QLatin1String("BAND"))
+      defaultBandSet = qy.value(3).toInt();
+    if (qy.value(0).toString() == QLatin1String("MODE"))
+      defaultModeSet = qy.value(3).toInt();
+    fieldsTypes << qy.value(1).toString();
+    linlogFields << qy.value(2).toString();
   }
-//Prepare default Combo boxes
+  //Prepare default Combo boxes
   j = defaultBand->count();
-  if ( j > 0 )
-    for ( i = j - 1;i >= 0; i-- )
-      defaultBand->removeItem ( i );
+  if (j > 0)
+    for (i = j - 1; i >= 0; i--)
+      defaultBand->removeItem(i);
   j = defaultMode->count();
-  if ( j > 0 )
-    for ( i = j - 1;i >= 0; i-- )
-      defaultMode->removeItem ( i );
+  if (j > 0)
+    for (i = j - 1; i >= 0; i--)
+      defaultMode->removeItem(i);
 
-  qy.exec ( QLatin1String ( "select Id,BANDValue from BAND" ) );
-  while ( qy.next() )
-    defaultBand->insertItem ( qy.value ( 0 ).toInt(), qy.value ( 1 ).toString(), QVariant ( qy.value ( 0 ).toInt() ) );
-  if ( defaultBandSet > 0 )
-    defaultBand->setCurrentIndex ( defaultBandSet );
-  qy.exec ( QLatin1String ( "select Id,MODEValue from MODE" ) );
-  while ( qy.next() )
-    defaultMode->insertItem ( qy.value ( 0 ).toInt(), qy.value ( 1 ).toString(), QVariant ( qy.value ( 0 ).toInt() ) );
-  if ( defaultModeSet > 0 )
-    defaultMode->setCurrentIndex ( defaultModeSet );
+  qy.exec(QLatin1String("select Id,BANDValue from BAND"));
+  while (qy.next())
+    defaultBand->insertItem(qy.value(0).toInt(), qy.value(1).toString(), QVariant(qy.value(0).toInt()));
+  if (defaultBandSet > 0)
+    defaultBand->setCurrentIndex(defaultBandSet);
+  qy.exec(QLatin1String("select Id,MODEValue from MODE"));
+  while (qy.next())
+    defaultMode->insertItem(qy.value(0).toInt(), qy.value(1).toString(), QVariant(qy.value(0).toInt()));
+  if (defaultModeSet > 0)
+    defaultMode->setCurrentIndex(defaultModeSet);
 
-  qsoTable->setReadOnly ( true );
-  qsoTable->setTable ( QLatin1String ( "orderedqsos" ) );
-  editQso->setTable ( QLatin1String ( "qsos" ) );
+  qsoTable->setReadOnly(true);
+  qsoTable->setTable(QLatin1String("orderedqsos"));
+  editQso->setTable(QLatin1String("qsos"));
 
-  for ( int i = 0;i < linlogFields.size();i++ )
+  for (int i = 0; i < linlogFields.size(); i++)
   {
-    editQso->setHeaderData ( i + 1, Qt::Horizontal, linlogFields[i] );
-    qsoTable->setHeaderData ( i + 1, Qt::Horizontal, linlogFields[i] );
+    editQso->setHeaderData(i + 1, Qt::Horizontal, linlogFields[i]);
+    qsoTable->setHeaderData(i + 1, Qt::Horizontal, linlogFields[i]);
   }
-  qsoTable->setQsoFieldTypes ( fieldsTypes );
-  qsoTable->setDependency ( databaseFields, fieldsTypes );
-  qsoTable->setSort ( 1, Qt::DescendingOrder );
+  qsoTable->setQsoFieldTypes(fieldsTypes);
+  qsoTable->setDependency(databaseFields, fieldsTypes);
+  qsoTable->setSort(1, Qt::DescendingOrder);
   qsoTable->select();
-//qDebug ( "Selectstatement %s", qPrintable ( qsoTable->showSelectStatement() ) );
-  qsoList->setModel ( qsoTable );
-  qsoList->setSelectionBehavior ( QAbstractItemView::SelectRows );
+  //qDebug ( "Selectstatement %s", qPrintable ( qsoTable->showSelectStatement() ) );
+  qsoList->setModel(qsoTable);
+  qsoList->setSelectionBehavior(QAbstractItemView::SelectRows);
   qsoList->verticalHeader()->hide();
   qsoList->resizeColumnsToContents();
-  qsoList->hideColumn ( 0 ); // Don't show the index column
+  qsoList->hideColumn(0); // Don't show the index column
   qsoList->show();
-  editQso->setQsoFieldTypes ( fieldsTypes );
-  editQso->setDependency ( databaseFields, fieldsTypes );
-  editQso->setEditStrategy ( QSqlTableModel::OnManualSubmit );
-  editQsoRecord->setModel ( editQso );
-  editQsoRecord->setNumberOfColumns ( databaseFields.size() );
-  connect ( editQsoRecord, SIGNAL ( qsoDataComplete() ), this, SLOT ( saveInput() ) );
-  editQsoRecord->setQsoFieldTypes ( fieldsTypes );
+  editQso->setQsoFieldTypes(fieldsTypes);
+  editQso->setDependency(databaseFields, fieldsTypes);
+  editQso->setEditStrategy(QSqlTableModel::OnManualSubmit);
+  editQsoRecord->setModel(editQso);
+  editQsoRecord->setNumberOfColumns(databaseFields.size());
+  connect(editQsoRecord, SIGNAL(qsoDataComplete()), this, SLOT(saveInput()));
+  editQsoRecord->setQsoFieldTypes(fieldsTypes);
   editQsoRecord->verticalHeader()->hide();
-  editQsoRecord->setHorizontalScrollMode ( QAbstractItemView::ScrollPerItem );
-  editQsoRecord->setSelectionMode ( QAbstractItemView::NoSelection );
-  editQsoRecord->hideColumn ( 0 );
+  editQsoRecord->setHorizontalScrollMode(QAbstractItemView::ScrollPerItem);
+  editQsoRecord->setSelectionMode(QAbstractItemView::NoSelection);
+  editQsoRecord->hideColumn(0);
   editQsoRecord->show();
   qsoList->show();
   clearInput();
   qy.clear();
 }
+
 void LinLogBook::startServer()
 {
-  if ( qsoServer <= 0 )
+  if (qsoServer <= 0)
   {
     qsoServer = new LinLogBookServer;
-    connect ( qsoServer, SIGNAL ( qsoElement ( QString ) ), this, SLOT ( setDataFromServer ( QString ) ) );
+    connect(qsoServer, SIGNAL(qsoElement(QString)), this, SLOT(setDataFromServer(QString)));
   }
-  if ( qsoServer->listen ( QHostAddress::Any, portNumber ) )
+  if (qsoServer->listen(QHostAddress::Any, portNumber))
   {
-    serverStatus.setText ( tr ( "Server is running on port %1" ).arg ( portNumber ) );
-    actionStartServer->setEnabled ( false );
-    actionStopServer->setEnabled ( true );
+    serverStatus.setText(tr("Server is running on port %1").arg(portNumber));
+    actionStartServer->setEnabled(false);
+    actionStopServer->setEnabled(true);
   }
   else
-    QMessageBox::warning ( 0, tr ( "Start LinLogBook Server" ), tr ( "Could not start Server on port %1\n" ).arg ( portNumber )  , QMessageBox::Ok );
+    QMessageBox::warning(0, tr("Start LinLogBook Server"), tr("Could not start Server on port %1\n").arg(portNumber), QMessageBox::Ok);
 }
+
 void LinLogBook::stopServer()
 {
-  if ( qsoServer > 0 )
+  if (qsoServer > 0)
   {
     qsoServer->close();
-    serverStatus.setText ( tr ( "Server is not running" ) );
-    actionStartServer->setEnabled ( true );
-    actionStopServer->setEnabled ( false );
+    serverStatus.setText(tr("Server is not running"));
+    actionStartServer->setEnabled(true);
+    actionStopServer->setEnabled(false);
   }
 }
-void LinLogBook::setDataFromServer ( QString s )
+
+void LinLogBook::setDataFromServer(QString s)
 {
   QString dateformat = dateFormat;
-  dateFormat = QLatin1String ( "yyyyMMdd" );
+  dateFormat = QLatin1String("yyyyMMdd");
   int column;
   QString s1, s2;
-  column = prepareItem ( s, &s1, &s2 );
-  if ( column > 0 )
+  column = prepareItem(s, &s1, &s2);
+  if (column > 0)
   {
-    QModelIndex I = editQso->index ( 0, column );
-    editQso->setData ( I , QVariant ( s1 ), Qt::DisplayRole );
-    editQso->setData ( I , QVariant ( s2 ), Qt::EditRole );
+    QModelIndex I = editQso->index(0, column);
+    editQso->setData(I, QVariant(s1), Qt::DisplayRole);
+    editQso->setData(I, QVariant(s2), Qt::EditRole);
 
   }
   dateFormat = dateformat;
 }
-int LinLogBook::prepareItem ( QString s, QString *s1, QString *s2 )
+
+int LinLogBook::prepareItem(QString s, QString *s1, QString *s2)
 {
   int pos, valueLength;
   QString paramName;
   QString paramValue;
   QString actLine = s;
-  if ( !actLine.startsWith ( QLatin1Char ( '<' ) ) )
+  if (!actLine.startsWith(QLatin1Char('<')))
     return -1;
-  actLine = actLine.mid ( 1 );
-  pos = actLine.indexOf ( QRegExp ( QLatin1String ( ":|>" ) ) );
-  paramName = actLine.left ( pos );
-  if ( pos < 0 )
+  actLine = actLine.mid(1);
+  pos = actLine.indexOf(QRegExp(QLatin1String(":|>")));
+  paramName = actLine.left(pos);
+  if (pos < 0)
   {
-    qDebug ( "Falscher Aufbau" );
+    qDebug("Falscher Aufbau");
     return -1;
   }
   pos++;
-  actLine = actLine.mid ( pos );
-  pos = actLine.indexOf ( QRegExp ( QLatin1String ( ":|>" ) ) );
-  valueLength = actLine.left ( pos ).toInt();
-  actLine = actLine.mid ( pos );
-  pos = actLine.indexOf ( QLatin1Char ( '>' ) );
+  actLine = actLine.mid(pos);
+  pos = actLine.indexOf(QRegExp(QLatin1String(":|>")));
+  valueLength = actLine.left(pos).toInt();
+  actLine = actLine.mid(pos);
+  pos = actLine.indexOf(QLatin1Char('>'));
   pos++;
-  actLine = actLine.mid ( pos );
-  paramValue = actLine.left ( valueLength );
+  actLine = actLine.mid(pos);
+  paramValue = actLine.left(valueLength);
   pos = valueLength + 1;
-  actLine = actLine.mid ( pos );
-// Check , if supported by LinLogBook
-  if ( paramName.toUpper() == QLatin1String ( "EOR" ) )
+  actLine = actLine.mid(pos);
+  // Check , if supported by LinLogBook
+  if (paramName.toUpper() == QLatin1String("EOR"))
   {
     saveInput();
     return -1;
   }
-  if ( databaseFields.contains ( paramName ) )
+  if (databaseFields.contains(paramName))
   {
-    int col = databaseFields.indexOf ( QRegExp ( paramName ) );
-    if ( col >= 0 )
+    int col = databaseFields.indexOf(QRegExp(paramName));
+    if (col >= 0)
       col++;
     *s1 = paramValue;
-    if ( foreignKey ( paramName ) )
-      *s2 = getKey ( paramName, paramValue );
+    if (foreignKey(paramName))
+      *s2 = getKey(paramName, paramValue);
     else
       *s2 = paramValue;
     return col;
@@ -988,298 +1030,305 @@ int LinLogBook::prepareItem ( QString s, QString *s1, QString *s2 )
     return -1;
 }
 
-bool LinLogBook::openSelectedDb ( QString dbname )
+bool LinLogBook::openSelectedDb(QString dbname)
 {
-  QSqlDatabase db =  QSqlDatabase::addDatabase ( QLatin1String ( "QSQLITE" ) );
-  db.setDatabaseName ( dbname );
-  QString s = QFileInfo ( dbname ).fileName();
-  if ( db.open() )
+  QSqlDatabase db = QSqlDatabase::addDatabase(QLatin1String("QSQLITE"));
+  db.setDatabaseName(dbname);
+  QString s = QFileInfo(dbname).fileName();
+  if (db.open())
   {
-    dbNameMessage.setText ( tr ( "Database " ) + s );
-    actionImportCtyDat->setEnabled ( true );
+    dbNameMessage.setText(tr("Database ") + s);
+    actionImportCtyDat->setEnabled(true);
   }
   else
   {
-    QMessageBox::warning ( 0, tr ( "Open Database" ), tr ( "Could not open Database %1\n" ).arg ( dbname ) + db.lastError().text(), QMessageBox::Ok );
+    QMessageBox::warning(0, tr("Open Database"), tr("Could not open Database %1\n").arg(dbname) + db.lastError().text(), QMessageBox::Ok);
     return false;
   }
   return readTables();
 }
+
 void LinLogBook::exportForEQSLUpload()
 {
-  QDir dir ;
+  QDir dir;
   QFile exportFile;
   QString adifFileName;
   QString s = QDir::homePath();
-  bool ok = dir.cd ( s );
+  bool ok = dir.cd(s);
   ok = dir.makeAbsolute();
   s = dir.path();
-  QFileDialog fileOpenDialog ( this, tr ( "Export Data to Adif File" ), s , tr ( "Adif Files (*.adi)" ) );
-  if ( fileOpenDialog.exec() == QDialog::Accepted )
+  QFileDialog fileOpenDialog(this, tr("Export Data to Adif File"), s, tr("Adif Files (*.adi)"));
+  if (fileOpenDialog.exec() == QDialog::Accepted)
   {
-    adifFileName = fileOpenDialog.selectedFiles().at ( 0 ) ;
-    exportFile.setFileName ( adifFileName );
-    if ( exportFile.exists() )
+    adifFileName = fileOpenDialog.selectedFiles().at(0);
+    exportFile.setFileName(adifFileName);
+    if (exportFile.exists())
     {
-      if ( QMessageBox::question ( 0, tr ( "Export Data to Adif File" ), tr ( "File %1 already exits.\nOverwrite ?" ).arg ( adifFileName ), QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel ) == QMessageBox::Cancel )
+      if (QMessageBox::question(0, tr("Export Data to Adif File"), tr("File %1 already exits.\nOverwrite ?").arg(adifFileName), QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel) == QMessageBox::Cancel)
         return;
     }
     else
     {
-      adifFileName.append ( QLatin1String ( ".adi" ) );
-      exportFile.setFileName ( adifFileName );
+      adifFileName.append(QLatin1String(".adi"));
+      exportFile.setFileName(adifFileName);
     }
   }
   else
     return;
-  if ( !exportFile.open ( QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate ) )
+  if (!exportFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
   {
-    QMessageBox::critical ( 0, tr ( "Export Data to Adif File" ), tr ( "Could not open file: " ) + adifFileName );
+    QMessageBox::critical(0, tr("Export Data to Adif File"), tr("Could not open file: ") + adifFileName);
     return;
   }
-// Menu is only visible if EQSL_QSL_SENT field is present
-  QSqlQuery qy ( QLatin1String ( "select " ) + databaseFields.join ( QLatin1String ( "," ) ) + QLatin1String ( " from qsos where EQSL_QSL_SENT= (select id from EQSL_QSL_SENT where EQSL_QSL_SENTvalue='R') " ) );
-  int count = writeAdif ( qy, &exportFile );
+  // Menu is only visible if EQSL_QSL_SENT field is present
+  QSqlQuery qy(QLatin1String("select ") + databaseFields.join(QLatin1String(",")) + QLatin1String(" from qsos where EQSL_QSL_SENT= (select id from EQSL_QSL_SENT where EQSL_QSL_SENTvalue='R') "));
+  int count = writeAdif(qy, &exportFile);
   exportFile.close();
-  s = QLatin1String ( "update qsos set EQSL_QSL_SENT=(select Id from EQSL_QSL_SENT where EQSL_QSL_SENTvalue='Y') " );
-  if ( databaseFields.contains ( QLatin1String ( "EQSL_QSLSDATE" ) ) )
+  s = QLatin1String("update qsos set EQSL_QSL_SENT=(select Id from EQSL_QSL_SENT where EQSL_QSL_SENTvalue='Y') ");
+  if (databaseFields.contains(QLatin1String("EQSL_QSLSDATE")))
   {
-    s.append ( ",EQSL_QSLSDATE='" );
-    s.append ( QDate::currentDate().toString ( QLatin1String ( "yyyy-MM-dd" ) ) );
-    s.append ( "' " );
+    s.append(",EQSL_QSLSDATE='");
+    s.append(QDate::currentDate().toString(QLatin1String("yyyy-MM-dd")));
+    s.append("' ");
   }
-  s.append ( " where eqsl_qsl_sent=(select id from eqsl_qsl_sent where eqsl_qsl_sentvalue='R')" );
-  qDebug ( "Query String %s", qPrintable ( s ) );
+  s.append(" where eqsl_qsl_sent=(select id from eqsl_qsl_sent where eqsl_qsl_sentvalue='R')");
+  qDebug("Query String %s", qPrintable(s));
 
-  ok = qy.exec ( s );
-  QMessageBox::information ( 0, tr ( "Export for Eqsl Upload" ), tr ( " %1 Qso records writen  to file %2 for eQsl upload" ).arg ( count ).arg ( exportFile.fileName() ) );
+  ok = qy.exec(s);
+  QMessageBox::information(0, tr("Export for Eqsl Upload"), tr(" %1 Qso records writen  to file %2 for eQsl upload").arg(count).arg(exportFile.fileName()));
   qsoTable->select();
 }
-int LinLogBook::writeAdif ( QSqlQuery qy, QFile *exportFile )
+
+int LinLogBook::writeAdif(QSqlQuery qy, QFile *exportFile)
 {
-  QTextStream out ( exportFile );
+  QTextStream out(exportFile);
   QString s;
   out << "ADIF v2.0 export from " << VERSION << endl;
   out << "Generated on " << QDateTime::currentDateTime().toUTC().toString() << " UTC" << endl;
   out << "<PROGRAMID:10>LinLogBook" << endl;
   out << "<ADIF_Ver:1>2" << endl;
   out << "<EOH>" << endl;
-  qy.exec ();
+  qy.exec();
   int count = 0;
-  while ( qy.next() )
+  while (qy.next())
   {
-    for ( int i = 0;i < databaseFields.size();i++ )
+    for (int i = 0; i < databaseFields.size(); i++)
     {
-      if ( fieldsTypes[i] == QLatin1String ( "E" ) )
+      if (fieldsTypes[i] == QLatin1String("E"))
       {
         QSqlQuery qydepend;
-        QString s1 = QString ( QLatin1String ( "select %1value from %1 where Id = %2" ) ).arg ( databaseFields[i] ).arg ( qy.value ( i ).toString() );
-        qydepend.exec ( s1 );
-        if ( qydepend.next() )
-          s = qydepend.value ( 0 ).toString();
+        QString s1 = QString(QLatin1String("select %1value from %1 where Id = %2")).arg(databaseFields[i]).arg(qy.value(i).toString());
+        qydepend.exec(s1);
+        if (qydepend.next())
+          s = qydepend.value(0).toString();
         else s.clear();
       }
       else
-        s = qy.value ( i ).toString();
-      if ( fieldsTypes[i] == QLatin1String ( "D" ) )
-        s.remove ( QLatin1Char ( '-' ) );
-      if ( !s.isEmpty() )
-        out << "<" << databaseFields[i] << ":" << s.size() << ">" << s ;
+        s = qy.value(i).toString();
+      if (fieldsTypes[i] == QLatin1String("D"))
+        s.remove(QLatin1Char('-'));
+      if (!s.isEmpty())
+        out << "<" << databaseFields[i] << ":" << s.size() << ">" << s;
     }
     out << "<EOR>" << endl;
     count++;
   }
   return count;
 }
+
 void LinLogBook::saveDatabaseDefinion()
 {
   int i;
   QString s, value;
 
   QFile exportFile;
-  QDir dir ( myLinLogBookDirectory );
+  QDir dir(myLinLogBookDirectory);
   s = QDir::homePath();
-  bool ok = dir.cd ( s );
-  if ( !dir.exists() )
-    ok = dir.mkpath ( myLinLogBookDirectory );
-  ok = dir.cd ( myLinLogBookDirectory );
+  bool ok = dir.cd(s);
+  if (!dir.exists())
+    ok = dir.mkpath(myLinLogBookDirectory);
+  ok = dir.cd(myLinLogBookDirectory);
   ok = dir.makeAbsolute();
   s = dir.path();
-  QFileDialog fileOpenDialog ( this, tr ( "Save Databasedefinitons" ), s , tr ( "Databasedefinitions (*.sql)" ) );
-  if ( fileOpenDialog.exec() == QDialog::Accepted )
+  QFileDialog fileOpenDialog(this, tr("Save Databasedefinitons"), s, tr("Databasedefinitions (*.sql)"));
+  if (fileOpenDialog.exec() == QDialog::Accepted)
   {
-    QString fileName = fileOpenDialog.selectedFiles().at ( 0 );
-    if ( !fileName.endsWith ( QLatin1String ( ".sql" ), Qt::CaseInsensitive ) )
-      fileName.append ( QLatin1String ( ".sql" ) );
+    QString fileName = fileOpenDialog.selectedFiles().at(0);
+    if (!fileName.endsWith(QLatin1String(".sql"), Qt::CaseInsensitive))
+      fileName.append(QLatin1String(".sql"));
 
-    exportFile.setFileName ( fileName );
-    if ( exportFile.exists() )
+    exportFile.setFileName(fileName);
+    if (exportFile.exists())
     {
-      if ( QMessageBox::question ( 0, tr ( "Save Databasedefinitons" ), tr ( "File " ) + fileName + tr ( " already exits.\nOverwrite ?" ), QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel ) == QMessageBox::Cancel )
+      if (QMessageBox::question(0, tr("Save Databasedefinitons"), tr("File ") + fileName + tr(" already exits.\nOverwrite ?"), QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel) == QMessageBox::Cancel)
         return;
     }
   }
   else
     return;
   QSqlQuery qy;
-  if ( dbStatus < 1 )
+  if (dbStatus < 1)
   {
-    QMessageBox::warning ( 0, tr ( "Save Databasedefinition" ), tr ( "Database %1 is empty, no Definitions available" ).arg ( dbName ), QMessageBox::Ok );
+    QMessageBox::warning(0, tr("Save Databasedefinition"), tr("Database %1 is empty, no Definitions available").arg(dbName), QMessageBox::Ok);
     return;
   }
-  if ( !exportFile.open ( QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate ) )
+  if (!exportFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
   {
-    QMessageBox::critical ( 0, tr ( "Save Databasedefinition" ), tr ( "Could not open file %1: to store Databasedefinition" ).arg ( exportFile.fileName() ) );
+    QMessageBox::critical(0, tr("Save Databasedefinition"), tr("Could not open file %1: to store Databasedefinition").arg(exportFile.fileName()));
     return;
   }
-  QTextStream out ( &exportFile );
+  QTextStream out(&exportFile);
   QSqlDatabase db = QSqlDatabase::database();
-  QStringList tables = db.tables ( QSql::Tables );
+  QStringList tables = db.tables(QSql::Tables);
   /** This part is probably sqlite specific **/
-  for ( i = 0; i < tables.size();i++ )
+  for (i = 0; i < tables.size(); i++)
   {
-    s = tables.at ( i );
-    qy.exec ( QLatin1String ( "select sql from sqlite_master where type='table' and name='" ) + s + QLatin1String ( "'" ) );
+    s = tables.at(i);
+    qy.exec(QLatin1String("select sql from sqlite_master where type='table' and name='") + s + QLatin1String("'"));
 
-    if ( ( s != QLatin1String ( "qsos" ) ) && ( s != QLatin1String ( "dbStatus" ) ) && ( s != QLatin1String ( "sqlite_sequence" ) ) )
+    if ((s != QLatin1String("qsos")) && (s != QLatin1String("dbStatus")) && (s != QLatin1String("sqlite_sequence")))
     {
-      if ( qy.next() )
+      if (qy.next())
       {
-//    out << "BEGIN TRANSACTION;" << endl;
-        out << qy.value ( 0 ).toString() << QLatin1Char ( ';' ) << endl;
-        qy.exec ( QLatin1String ( "select * from " ) + s );
-        while ( qy.next() )
+        //    out << "BEGIN TRANSACTION;" << endl;
+        out << qy.value(0).toString() << QLatin1Char(';') << endl;
+        qy.exec(QLatin1String("select * from ") + s);
+        while (qy.next())
         {
           int count = qy.record().count();
           out << "INSERT INTO " << s << " VALUES(";
           int col;
-          for ( col = 0; col < ( count - 1 ); col++ )
+          for (col = 0; col < (count - 1); col++)
           {
-            value = qy.value ( col ).toString();
-            value.replace ( QLatin1Char ( '\'' ), QLatin1String ( "''" ) );
+            value = qy.value(col).toString();
+            value.replace(QLatin1Char('\''), QLatin1String("''"));
             out << "'" << value << "',";
           }
-          value = qy.value ( col ).toString();
-          value.replace ( QLatin1Char ( '\'' ), QLatin1String ( "''" ) );
+          value = qy.value(col).toString();
+          value.replace(QLatin1Char('\''), QLatin1String("''"));
           out << "'" << value << "');" << endl;
 
         }
-//    out << "COMMIT;" << endl;
+        //    out << "COMMIT;" << endl;
       }
     }
   }
   out << "UPDATE dbStatus set status= ";
-  if ( dbStatus < 3 )
+  if (dbStatus < 3)
     out << dbStatus;
   else
     out << "2";
   out << ";" << endl;
 
   exportFile.close();
-  QMessageBox::information ( 0, tr ( "Save Databasedefinition" ), tr ( "Definitions of database %1 successfully saved to file %2" ).arg ( dbName ).arg ( exportFile.fileName() ) );
+  QMessageBox::information(0, tr("Save Databasedefinition"), tr("Definitions of database %1 successfully saved to file %2").arg(dbName).arg(exportFile.fileName()));
 }
+
 bool LinLogBook::readTables()
 {
   /** The tables depending on the database state are read
       and the correct menu items will be activated **/
   int i, j;
   QSqlQuery qy;
-  if ( !qy.exec ( QLatin1String ( "select status from dbStatus" ) ) )
+  if (!qy.exec(QLatin1String("select status from dbStatus")))
   {
-    QMessageBox::critical ( 0, tr ( "Open Database" ), tr ( "Could not ascertain status of database: %1 \nPerhaps database destroyed.\n Recreate Databse" ).arg ( dbName ) , QMessageBox::Ok );
+    QMessageBox::critical(0, tr("Open Database"), tr("Could not ascertain status of database: %1 \nPerhaps database destroyed.\n Recreate Databse").arg(dbName), QMessageBox::Ok);
     return false;
   }
-  if ( !qy.next() )
+  if (!qy.next())
   {
-    QMessageBox::critical ( 0, tr ( "Open Database" ), tr ( "Could not select status of database: %1 \nPerhaps database destroyed.\n Recreate Databse" ).arg ( dbName ) , QMessageBox::Ok );
+    QMessageBox::critical(0, tr("Open Database"), tr("Could not select status of database: %1 \nPerhaps database destroyed.\n Recreate Databse").arg(dbName), QMessageBox::Ok);
     return false;
   }
 
-  dbStatus = qy.value ( 0 ).toInt();
-// In some situations readTables might be calle repeatedly
-  if ( qsoTable == 0 )
+  dbStatus = qy.value(0).toInt();
+  // In some situations readTables might be calle repeatedly
+  if (qsoTable == 0)
     qsoTable = new QsoTableModel();
-  if ( editQso == 0 )
+  if (editQso == 0)
     editQso = new QsoTableModel();
-  if ( ( dbStatus > 0 ) && ( dbStatus < 3 ) )
+  if ((dbStatus > 0) && (dbStatus < 3))
   {
     databaseFields.clear();
     fieldsTypes.clear();
     linlogFields.clear();
     j = defaultBand->count();
-    if ( j > 0 )
-      for ( i = j - 1;i >= 0; i-- )
-        defaultBand->removeItem ( i );
+    if (j > 0)
+      for (i = j - 1; i >= 0; i--)
+        defaultBand->removeItem(i);
     j = defaultMode->count();
-    if ( j > 0 )
-      for ( i = j - 1;i >= 0; i-- )
-        defaultMode->removeItem ( i );
-    qy.exec ( QLatin1String ( "select Id,BANDValue from BAND" ) );
-    while ( qy.next() )
-      defaultBand->insertItem ( qy.value ( 0 ).toInt(), qy.value ( 1 ).toString(), QVariant ( qy.value ( 0 ).toInt() ) );
-    qy.exec ( QLatin1String ( "select Id,MODEValue from MODE" ) );
-    while ( qy.next() )
-      defaultMode->insertItem ( qy.value ( 0 ).toInt(), qy.value ( 1 ).toString(), QVariant ( qy.value ( 0 ).toInt() ) );
+    if (j > 0)
+      for (i = j - 1; i >= 0; i--)
+        defaultMode->removeItem(i);
+    qy.exec(QLatin1String("select Id,BANDValue from BAND"));
+    while (qy.next())
+      defaultBand->insertItem(qy.value(0).toInt(), qy.value(1).toString(), QVariant(qy.value(0).toInt()));
+    qy.exec(QLatin1String("select Id,MODEValue from MODE"));
+    while (qy.next())
+      defaultMode->insertItem(qy.value(0).toInt(), qy.value(1).toString(), QVariant(qy.value(0).toInt()));
   }
-  if ( dbStatus == 3 )
+  if (dbStatus == 3)
     prepareViews();
   return true;
 }
-void LinLogBook::setDefaultBand ( int cind )
+
+void LinLogBook::setDefaultBand(int cind)
 {
-  if ( cind >= 0 )
+  if (cind >= 0)
   {
     QString s = defaultBand->currentText();
-    int col = databaseFields.indexOf ( QRegExp ( QLatin1String ( "BAND" ) ) ) + 1;
-    QModelIndex I = editQso->index ( 0, col );
-    editQso->setData ( I , QVariant ( defaultBand->itemData ( cind ).toInt() ), Qt::EditRole );
-    editQso->setData ( I , QVariant ( s ), Qt::DisplayRole );
+    int col = databaseFields.indexOf(QRegExp(QLatin1String("BAND"))) + 1;
+    QModelIndex I = editQso->index(0, col);
+    editQso->setData(I, QVariant(defaultBand->itemData(cind).toInt()), Qt::EditRole);
+    editQso->setData(I, QVariant(s), Qt::DisplayRole);
   }
 }
-void LinLogBook::setDefaultMode ( int cind )
+
+void LinLogBook::setDefaultMode(int cind)
 {
-  if ( cind >= 0 )
+  if (cind >= 0)
   {
     QString s = defaultMode->currentText();
-    int col = databaseFields.indexOf ( QRegExp ( QLatin1String ( "MODE" ) ) ) + 1;
-    QModelIndex I = editQso->index ( 0, col );
-    editQso->setData ( I , QVariant ( defaultMode->itemData ( cind ).toInt() ), Qt::EditRole );
-    editQso->setData ( I , QVariant ( s ), Qt::DisplayRole );
+    int col = databaseFields.indexOf(QRegExp(QLatin1String("MODE"))) + 1;
+    QModelIndex I = editQso->index(0, col);
+    editQso->setData(I, QVariant(defaultMode->itemData(cind).toInt()), Qt::EditRole);
+    editQso->setData(I, QVariant(s), Qt::DisplayRole);
   }
 }
+
 void LinLogBook::updateBaseTables()
 {
   QSqlQuery qy;
   bool ok;
   QString dbname;
-  QDir dir ( myLinLogBookDirectory );
+  QDir dir(myLinLogBookDirectory);
   QString s = QDir::homePath();
-  ok = dir.cd ( s );
-  ok = dir.cd ( myLinLogBookDirectory );
+  ok = dir.cd(s);
+  ok = dir.cd(myLinLogBookDirectory);
   ok = dir.makeAbsolute();
   s = dir.path();
-  QFileDialog basetableOpenDialog ( this, tr ( "Opens an existing File with sql commands" ), s, tr ( "Command files (*.sql)" ) );
-  if ( basetableOpenDialog.exec() == QDialog::Accepted )
+  QFileDialog basetableOpenDialog(this, tr("Opens an existing File with sql commands"), s, tr("Command files (*.sql)"));
+  if (basetableOpenDialog.exec() == QDialog::Accepted)
   {
-    s = basetableOpenDialog.selectedFiles().at ( 0 ) ;
-    QFile ExecFile ( s );
-    if ( !ExecFile.open ( QIODevice::ReadOnly | QIODevice::Text ) )
+    s = basetableOpenDialog.selectedFiles().at(0);
+    QFile ExecFile(s);
+    if (!ExecFile.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-      QMessageBox::information ( 0, tr ( "Update Basetables" ), tr ( "Unable to open File %1 " ).arg ( s ) );
+      QMessageBox::information(0, tr("Update Basetables"), tr("Unable to open File %1 ").arg(s));
       return;
     }
     else
     {
       QSqlDatabase db = QSqlDatabase::database();
       ok = db.transaction();
-      if ( !ok )
-        qDebug ( "Transaction Error %s", qPrintable ( db.lastError().text() ) );
-      if ( execFile ( &ExecFile , 0 ) )
+      if (!ok)
+        qDebug("Transaction Error %s", qPrintable(db.lastError().text()));
+      if (execFile(&ExecFile, 0))
       {
-        QMessageBox::information ( 0, tr ( "Update Basetables" ), tr ( "Basetables updated  " ) );
+        QMessageBox::information(0, tr("Update Basetables"), tr("Basetables updated  "));
         ok = db.commit();
-        if ( !ok )
-          qDebug ( "Commit Error %s", qPrintable ( db.lastError().text() ) );
+        if (!ok)
+          qDebug("Commit Error %s", qPrintable(db.lastError().text()));
 
         readTables();
       }
@@ -1297,36 +1346,36 @@ void LinLogBook::createBaseTables()
   QSqlQuery qy;
   bool ok;
   QString dbname;
-  QProgressBar progress ( this );
-  progress.setMinimum ( 0 );
-  progress.setMaximum ( 0 );
-  progress.setGeometry ( width() / 2, height() / 4, 50, 20 );
+  QProgressBar progress(this);
+  progress.setMinimum(0);
+  progress.setMaximum(0);
+  progress.setGeometry(width() / 2, height() / 4, 50, 20);
 
-  QDir dir ( myLinLogBookDirectory );
+  QDir dir(myLinLogBookDirectory);
   QString s = QDir::homePath();
-  ok = dir.cd ( s );
-  ok = dir.cd ( myLinLogBookDirectory );
+  ok = dir.cd(s);
+  ok = dir.cd(myLinLogBookDirectory);
   ok = dir.makeAbsolute();
   s = dir.path();
-  QFileDialog basetableOpenDialog ( this, tr ( "Opens an existing File with sql commands" ), s, tr ( "Command files (*.sql)" ) );
-  if ( basetableOpenDialog.exec() == QDialog::Accepted )
+  QFileDialog basetableOpenDialog(this, tr("Opens an existing File with sql commands"), s, tr("Command files (*.sql)"));
+  if (basetableOpenDialog.exec() == QDialog::Accepted)
   {
-    s = basetableOpenDialog.selectedFiles().at ( 0 ) ;
-    QFile ExecFile ( s );
-    if ( !ExecFile.open ( QIODevice::ReadOnly | QIODevice::Text ) )
+    s = basetableOpenDialog.selectedFiles().at(0);
+    QFile ExecFile(s);
+    if (!ExecFile.open(QIODevice::ReadOnly | QIODevice::Text))
     {
-      QMessageBox::information ( 0, tr ( "Create Basetables" ), tr ( "Unable to open File  " ) + s );
+      QMessageBox::information(0, tr("Create Basetables"), tr("Unable to open File  ") + s);
       return;
     }
     else
     {
-      ok = execFile ( &ExecFile, &progress );
-      if ( ok )
+      ok = execFile(&ExecFile, &progress);
+      if (ok)
       {
-        if ( !qy.exec ( QLatin1String ( "update dbStatus set status=1" ) ) )
+        if (!qy.exec(QLatin1String("update dbStatus set status=1")))
         {
-          QMessageBox::critical ( 0, tr ( "Create Basetables" ), tr ( "Could not update dbStatus: " ) , QMessageBox::Ok );
-          actionUpdateBaseTables->setEnabled ( true );
+          QMessageBox::critical(0, tr("Create Basetables"), tr("Could not update dbStatus: "), QMessageBox::Ok);
+          actionUpdateBaseTables->setEnabled(true);
           return;
         }
         else
@@ -1337,76 +1386,77 @@ void LinLogBook::createBaseTables()
   readTables();
   enableMenuEntries();
 }
+
 void LinLogBook::importCtyDat()
 {
   QString ctyFileName;
   bool ok;
-  QDir dir ( myLinLogBookDirectory );
+  QDir dir(myLinLogBookDirectory);
   QString s = QDir::homePath();
-  ok = dir.cd ( s );
-  if ( !dir.exists() )
-    ok = dir.mkpath ( myLinLogBookDirectory );
-  ok = dir.cd ( myLinLogBookDirectory );
+  ok = dir.cd(s);
+  if (!dir.exists())
+    ok = dir.mkpath(myLinLogBookDirectory);
+  ok = dir.cd(myLinLogBookDirectory);
   ok = dir.makeAbsolute();
   s = dir.path();
 
-  QFileDialog ctyDat ( this, tr ( "Import cty.dat" ), s, tr ( "Cty.dat File (*.dat)" ) );
-  ctyDat.setAcceptMode ( QFileDialog::AcceptOpen );
-  if ( ctyDat.exec() == QDialog::Accepted )
-    ctyFileName = ctyDat.selectedFiles().at ( 0 );
+  QFileDialog ctyDat(this, tr("Import cty.dat"), s, tr("Cty.dat File (*.dat)"));
+  ctyDat.setAcceptMode(QFileDialog::AcceptOpen);
+  if (ctyDat.exec() == QDialog::Accepted)
+    ctyFileName = ctyDat.selectedFiles().at(0);
   else
     return;
-  QFile importFile ( ctyFileName );
-  if ( !importFile.open ( QIODevice::ReadOnly | QIODevice::Text ) )
-    QMessageBox::information ( 0, tr ( "Import cty.dat" ), tr ( "Could not open file: " ) + ctyFileName );
+  QFile importFile(ctyFileName);
+  if (!importFile.open(QIODevice::ReadOnly | QIODevice::Text))
+    QMessageBox::information(0, tr("Import cty.dat"), tr("Could not open file: ") + ctyFileName);
   else
   {
-    QProgressDialog progress ( this );
+    QProgressDialog progress(this);
 
-    progress.setLabelText ( tr ( "Importing file %1" ).arg ( ctyFileName ) );
-    progress.setRange ( 0, importFile.size() );
+    progress.setLabelText(tr("Importing file %1").arg(ctyFileName));
+    progress.setRange(0, importFile.size());
     int bytesRead = 0;
     int count = 0;
     QSqlQuery qy;
-// First we drop both required tables
-    qy.exec ( QLatin1String ( "drop table countrylist" ) );
-    qy.exec ( QLatin1String ( "drop table prefixlist" ) );
-// Now we recrate the tables
-    ok = qy.exec ( QLatin1String ( "create table countrylist(mainPrefix PRIMARY KEY not null,countryName not null,continent not null)" ) );
-    if ( !ok )
+    // First we drop both required tables
+    qy.exec(QLatin1String("drop table countrylist"));
+    qy.exec(QLatin1String("drop table prefixlist"));
+    // Now we recrate the tables
+    ok = qy.exec(QLatin1String("create table countrylist(mainPrefix PRIMARY KEY not null,countryName not null,continent not null)"));
+    if (!ok)
     {
-      QMessageBox::critical ( 0, tr ( "Import cty.dat" ), tr ( "Could not create table countrylist: " ) , QMessageBox::Ok );
+      QMessageBox::critical(0, tr("Import cty.dat"), tr("Could not create table countrylist: "), QMessageBox::Ok);
       return;
     }
-    ok = qy.exec ( QLatin1String ( "create table prefixlist(prefix PRIMARY KEY not null,mainPrefix,WAZ,ITU)" ) ); //mainPrefix should be a foreign key constraint, but sqlite does not support this
-    if ( !ok )
+    ok = qy.exec(QLatin1String("create table prefixlist(prefix PRIMARY KEY not null,mainPrefix,WAZ,ITU)")); //mainPrefix should be a foreign key constraint, but sqlite does not support this
+    if (!ok)
     {
-      QMessageBox::critical ( 0, tr ( "Import cty.dat" ), tr ( "Could not create table prefixlist: " ) , QMessageBox::Ok );
+      QMessageBox::critical(0, tr("Import cty.dat"), tr("Could not create table prefixlist: "), QMessageBox::Ok);
       return;
     }
-    QTextStream line ( &importFile );
+    QTextStream line(&importFile);
     QString countryName, mainPrefix, WAZ, ITU, continent;
-    while ( !line.atEnd() )
+    while (!line.atEnd())
     {
       QString actLine = line.readLine();
       count++;
       bytesRead += actLine.length();
-      countryName = actLine.section ( QLatin1Char ( ':' ), 0, 0 );
-      if ( countryName.contains ( QLatin1Char ( '\'' ) ) )
-        countryName.replace ( QLatin1Char ( '\'' ), QLatin1String ( "''" ) );
-      WAZ = actLine.section ( QLatin1Char ( ':' ), 1, 1 );
-      WAZ.remove ( QLatin1Char ( ' ' ) );
-      ITU = actLine.section ( QLatin1Char ( ':' ), 2, 2 );
-      ITU.remove ( QLatin1Char ( ' ' ) );
-      continent = actLine.section ( QLatin1Char ( ':' ), 3, 3 );
-      continent.remove ( QLatin1Char ( ' ' ) );
-      mainPrefix = actLine.section ( QLatin1Char ( ':' ), 7, 7 );
-      mainPrefix.remove ( QLatin1Char ( ' ' ) );
-      ok = qy.exec ( QString ( QLatin1String ( "insert into countrylist values('%1','%2','%3')" ) ).arg ( mainPrefix ).arg ( countryName ).arg ( continent ) );
+      countryName = actLine.section(QLatin1Char(':'), 0, 0);
+      if (countryName.contains(QLatin1Char('\'')))
+        countryName.replace(QLatin1Char('\''), QLatin1String("''"));
+      WAZ = actLine.section(QLatin1Char(':'), 1, 1);
+      WAZ.remove(QLatin1Char(' '));
+      ITU = actLine.section(QLatin1Char(':'), 2, 2);
+      ITU.remove(QLatin1Char(' '));
+      continent = actLine.section(QLatin1Char(':'), 3, 3);
+      continent.remove(QLatin1Char(' '));
+      mainPrefix = actLine.section(QLatin1Char(':'), 7, 7);
+      mainPrefix.remove(QLatin1Char(' '));
+      ok = qy.exec(QString(QLatin1String("insert into countrylist values('%1','%2','%3')")).arg(mainPrefix).arg(countryName).arg(continent));
 
-      if ( !ok )
+      if (!ok)
       {
-        QMessageBox::critical ( 0, tr ( "Insert into countrylist" ), tr ( "Could not insert entry\nline was " ) + actLine , QMessageBox::Ok );
+        QMessageBox::critical(0, tr("Insert into countrylist"), tr("Could not insert entry\nline was ") + actLine, QMessageBox::Ok);
         return;
       }
       do
@@ -1414,128 +1464,135 @@ void LinLogBook::importCtyDat()
         actLine = line.readLine();
         bytesRead += actLine.length();
         count++;
-        if ( actLine.isEmpty() )
+        if (actLine.isEmpty())
         {
-          QMessageBox::critical ( 0, tr ( "Import cty.dat" ), tr ( "cty.dat, line %1 was empty" ).arg ( count ) , QMessageBox::Ok );
+          QMessageBox::critical(0, tr("Import cty.dat"), tr("cty.dat, line %1 was empty").arg(count), QMessageBox::Ok);
           return;
         }
         QString s;
-        QStringList list = actLine.split ( QLatin1Char ( ',' ) );
-        for ( int i = 0;i < list.size();i++ )
+        QStringList list = actLine.split(QLatin1Char(','));
+        for (int i = 0; i < list.size(); i++)
         {
           QString prefix, subWAZ, subITU;
           s = list[i];
-          if ( !s.isEmpty() )
+          if (!s.isEmpty())
           {
             int len;
-            int pos1 = s.indexOf ( QLatin1Char ( '(' ) );
-            int pos2 = s.indexOf ( QLatin1Char ( '[' ) );
-            if ( ( pos1 < 0 ) && ( pos2 < 0 ) )
+            int pos1 = s.indexOf(QLatin1Char('('));
+            int pos2 = s.indexOf(QLatin1Char('['));
+            if ((pos1 < 0) && (pos2 < 0))
             {
               prefix = s;
               subWAZ = WAZ;
               subITU = ITU;
             }
-            else if ( pos2 < 0 ) // pos1 > 0
+            else if (pos2 < 0) // pos1 > 0
             {
-              prefix = s.left ( pos1 );
+              prefix = s.left(pos1);
               pos1++;
-              len = s.indexOf ( QLatin1Char ( ')' ) );
-              if ( ( len < 0 ) || ( ( len - pos1 ) < 1 ) )
+              len = s.indexOf(QLatin1Char(')'));
+              if ((len < 0) || ((len - pos1) < 1))
               {
-                QMessageBox::critical ( 0, tr ( "Import cty.dat" ), tr ( "Error in prefix\nline was " ) + actLine , QMessageBox::Ok );
+                QMessageBox::critical(0, tr("Import cty.dat"), tr("Error in prefix\nline was ") + actLine, QMessageBox::Ok);
                 return;
               }
-              subWAZ = s.mid ( pos1, len - pos1 );
+              subWAZ = s.mid(pos1, len - pos1);
               subITU = ITU;
             }
-            else if ( pos1 < 0 ) //pos2 > 0
+            else if (pos1 < 0) //pos2 > 0
             {
-              prefix = s.left ( pos2 );
+              prefix = s.left(pos2);
               pos2++;
-              len = s.indexOf ( QLatin1Char ( ']' ) );
-              if ( ( len < 0 ) || ( ( len - pos2 ) < 1 ) )
+              len = s.indexOf(QLatin1Char(']'));
+              if ((len < 0) || ((len - pos2) < 1))
               {
-                QMessageBox::critical ( 0, tr ( "Import cty.dat" ), tr ( "Error in prefix\nline was " ) + actLine , QMessageBox::Ok );
+                QMessageBox::critical(0, tr("Import cty.dat"), tr("Error in prefix\nline was ") + actLine, QMessageBox::Ok);
                 return;
               }
               subWAZ = WAZ;
-              subITU = s.mid ( pos2, len - pos2 );;
+              subITU = s.mid(pos2, len - pos2);
+              ;
             }
             else // pos1 > 0 and pos2 > 0)
             {
-              prefix = s.left ( pos1 );
-              len = s.indexOf ( QLatin1Char ( ')' ) );
+              prefix = s.left(pos1);
+              len = s.indexOf(QLatin1Char(')'));
               pos1++;
               pos2++;
-              if ( ( len < 0 ) || ( ( len - pos1 ) < 1 ) )
+              if ((len < 0) || ((len - pos1) < 1))
               {
-                QMessageBox::critical ( 0, tr ( "Import cty.dat" ), tr ( "Error in prefix\nline was " ) + actLine , QMessageBox::Ok );
+                QMessageBox::critical(0, tr("Import cty.dat"), tr("Error in prefix\nline was ") + actLine, QMessageBox::Ok);
                 return;
               }
-              subWAZ = s.mid ( pos1, len - pos1 );
-              len = s.indexOf ( QLatin1Char ( ']' ) );
-              if ( ( len < 0 ) || ( ( len - pos2 ) < 1 ) )
+              subWAZ = s.mid(pos1, len - pos1);
+              len = s.indexOf(QLatin1Char(']'));
+              if ((len < 0) || ((len - pos2) < 1))
               {
-                QMessageBox::critical ( 0, tr ( "Import cty.dat" ), tr ( "Error in prefix\nline was " ) + actLine , QMessageBox::Ok );
+                QMessageBox::critical(0, tr("Import cty.dat"), tr("Error in prefix\nline was ") + actLine, QMessageBox::Ok);
                 return;
               }
-              subITU = s.mid ( pos2, len - pos2 );
+              subITU = s.mid(pos2, len - pos2);
             }
-            prefix.remove ( QLatin1Char ( ';' ) );
-            prefix.remove ( QLatin1Char ( ' ' ) );
-            prefix.remove ( QLatin1Char ( '/' ) );
-            ok = qy.exec ( QString ( QLatin1String ( "insert into prefixlist values('%1','%2','%3','%4')" ) ).arg ( prefix ).arg ( mainPrefix ).arg ( subWAZ ).arg ( subITU ) );
-            if ( !ok )
+            prefix.remove(QLatin1Char(';'));
+            prefix.remove(QLatin1Char(' '));
+            prefix.remove(QLatin1Char('/'));
+            ok = qy.exec(QString(QLatin1String("insert into prefixlist values('%1','%2','%3','%4')")).arg(prefix).arg(mainPrefix).arg(subWAZ).arg(subITU));
+            if (!ok)
             {
-//test, if prefix is already in prefixlist
-              ok = qy.exec ( QString ( QLatin1String ( "select mainPrefix from prefixlist where prefix='%1'" ) ).arg ( prefix ) );
-              if ( !ok )
+              //test, if prefix is already in prefixlist
+              ok = qy.exec(QString(QLatin1String("select mainPrefix from prefixlist where prefix='%1'")).arg(prefix));
+              if (!ok)
               {
-                QMessageBox::critical ( 0, tr ( "Insert into prefixlist" ), tr ( "Could not insert entry\nline was " ) + actLine , QMessageBox::Ok );
+                QMessageBox::critical(0, tr("Insert into prefixlist"), tr("Could not insert entry\nline was ") + actLine, QMessageBox::Ok);
                 return;
               }
               else
               {
-                if ( qy.next() )
-                  QMessageBox::critical ( 0, tr ( "Insert into prefixlist" ), tr ( "Prefix " ) + prefix + tr ( " already in Prefix list for country " ) + mainPrefix + tr ( "\n now it should be inserted for " ) + qy.value ( 0 ).toString() , QMessageBox::Ok );
+                if (qy.next())
+                  QMessageBox::critical(0, tr("Insert into prefixlist"), tr("Prefix ") + prefix + tr(" already in Prefix list for country ") + mainPrefix + tr("\n now it should be inserted for ") + qy.value(0).toString(), QMessageBox::Ok);
                 else
                 {
-                  QMessageBox::critical ( 0, tr ( "Insert into prefixlist" ), tr ( "Could not insert entry, reason unknown\nline was " ) + actLine , QMessageBox::Ok );
+                  QMessageBox::critical(0, tr("Insert into prefixlist"), tr("Could not insert entry, reason unknown\nline was ") + actLine, QMessageBox::Ok);
                   return;
                 }
               }
             }
           }
         }
-        ok = !s.contains ( QLatin1Char ( ';' ) );
+        ok = !s.contains(QLatin1Char(';'));
       }
-      while ( ok );
-      progress.setValue ( bytesRead );
+      while (ok);
+      progress.setValue(bytesRead);
       qApp->processEvents();
-      if ( progress.wasCanceled() )
+      if (progress.wasCanceled())
         break;
 
     }
   }
 }
-void LinLogBook::displayCallSignInfo ( QString callSign )
+
+void LinLogBook::displayCallSignInfo(QString callSign, QString hisLocator)
 {
-//Delete previous entries
-  mainPrefix->setText ( tr ( "Main Prefix: " ) );
-  wazZone->setText ( tr ( "WAZ Zone: " ) );
-  ituZone->setText ( tr ( "ITU Zone: " ) );
-  countryName->setText ( tr ( "Country Name: " ) );
-  continent->setText ( tr ( "Continent: " ) );
-  CallSignInfo s = getCallSignInfo ( callSign );
-  mainPrefix->setText ( tr ( "Main Prefix: " ) + s.mainPrefix );
-  wazZone->setText ( tr ( "WAZ Zone: " ) + s.wazZone );
-  ituZone->setText ( tr ( "ITU Zone: " ) + s.ituZone );
-  countryName->setText ( tr ( "Country Name: " ) + s.countryName );
-  continent->setText ( tr ( "Continent: " ) + s.continent );
+  //Delete previous entries
+  mainPrefix->setText(tr("Main Prefix: "));
+  wazZone->setText(tr("WAZ Zone: "));
+  ituZone->setText(tr("ITU Zone: "));
+  countryName->setText(tr("Country Name: "));
+  continent->setText(tr("Continent: "));
+  CallSignInfo s = getCallSignInfo(callSign);
+  mainPrefix->setText(tr("Main Prefix: ") + s.mainPrefix);
+  wazZone->setText(tr("WAZ Zone: ") + s.wazZone);
+  ituZone->setText(tr("ITU Zone: ") + s.ituZone);
+  countryName->setText(tr("Country Name: ") + s.countryName);
+  continent->setText(tr("Continent: ") + s.continent);
+  distanceValue->setText(calculateDistance(myLocator, hisLocator));
+  detailView->setCallsignInfo(s, distanceValue->text());
+
 
 }
-LinLogBook::CallSignInfo LinLogBook::getCallSignInfo ( QString callSign )
+//LinLogBook::CallSignInfo LinLogBook::getCallSignInfo ( QString callSign )
+
+CallSignInfo LinLogBook::getCallSignInfo(QString callSign)
 {
   QString s;
   bool ok;
@@ -1547,208 +1604,215 @@ LinLogBook::CallSignInfo LinLogBook::getCallSignInfo ( QString callSign )
   info.countryName.clear();
   info.continent.clear();
   info.worked = false;
-  if ( callSign.isEmpty() )
+  if (callSign.isEmpty())
     return info;
-  int pos = callSign.indexOf ( QLatin1Char ( '/' ) );
-  if ( pos > 0 )
-    s = callSign.left ( pos ).toUpper();
+  int pos = callSign.indexOf(QLatin1Char('/'));
+  if (pos > 0)
+    s = callSign.left(pos).toUpper();
   else
     s = callSign.toUpper();
-// Check, if already worked
-  ok = qy.exec ( QString ( QString ( QLatin1String ( "select call from qsos where CALL='%1'" ) ).arg ( s ) ) );
-  if ( !ok )
-    qDebug ( "Error in qsosearch %s", qPrintable ( s ) );
+  // Check, if already worked
+  ok = qy.exec(QString(QString(QLatin1String("select call from qsos where CALL='%1'")).arg(s)));
+  if (!ok)
+    qDebug("Error in qsosearch %s", qPrintable(s));
   info.worked = qy.next();
-  ok = qy.exec ( QString ( QLatin1String ( "select mainPrefix,WAZ,ITU from prefixlist where prefix='%1'" ) ).arg ( s ) );
-  if ( !ok )
-    qDebug ( "Error in prefixsearch" );
+  ok = qy.exec(QString(QLatin1String("select mainPrefix,WAZ,ITU from prefixlist where prefix='%1'")).arg(s));
+  if (!ok)
+    qDebug("Error in prefixsearch");
   ok = qy.next();
-  if ( !ok )
+  if (!ok)
   {
-    pos = s.indexOf ( QRegExp ( QLatin1String ( "[0-9]" ) ), 1 );
-    s = s.left ( pos + 1 );
-    ok = qy.exec ( QString ( QLatin1String ( "select mainPrefix,WAZ,ITU from prefixlist where prefix='%1'" ) ).arg ( s ) );
-    if ( !ok )
-      qDebug ( "Error in prefixsearch 2" );
+    pos = s.indexOf(QRegExp(QLatin1String("[0-9]")), 1);
+    s = s.left(pos + 1);
+    ok = qy.exec(QString(QLatin1String("select mainPrefix,WAZ,ITU from prefixlist where prefix='%1'")).arg(s));
+    if (!ok)
+      qDebug("Error in prefixsearch 2");
     ok = qy.next();
-    if ( !ok )
+    if (!ok)
     {
-      s = s.left ( pos );
-      ok = qy.exec ( QString ( QLatin1String ( "select mainPrefix,WAZ,ITU from prefixlist where prefix='%1'" ) ).arg ( s ) );
-      if ( !ok )
-        qDebug ( "Error in prefixsearch 2" );
+      s = s.left(pos);
+      ok = qy.exec(QString(QLatin1String("select mainPrefix,WAZ,ITU from prefixlist where prefix='%1'")).arg(s));
+      if (!ok)
+        qDebug("Error in prefixsearch 2");
       ok = qy.next();
-      if ( !ok && pos > 1 )
+      if (!ok && pos > 1)
       {
-        s = s.left ( pos - 1 );
-        ok = qy.exec ( QString ( QLatin1String ( "select mainPrefix,WAZ,ITU from prefixlist where prefix='%1'" ) ).arg ( s ) );
-        if ( !ok )
-          qDebug ( "Error in prefixsearch 3" );
+        s = s.left(pos - 1);
+        ok = qy.exec(QString(QLatin1String("select mainPrefix,WAZ,ITU from prefixlist where prefix='%1'")).arg(s));
+        if (!ok)
+          qDebug("Error in prefixsearch 3");
         ok = qy.next();
-        if ( !ok )
+        if (!ok)
           return info; // No Match
       }
-//   else
-//    return info; // No Match
+      //   else
+      //    return info; // No Match
     }
   }
-  info.mainPrefix = qy.value ( 0 ).toString() ;
-  info.wazZone = qy.value ( 1 ).toString() ;
-  info.ituZone = qy.value ( 2 ).toString() ;
-  s = qy.value ( 0 ).toString();
-  ok = qy.exec ( QString ( QLatin1String ( "select countryName,continent from countrylist where mainPrefix='%1'" ) ).arg ( s ) );
-  if ( !ok )
-    qDebug ( "Error in countrylist, mainPrefix: %s", qPrintable ( s ) );
-  if ( qy.next() )
+  info.mainPrefix = qy.value(0).toString();
+  info.wazZone = qy.value(1).toString();
+  info.ituZone = qy.value(2).toString();
+  s = qy.value(0).toString();
+  ok = qy.exec(QString(QLatin1String("select countryName,continent from countrylist where mainPrefix='%1'")).arg(s));
+  if (!ok)
+    qDebug("Error in countrylist, mainPrefix: %s", qPrintable(s));
+  if (qy.next())
   {
-    info.countryName = qy.value ( 0 ).toString() ;
-    info.continent = qy.value ( 1 ).toString() ;
+    info.countryName = qy.value(0).toString();
+    info.continent = qy.value(1).toString();
   }
   return info;
 }
-void LinLogBook::showStatistic ( QAction *a )
+
+void LinLogBook::showStatistic(QAction *a)
 {
-  StatisticsTotal *s = new StatisticsTotal ( a->text() );
+  StatisticsTotal *s = new StatisticsTotal(a->text());
   s->exec();
   delete s;
 }
+
 void LinLogBook::aboutQT()
 {
-  QMessageBox::aboutQt ( this );
+  QMessageBox::aboutQt(this);
 }
+
 void LinLogBook::aboutLinLogBook()
 {
-  QMessageBox::about ( this, QString ( tr ( "About QLinLogBook" ) ), QString ( tr ( "<h3>About LinLogBook</h3><p><a href=\"http://linlogbook.sf.net/\">LinLogBook</a> is a highly user configurable LoogBook program for Linux and Mac OSX by Volker Schroer, DL1KSV. It is developed  under GPL( Read the file COPYING contained in the distribution for more information)</p><p>LinLogBook uses <a href=\"http://www.sqlite.org/\">sqlite </a> as sql  database to store the data.</p>" ) ) );
+  QMessageBox::about(this, QString(tr("About QLinLogBook")), QString(tr("<h3>About LinLogBook</h3><p><a href=\"http://linlogbook.sf.net/\">LinLogBook</a> is a highly user configurable LoogBook program for Linux and Mac OSX by Volker Schroer, DL1KSV. It is developed  under GPL( Read the file COPYING contained in the distribution for more information)</p><p>LinLogBook uses <a href=\"http://www.sqlite.org/\">sqlite </a> as sql  database to store the data.</p>")));
 }
+
 void LinLogBook::aboutCtydat()
 {
-  QMessageBox::about ( this, QString ( tr ( "About cty.dat" ) ), QString ( tr ( "<h3>About cty.dat</h3><p>The cty.dat file contains DXCC entities</p><p> and is maintained by Jim Reisert, AD1C </p><p>See <a href=\"http://country-files.com/\">country-files-com</a> for more information and download</p>" ) ) );
+  QMessageBox::about(this, QString(tr("About cty.dat")), QString(tr("<h3>About cty.dat</h3><p>The cty.dat file contains DXCC entities</p><p> and is maintained by Jim Reisert, AD1C </p><p>See <a href=\"http://country-files.com/\">country-files-com</a> for more information and download</p>")));
 }
+
 void LinLogBook::saveViews()
 {
   QString s;
   QSqlQuery qy;
   QFile exportFile;
-  QDir dir ( myLinLogBookDirectory );
+  QDir dir(myLinLogBookDirectory);
   s = QDir::homePath();
-  bool ok = dir.cd ( s );
-  if ( !dir.exists() )
-    ok = dir.mkpath ( myLinLogBookDirectory );
-  ok = dir.cd ( myLinLogBookDirectory );
+  bool ok = dir.cd(s);
+  if (!dir.exists())
+    ok = dir.mkpath(myLinLogBookDirectory);
+  ok = dir.cd(myLinLogBookDirectory);
   ok = dir.makeAbsolute();
   s = dir.path();
-  QFileDialog fileOpenDialog ( this, tr ( "Save Views" ), s , tr ( "Views (*.sql)" ) );
-  if ( fileOpenDialog.exec() == QDialog::Accepted )
+  QFileDialog fileOpenDialog(this, tr("Save Views"), s, tr("Views (*.sql)"));
+  if (fileOpenDialog.exec() == QDialog::Accepted)
   {
-    QString fileName = fileOpenDialog.selectedFiles().at ( 0 );
-    if ( !fileName.endsWith ( QLatin1String ( ".sql" ), Qt::CaseInsensitive ) )
-      fileName.append ( QLatin1String ( ".sql" ) );
+    QString fileName = fileOpenDialog.selectedFiles().at(0);
+    if (!fileName.endsWith(QLatin1String(".sql"), Qt::CaseInsensitive))
+      fileName.append(QLatin1String(".sql"));
 
-    exportFile.setFileName ( fileName );
-    if ( exportFile.exists() )
+    exportFile.setFileName(fileName);
+    if (exportFile.exists())
     {
-      if ( QMessageBox::question ( 0, tr ( "Save Views" ), tr ( "File " ) + fileName + tr ( " already exits.\nOverwrite ?" ), QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel ) == QMessageBox::Cancel )
+      if (QMessageBox::question(0, tr("Save Views"), tr("File ") + fileName + tr(" already exits.\nOverwrite ?"), QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel) == QMessageBox::Cancel)
         return;
     }
   }
   else
     return;
-// And now save the view definition
-  if ( !exportFile.open ( QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate ) )
+  // And now save the view definition
+  if (!exportFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
   {
-    QMessageBox::critical ( 0, tr ( "Save Views" ), tr ( "Could not open file %1: to store Views" ).arg ( exportFile.fileName() ) );
+    QMessageBox::critical(0, tr("Save Views"), tr("Could not open file %1: to store Views").arg(exportFile.fileName()));
     return;
   }
-  QTextStream out ( &exportFile );
+  QTextStream out(&exportFile);
   QSqlDatabase db = QSqlDatabase::database();
-  QStringList tables = db.tables ( QSql::Views );
-  if ( tables.size() > 1 ) // There should exist at least the View orderedqsos,
+  QStringList tables = db.tables(QSql::Views);
+  if (tables.size() > 1) // There should exist at least the View orderedqsos,
     // but this view will be created together with the table qsos
     // so we should not save this view
   {
-    for ( int  i = 0; i < tables.size();i++ )
+    for (int i = 0; i < tables.size(); i++)
     {
-      s = tables.at ( i );
-      if ( s != QLatin1String ( "orderedqsos" ) )
+      s = tables.at(i);
+      if (s != QLatin1String("orderedqsos"))
       {
-        qy.exec ( QLatin1String ( "select sql from sqlite_master where type='view' and name='" ) + s + QLatin1String ( "'" ) );
-        if ( qy.next() )
-          out << qy.value ( 0 ).toString() << QLatin1Char ( ';' ) << endl;
+        qy.exec(QLatin1String("select sql from sqlite_master where type='view' and name='") + s + QLatin1String("'"));
+        if (qy.next())
+          out << qy.value(0).toString() << QLatin1Char(';') << endl;
       }
     }
   }
   exportFile.close();
-  QMessageBox::information ( 0, tr ( "Save Views" ), tr ( "Views of database %1 successfully saved to file %2" ).arg ( dbName ).arg ( exportFile.fileName() ) );
+  QMessageBox::information(0, tr("Save Views"), tr("Views of database %1 successfully saved to file %2").arg(dbName).arg(exportFile.fileName()));
 
 }
+
 void LinLogBook::qslCardSetup()
 {
   SetupQslCard *setupQslCard = new SetupQslCard();
-  if ( setupQslCard->exec() )
-    actionPrintQSLCard->setEnabled ( true );
+  if (setupQslCard->exec())
+    actionPrintQSLCard->setEnabled(true);
   delete setupQslCard;
 }
+
 void LinLogBook::printQSLCard()
 {
-  QString s ( QLatin1String ( "select " ) );
-  QString whereClause ( QLatin1String ( " where qsl_sent=(select id from qsl_sent where qsl_sentvalue='R')" ) );
+
+  QString s(QLatin1String("select "));
+  QString whereClause(QLatin1String(" where qsl_sent=(select id from qsl_sent where qsl_sentvalue='R')"));
   QStringList fromClause;
-  fromClause << QLatin1String ( "qsos" );
+  fromClause << QLatin1String("qsos");
   QStringList *fields;
   QStringList types;
-  float convert = 7.2 / 2.54; // Factor to convert mm to pixel
   int entries, i, extraEntries;
   QSqlQuery qy;
   bool firstPage;
-// Build sql statement
+  // Build sql statement
   QSLCardInfo *info = new QSLCardInfo();
-  if ( ( entries = info->numEntries() ) == 0 )
+  if ((entries = info->numEntries()) == 0)
   {
-    QMessageBox::warning ( 0, tr ( "Print QSl Card" ), tr ( "Card Definition is missing.\nUnable to print" ) , QMessageBox::Ok );
+    QMessageBox::warning(0, tr("Print QSl Card"), tr("Card Definition is missing.\nUnable to print"), QMessageBox::Ok);
     return;
   }
   extraEntries = info->numExtraEntries();
   fields = info->fieldList();
-  for ( i = 0; i < entries; i++ )
+  for (i = 0; i < entries; i++)
   {
-    QString param = fields->at ( i );
-    if ( i > 0 )
-      s.append ( QLatin1Char ( ',' ) );
-    s.append ( param );
-    int pos = databaseFields.indexOf ( param );
-    types << fieldsTypes.at ( pos );
-    if ( fieldsTypes.at ( pos ) == QLatin1String ( "E" ) )
+    QString param = fields->at(i);
+    if (i > 0)
+      s.append(QLatin1Char(','));
+    s.append(param);
+    int pos = databaseFields.indexOf(param);
+    types << fieldsTypes.at(pos);
+    if (fieldsTypes.at(pos) == QLatin1String("E"))
     {
-      s.append ( QLatin1String ( "value" ) );
-//   fromClause.append ( QLatin1String ( "," ) );
-//   fromClause.append ( param );
-      if ( !fromClause.contains ( param, Qt::CaseInsensitive ) )
+      s.append(QLatin1String("value"));
+      if (!fromClause.contains(param, Qt::CaseInsensitive))
         fromClause << param;
-      whereClause.append ( QLatin1String ( " and qsos." ) );
-      whereClause.append ( param );
-      whereClause.append ( QLatin1String ( "=" ) );
-      whereClause.append ( param );
-      whereClause.append ( QLatin1String ( ".id" ) );
+      whereClause.append(QLatin1String(" and qsos."));
+      whereClause.append(param);
+      whereClause.append(QLatin1String("="));
+      whereClause.append(param);
+      whereClause.append(QLatin1String(".id"));
     }
 
   }
-  s.append ( QLatin1String ( " from " ) );
-  s.append ( fromClause.join ( QLatin1String ( "," ) ) );
-  s.append ( whereClause );
+  s.append(QLatin1String(" from "));
+  s.append(fromClause.join(QLatin1String(",")));
+  s.append(whereClause);
 
-  bool ok = qy.exec ( s );
-  if ( !ok )
-    qDebug ( "%s", qPrintable ( s ) );
-  if ( !ok )
+  bool ok = qy.exec(s);
+  if (!ok)
+    qDebug("%s", qPrintable(s));
+  if (!ok)
     return;
 
 
   QPrinter printer;
-  QPrintDialog printDialog ( &printer );
+  QPrintDialog printDialog(&printer);
   firstPage = true;
-  if ( printDialog.exec() )
+  if (printDialog.exec())
   {
-    QPainter painter ( &printer );
+    // Qpainter now takes the resolution of the printer, not 72 dpi as written in the ddocumentation
+    float convert = ((float) printer.resolution()) / 25.4; // Factor to convert mm to pixel
+    QPainter painter(&printer);
     int fontsize = painter.font().pointSize();
     QStringList *Conditions = info->printConditions();
     QStringList *Values = info->printValues();
@@ -1758,209 +1822,258 @@ void LinLogBook::printQSLCard()
     QList<int> *fontSizeExtraText = info->fontSizeExtra();
     QPoint p;
     QList<QPoint>* extraListCoordinates = info->extraTextListCoordinates();
-    while ( qy.next() )
+    while (qy.next())
     {
-      if ( !firstPage )
+      if (!firstPage)
         printer.newPage();
       firstPage = false;
       painter.save();
       QFont f = painter.font();
-      for ( i = 0;i < entries; i++ )
+      for (i = 0; i < entries; i++)
       {
-        if ( fontSizeText->at ( i ) > 0 )
-          f.setPointSize ( fontSizeText->at ( i ) );
+        if (fontSizeText->at(i) > 0)
+          f.setPointSize(fontSizeText->at(i));
         else
-          f.setPointSize ( fontsize );
-        painter.setFont ( f );
-        p = coordinates->at ( i );
+          f.setPointSize(fontsize);
+        painter.setFont(f);
+        p = coordinates->at(i);
         p *= convert;
-        if ( ! ( Conditions->at ( i ).isEmpty() ) )
+        if (!(Conditions->at(i).isEmpty()))
         {
-          if ( qy.value ( i ).toString() == Conditions->at ( i ) )
-            painter.drawText ( p.x(), p.y(), Values->at ( i ) );
+          if (qy.value(i).toString() == Conditions->at(i))
+            painter.drawText(p.x(), p.y(), Values->at(i));
         }
         else
         {
-          if ( types.at ( i ) == QLatin1String ( "D" ) )
-            s = qy.value ( i ).toDate().toString ( dateFormat );
-          else if ( types.at ( i ) == QLatin1String ( "T" ) )
-            s = qy.value ( i ).toTime().toString ( QLatin1String ( "HH:mm" ) );
+          if (types.at(i) == QLatin1String("D"))
+            s = qy.value(i).toDate().toString(dateFormat);
+          else if (types.at(i) == QLatin1String("T"))
+          {
+            // The following statement does not work any longer
+            //            s = qy.value ( i ).toTime().toString ( QLatin1String ( "HH:mm" ) ); //so
+            s = qy.value(i).toString();
+            s.insert(2, QLatin1Char(':'));
+          }
           else
-            s = qy.value ( i ).toString();
-          painter.drawText ( p.x(), p.y(), s );
+            s = qy.value(i).toString();
+          painter.drawText(p.x(), p.y(), s);
         }
       }
-      for ( i = 0;i < extraEntries;i++ )
+      for (i = 0; i < extraEntries; i++)
       {
-        if ( fontSizeExtraText->at ( i ) > 0 )
-          f.setPointSize ( fontSizeExtraText->at ( i ) );
+        if (fontSizeExtraText->at(i) > 0)
+          f.setPointSize(fontSizeExtraText->at(i));
         else
-          f.setPointSize ( fontsize );
-        painter.setFont ( f );
-        p = extraListCoordinates->at ( i );
+          f.setPointSize(fontsize);
+        painter.setFont(f);
+        p = extraListCoordinates->at(i);
         p *= convert;
-        painter.drawText ( p.x(), p.y(), extraList->at ( i ) );
+        painter.drawText(p.x(), p.y(), extraList->at(i));
       }
       painter.restore();
 
     }
-    if ( firstPage )  // Hack, as sqlite does report the size of query, so we check if at least one record was processed
+    if (firstPage) // Hack, as sqlite does report the size of query, so we check if at least one record was processed
     {
-      QMessageBox::question ( this, tr ( "QSL Card Print" ), tr ( "There was nothing to print" ) );
+      QMessageBox::question(this, tr("QSL Card Print"), tr("There was nothing to print"));
       return;
     }
   }
   else
     return;
-  if ( QMessageBox::question ( this, tr ( "QSL Card Print" ), tr ( "Were all cards well printed ?" ), QMessageBox::Yes | QMessageBox::No ) == QMessageBox::Yes )
+  if (QMessageBox::question(this, tr("QSL Card Print"), tr("Were all cards well printed ?"), QMessageBox::Yes | QMessageBox::No) == QMessageBox::Yes)
   {
-//  s = QLatin1String ( "update qsos set qsl_sent=1 where qsl_sent=5" );
-    s = QLatin1String ( "update qsos set qsl_sent=(select id from qsl_sent where qsl_sentvalue='Y') " );
-    if ( databaseFields.contains ( QLatin1String ( "QSLSDATE" ) ) )
+    s = QLatin1String("update qsos set qsl_sent=(select id from qsl_sent where qsl_sentvalue='Y') ");
+    if (databaseFields.contains(QLatin1String("QSLSDATE")))
     {
-      s.append ( ",QSLSDATE='" );
-      s.append ( QDate::currentDate().toString ( QLatin1String ( "yyyy-MM-dd" ) ) );
-      s.append ( "' " );
+      s.append(",QSLSDATE='");
+      s.append(QDate::currentDate().toString(QLatin1String("yyyy-MM-dd")));
+      s.append("' ");
     }
-    s.append ( " where qsl_sent=(select id from qsl_sent where qsl_sentvalue='R')" );
-//qDebug("Query String %s",qPrintable(s));
-    ok = qy.exec ( s );
-    if ( ok )
+    s.append(" where qsl_sent=(select id from qsl_sent where qsl_sentvalue='R')");
+    //qDebug("Query String %s",qPrintable(s));
+    ok = qy.exec(s);
+    if (ok)
       qsoTable->select();
-    else qDebug ( "Could not update qso table" );
+    else qDebug("Could not update qso table");
   }
 }
 
 void LinLogBook::enableMenuEntries()
 {
-  if ( dbStatus == 0 )
+  if (dbStatus == 0)
   {
-    actionNewDatabase->setEnabled ( false );
-    actionOpenDatabase->setEnabled ( false );
-    actionImportCtyDat->setEnabled ( true );
-    actionUpdateBaseTables->setEnabled ( true );
-    actionCreateBaseTables->setEnabled ( true );
+    actionNewDatabase->setEnabled(false);
+    actionOpenDatabase->setEnabled(false);
+    actionImportCtyDat->setEnabled(true);
+    actionUpdateBaseTables->setEnabled(true);
+    actionCreateBaseTables->setEnabled(true);
   }
-// Preparing Menu entries depending on Database Status
-  if ( dbStatus == 1 )
+  // Preparing Menu entries depending on Database Status
+  if (dbStatus == 1)
   {
-    actionNewDatabase->setEnabled ( false );
-    actionOpenDatabase->setEnabled ( false );
-    actionDefineDatabaseFields->setEnabled ( true );
-    actionCreateBaseTables->setEnabled ( false );
-    actionUpdateBaseTables->setEnabled ( true );
+    actionNewDatabase->setEnabled(false);
+    actionOpenDatabase->setEnabled(false);
+    actionDefineDatabaseFields->setEnabled(true);
+    actionCreateBaseTables->setEnabled(false);
+    actionUpdateBaseTables->setEnabled(true);
   }
-  if ( dbStatus == 2 )
+  if (dbStatus == 2)
   {
-    actionNewDatabase->setEnabled ( false );
-    actionOpenDatabase->setEnabled ( false );
-    actionCreateBaseTables->setEnabled ( false );
-    actionDefineDatabaseFields->setEnabled ( true );
-    actionCreateQSOTable->setEnabled ( true );
-    actionUpdateBaseTables->setEnabled ( true );
+    actionNewDatabase->setEnabled(false);
+    actionOpenDatabase->setEnabled(false);
+    actionCreateBaseTables->setEnabled(false);
+    actionDefineDatabaseFields->setEnabled(true);
+    actionCreateQSOTable->setEnabled(true);
+    actionUpdateBaseTables->setEnabled(true);
   }
-  if ( dbStatus == 3 )
+  if (dbStatus == 3)
   {
-    actionNewDatabase->setEnabled ( false );
-    actionOpenDatabase->setEnabled ( false );
+    actionNewDatabase->setEnabled(false);
+    actionOpenDatabase->setEnabled(false);
 
-    actionCreateBaseTables->setEnabled ( false );
-    actionDefineDatabaseFields->setEnabled ( false );
-    actionCreateQSOTable->setEnabled ( false );
-    actionUpdateBaseTables->setEnabled ( true );
+    actionCreateBaseTables->setEnabled(false);
+    actionDefineDatabaseFields->setEnabled(false);
+    actionCreateQSOTable->setEnabled(false);
+    actionUpdateBaseTables->setEnabled(true);
 
-    clearRecord->setEnabled ( true );
-    saveRecord->setEnabled ( true );
-    deleteRecord->setEnabled ( true );
-    deleteAll->setEnabled ( true );
+    clearRecord->setEnabled(true);
+    saveRecord->setEnabled(true);
+    deleteRecord->setEnabled(true);
+    deleteAll->setEnabled(true);
 
-    actionSaveDatabaseDefinition->setEnabled ( true );
-    actionImportAdifFile->setEnabled ( true );
-    actionExportAdifFile->setEnabled ( true );
-    menuServer->setEnabled ( true );
-//Prepare Menu entries depending on database fields
+    actionSaveDatabaseDefinition->setEnabled(true);
+    actionImportAdifFile->setEnabled(true);
+    actionExportAdifFile->setEnabled(true);
+    menuServer->setEnabled(true);
+    //Prepare Menu entries depending on database fields
     QSqlQuery qy;
-    if ( databaseFields.contains ( QLatin1String ( "QSL_SENT" ) ) )
+    if (databaseFields.contains(QLatin1String("QSL_SENT")))
     {
-      actionQSLCardSetup->setEnabled ( true );
-      if ( qy.exec ( QLatin1String ( " select count(*) from cardfields" ) ) )
+      actionQSLCardSetup->setEnabled(true);
+      if (qy.exec(QLatin1String(" select count(*) from cardfields")))
       {
-        actionPrintQSLCard->setEnabled ( true );
-        actionPrintQSLCard->setVisible ( true );
+        actionPrintQSLCard->setEnabled(true);
+        actionPrintQSLCard->setVisible(true);
       }
     }
-    if ( databaseFields.contains ( QLatin1String ( "EQSL_QSL_SENT" ) ) )
+    if (databaseFields.contains(QLatin1String("EQSL_QSL_SENT")))
     {
-      actionExportforEQSLUpload->setEnabled ( true );
-      actionExportforEQSLUpload->setVisible ( true );
+      actionExportforEQSLUpload->setEnabled(true);
+      actionExportforEQSLUpload->setVisible(true);
     }
-    if ( databaseFields.contains ( QLatin1String ( "LOTW_QSL_SENT" ) ) )
+    if (databaseFields.contains(QLatin1String("LOTW_QSL_SENT")))
     {
-      actionExportforLotWUpload->setEnabled ( true );
-      actionExportforLotWUpload->setVisible ( true );
+      actionExportforLotWUpload->setEnabled(true);
+      actionExportforLotWUpload->setVisible(true);
     }
-    bool ok = qy.exec ( QLatin1String ( "select * from statistics" ) );
-    if ( ok )
+    bool ok = qy.exec(QLatin1String("select * from statistics"));
+    if (ok)
     {
-      menuStatistics->setEnabled ( true ); // Adopt Menu
+      menuStatistics->setEnabled(true); // Adopt Menu
       menuStatistics->clear();
-      while ( qy.next() )
-        menuStatistics->addAction ( qy.value ( 0 ).toString() );
+      while (qy.next())
+        menuStatistics->addAction(qy.value(0).toString());
     }
     QSqlDatabase db = QSqlDatabase::database();
-    QStringList tables = db.tables ( QSql::Views );
-    if ( tables.size() > 1 )
-      actionSaveViews->setEnabled ( true );
+    QStringList tables = db.tables(QSql::Views);
+    if (tables.size() > 1)
+      actionSaveViews->setEnabled(true);
   }
 }
+
 void LinLogBook::exportForLotWUpload()
 {
-  QDir dir ;
+  QDir dir;
   QFile exportFile;
   QString adifFileName;
   QString s = QDir::homePath();
-  bool ok = dir.cd ( s );
+  bool ok = dir.cd(s);
   ok = dir.makeAbsolute();
   s = dir.path();
-  QFileDialog fileOpenDialog ( this, tr ( "Export Data to Adif File for LotW" ), s , tr ( "Adif Files (*.adi)" ) );
-  if ( fileOpenDialog.exec() == QDialog::Accepted )
+  QFileDialog fileOpenDialog(this, tr("Export Data to Adif File for LotW"), s, tr("Adif Files (*.adi)"));
+  if (fileOpenDialog.exec() == QDialog::Accepted)
   {
-    adifFileName = fileOpenDialog.selectedFiles().at ( 0 ) ;
-    exportFile.setFileName ( adifFileName );
-    if ( exportFile.exists() )
+    adifFileName = fileOpenDialog.selectedFiles().at(0);
+    exportFile.setFileName(adifFileName);
+    if (exportFile.exists())
     {
-      if ( QMessageBox::question ( 0, tr ( "Export Data to Adif File for LotW" ), tr ( "File %1 already exits.\nOverwrite ?" ).arg ( adifFileName ), QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel ) == QMessageBox::Cancel )
+      if (QMessageBox::question(0, tr("Export Data to Adif File for LotW"), tr("File %1 already exits.\nOverwrite ?").arg(adifFileName), QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel) == QMessageBox::Cancel)
         return;
     }
     else
     {
-      adifFileName.append ( QLatin1String ( ".adi" ) );
-      exportFile.setFileName ( adifFileName );
+      adifFileName.append(QLatin1String(".adi"));
+      exportFile.setFileName(adifFileName);
     }
   }
   else
     return;
-  if ( !exportFile.open ( QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate ) )
+  if (!exportFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate))
   {
-    QMessageBox::critical ( 0, tr ( "Export Data to Adif File for LotW" ), tr ( "Could not open file: " ) + adifFileName );
+    QMessageBox::critical(0, tr("Export Data to Adif File for LotW"), tr("Could not open file: ") + adifFileName);
     return;
   }
-// Menu is only visible if EQSL_QSL_SENT field is present
-  QSqlQuery qy ( QLatin1String ( "select " ) + databaseFields.join ( QLatin1String ( "," ) ) + QLatin1String ( " from qsos where LOTW_QSL_SENT= (select id from LOTW_QSL_SENT where LOTW_QSL_SENTvalue='R') " ) );
-  int count = writeAdif ( qy, &exportFile );
+  // Menu is only visible if EQSL_QSL_SENT field is present
+  QSqlQuery qy(QLatin1String("select ") + databaseFields.join(QLatin1String(",")) + QLatin1String(" from qsos where LOTW_QSL_SENT= (select id from LOTW_QSL_SENT where LOTW_QSL_SENTvalue='R') "));
+  int count = writeAdif(qy, &exportFile);
   exportFile.close();
-  s = QLatin1String ( "update qsos set LOTW_QSL_SENT=(select Id from LOTW_QSL_SENT where LOTW_QSL_SENTvalue='Y') " );
-  if ( databaseFields.contains ( QLatin1String ( "LOTW_QSLSDATE" ) ) )
+  s = QLatin1String("update qsos set LOTW_QSL_SENT=(select Id from LOTW_QSL_SENT where LOTW_QSL_SENTvalue='Y') ");
+  if (databaseFields.contains(QLatin1String("LOTW_QSLSDATE")))
   {
-    s.append ( ",LOTW_QSLSDATE='" );
-    s.append ( QDate::currentDate().toString ( QLatin1String ( "yyyy-MM-dd" ) ) );
-    s.append ( "' " );
+    s.append(",LOTW_QSLSDATE='");
+    s.append(QDate::currentDate().toString(QLatin1String("yyyy-MM-dd")));
+    s.append("' ");
   }
-  s.append ( " where lotw_qsl_sent=(select id from lotw_qsl_sent where lotw_qsl_sentvalue='R')" );
-  qDebug ( "Query String %s", qPrintable ( s ) );
+  s.append(" where lotw_qsl_sent=(select id from lotw_qsl_sent where lotw_qsl_sentvalue='R')");
+  qDebug("Query String %s", qPrintable(s));
 
-  qy.exec ( s );
-  QMessageBox::information ( 0, tr ( "Export for LotW Upload" ), tr ( " %1 Qso records writen  to file %2 for LotW upload" ).arg ( count ).arg ( exportFile.fileName() ) );
+  qy.exec(s);
+  QMessageBox::information(0, tr("Export for LotW Upload"), tr(" %1 Qso records writen  to file %2 for LotW upload").arg(count).arg(exportFile.fileName()));
   qsoTable->select();
 }
 
+QString LinLogBook::calculateDistance(QString myLocator, QString hisLocator)
+{
+  coordinates mine, his;
+  double dist;
+  if (myLocator.isEmpty() || hisLocator.isEmpty())
+    return QLatin1String("Distance:");
+  if (myLocator.length() != 6)
+    return QLatin1String("Distance:");
+  QString s("Distance: %1 km");
+  mine = loc2coordinates(myLocator.constData());
+  his = loc2coordinates(hisLocator.constData());
+  dist = 6371. * acos(sin(mine.breite) * sin(his.breite) + cos(mine.breite) * cos(his.breite) * cos(mine.laenge - his.laenge));
+  return s.arg((int) dist, 6);
+}
+
+LinLogBook::coordinates LinLogBook::loc2coordinates(const QChar *l)
+{
+  coordinates c;
+  c.laenge = (20. * (l[0].toAscii() - 'A') + 2. * (l[2].toAscii() - '0') + (1. / 12.) * (l[4].toAscii() - 'A') + 1. / 24.);
+  c.laenge *= M_PI / 180.;
+  c.breite = 90. - (10. * (l[1].toAscii() - 'A') + 1. * (l[3].toAscii() - '0') + (1. / 24.) * (l[5].toAscii() - 'A') + 1. / 48.);
+  c.breite *= M_PI / 180.;
+  return c;
+}
+
+void LinLogBook::viewChanged(int i)
+{
+  if (i == 0)
+    return;
+  //Find selection
+  if (selectedRecord.isEmpty())
+    return;
+  detailView->showDetail(selectedRecord, fieldsTypes, linlogFields);
+}
+
+void LinLogBook::saveIndex(QModelIndex i)
+{
+  selectedRecord = editQso->record(i.row());
+  QString call=selectedRecord.value(QLatin1String("CALL")).toString();
+  QString locator=selectedRecord.value(QLatin1String("GRIDSQUARE")).toString();
+  displayCallSignInfo(call,locator);
+  if (differentViews->currentIndex() == 1)
+    viewChanged(1);
+}

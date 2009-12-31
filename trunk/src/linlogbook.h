@@ -28,6 +28,8 @@
 #include <QStringList>
 #include <QVariant>
 #include <QSqlDatabase>
+#include <QSqlRecord>
+#include "common.h"
 
 class QsoTableModel;
 class QSqlTableModel;
@@ -37,105 +39,118 @@ class QFile;
 class QProgressBar;
 class QAction;
 
-class LinLogBook : public QMainWindow, private Ui::MainWindow
-{
-		Q_OBJECT
+class LinLogBook : public QMainWindow, private Ui::MainWindow {
+    Q_OBJECT
 
-	public:
-		LinLogBook ( QWidget* parent = 0, Qt::WFlags fl = 0 );
-		~LinLogBook();
+public:
+    LinLogBook(QWidget* parent = 0, Qt::WFlags fl = 0);
+    ~LinLogBook();
 
-		struct CallSignInfo
-		{
-			QString mainPrefix;
-			QString wazZone;
-			QString ituZone;
-			QString countryName;
-			QString continent;
-			bool worked;
-		};
-	public slots:
-		/*$PUBLIC_SLOTS$*/
+        /**
+        struct CallSignInfo {
+            QString mainPrefix;
+            QString wazZone;
+            QString ituZone;
+            QString countryName;
+            QString continent;
+            bool worked;
+        };
+     **/
+    struct coordinates {
+        double laenge;
+        double breite;
+    };
 
-	protected:
-		/*$PROTECTED_FUNCTIONS$*/
-		void closeEvent ( QCloseEvent *event );
-		bool execFile ( QFile *, QProgressBar * );
-	protected slots:
-		/*$PROTECTED_SLOTS$*/
-		void setup();
-		void newDB();
-		void openDB();
-		void saveDatabaseDefinion();
-		void saveViews();
-		void defineQsoTableFields();
-		void importCtyDat();
-		void createQSOTable();
-		void createBaseTables();
-		void updateBaseTables();
-		void importAdifFile();
-		void exportAdifFile();
-		void exportForEQSLUpload();
-		void exportForLotWUpload();
-		void clearInput();
-		void saveInput();
-		void searchCallsign();
-		void takeEntry ( QModelIndex );
-		void deleteAllEntries();
-		void deleteEntry();
-		void startServer();
-		void stopServer();
-		void setDataFromServer ( QString );
-		void setDefaultBand ( int );
-		void setDefaultMode ( int );
-		void showStatistic ( QAction * );
-		void aboutQT();
-		void aboutLinLogBook();
-		void aboutCtydat();
-		void qslCardSetup();
-		void printQSLCard();
+public slots:
+    /*$PUBLIC_SLOTS$*/
 
-	private:
-		enum State {undef, Header, Record, adifName, readValue, insertRecord};
-		QString myLocator;
-		QString myCall;
-		QString myName;
-		QString myCity;
-		QString language;
-		QString myLinLogBookDirectory;
-//  QSqlDatabase db;
-		QLabel dbNameMessage;
-		bool reopenDb;
-		QString dbName;
-		QLabel serverStatus;
-		QStringList databaseFields;
-		QStringList fieldsTypes;
-		QStringList linlogFields;
-		QsoTableModel *qsoTable;
-		QsoTableModel *editQso;
-		int prepareItem ( QString, QString *, QString * );
-		int writeAdif ( QSqlQuery, QFile * );
-		LinLogBookServer *qsoServer;
-		QString hostName;
-		int portNumber;
-// -1 no db selected
-// 0 new db
-// 1 Basetables created
-// 2 qso tabe fields created
-// 3 qso table created
-		int dbStatus;
-		void readSettings();
-		void saveSettings();
-		bool openSelectedDb ( QString );
-		bool readTables();
-		bool foreignKey ( QString );
-		bool dateType ( QString );
-		QString getKey ( QString, QString );
-		void enableMenuEntries();
-	protected:
-		void prepareViews();
-		CallSignInfo getCallSignInfo ( QString callSign );
-		void displayCallSignInfo ( QString callSign );
+protected:
+    /*$PROTECTED_FUNCTIONS$*/
+    void closeEvent(QCloseEvent *event);
+    bool execFile(QFile *, QProgressBar *);
+protected slots:
+    /*$PROTECTED_SLOTS$*/
+    void setup();
+    void newDB();
+    void openDB();
+    void saveDatabaseDefinion();
+    void saveViews();
+    void defineQsoTableFields();
+    void importCtyDat();
+    void createQSOTable();
+    void createBaseTables();
+    void updateBaseTables();
+    void importAdifFile();
+    void exportAdifFile();
+    void exportForEQSLUpload();
+    void exportForLotWUpload();
+    void clearInput();
+    void saveInput();
+    void searchCallsign();
+    void takeEntry(QModelIndex);
+    void deleteAllEntries();
+    void deleteEntry();
+    void startServer();
+    void stopServer();
+    void setDataFromServer(QString);
+    void setDefaultBand(int);
+    void setDefaultMode(int);
+    void showStatistic(QAction *);
+    void aboutQT();
+    void aboutLinLogBook();
+    void aboutCtydat();
+    void qslCardSetup();
+    void printQSLCard();
+    void viewChanged(int);
+    void saveIndex(QModelIndex);
+
+private:
+
+    enum State {
+        undef, Header, Record, adifName, readValue, insertRecord
+    };
+    QString myLocator;
+    QString myCall;
+    QString myName;
+    QString myCity;
+    QString language;
+    QString myLinLogBookDirectory;
+    //  QSqlDatabase db;
+    QLabel dbNameMessage;
+    bool reopenDb;
+    QString dbName;
+    QLabel serverStatus;
+    QStringList databaseFields;
+    QStringList fieldsTypes;
+    QStringList linlogFields;
+    QsoTableModel *qsoTable;
+    QsoTableModel *editQso;
+    int prepareItem(QString, QString *, QString *);
+    int writeAdif(QSqlQuery, QFile *);
+    LinLogBookServer *qsoServer;
+    QString hostName;
+    int portNumber;
+    // -1 no db selected
+    // 0 new db
+    // 1 Basetables created
+    // 2 qso tabe fields created
+    // 3 qso table created
+    int dbStatus;
+    void readSettings();
+    void saveSettings();
+    bool openSelectedDb(QString);
+    bool readTables();
+    bool foreignKey(QString);
+    bool dateType(QString);
+    QString getKey(QString, QString);
+    void enableMenuEntries();
+    QString calculateDistance(QString myLoc, QString hisLoc);
+    coordinates loc2coordinates(const QChar *l);
+    QSqlRecord selectedRecord;
+protected:
+    void prepareViews();
+    CallSignInfo getCallSignInfo(QString callSign);
+    void displayCallSignInfo(QString callSign, QString Locator);
 
 };
 
