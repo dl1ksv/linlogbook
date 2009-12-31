@@ -5,6 +5,7 @@ Printing of qsl cards now respects printer resolution.
 Time of qso was not printed any longer on qsl card. ( Due to changes in qt ? ). Now fixed.
 
 You can store now eQsl cards in your database.
+Fixed tow format bugs in date and time format.
 
 LinLogBook 0.4
 As in the meantime the ADIF specification  distinguishes between the different ways  ( bureau, eqs, lotw )  sending qsl, LinLogBook is able to keep track of these ways.
