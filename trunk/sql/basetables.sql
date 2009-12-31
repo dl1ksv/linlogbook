@@ -111,3 +111,4 @@ insert into LOTW_QSL_SENT (LOTW_QSL_SENTvalue) values('N');
 insert into LOTW_QSL_SENT (LOTW_QSL_SENTvalue) values('R');
 insert into LOTW_QSL_SENT (LOTW_QSL_SENTvalue) values('Q');
 insert into LOTW_QSL_SENT (LOTW_QSL_SENTvalue) values('I');
+CREATE TABLE qslcards(Id INTEGER PRIMARY KEY,card blob);
