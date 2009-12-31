@@ -684,13 +684,10 @@ void LinLogBook::searchCallsign()
       editQso->setData(editQso->index(0, column), findCallsign->text().toUpper());
     column = r.indexOf(QLatin1String("QSO_DATE"));
     if (column > 0)
-    {
-      QString s = QDate::currentDate().toString(Qt::LocaleDate);
-      editQso->setData(editQso->index(0, column), s);
-    }
+      editQso->setData(editQso->index(0, column), QDate::currentDate().toString(dateFormat));
     column = r.indexOf(QLatin1String("TIME_ON"));
     if (column > 0)
-      editQso->setData(editQso->index(0, column), QDateTime::currentDateTime().toUTC().time().toString(dateFormat));
+      editQso->setData(editQso->index(0, column), QDateTime::currentDateTime().toUTC().time().toString(QLatin1String("HH:mm")));
   }
   else if (rows == 1)
   {
