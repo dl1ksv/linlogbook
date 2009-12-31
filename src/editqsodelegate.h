@@ -26,22 +26,21 @@
 
 /**
  @author Volker Schroer <dl1ksv@gmx.de>
-*/
-class EditQsoDelegate : public QSqlRelationalDelegate
-{
-		Q_OBJECT
-	public:
-		EditQsoDelegate ( QObject *parent = 0 );
-		void setQsoFieldTypes ( QStringList );
-		~EditQsoDelegate();
-QWidget* createEditor ( QWidget * parent, const QStyleOptionViewItem & option, const QModelIndex & index ) const;
-void setEditorData ( QWidget * editor, const QModelIndex & index ) const;
-void setModelData ( QWidget * editor, QAbstractItemModel * model, const QModelIndex & index ) const;
-	private:
-		QStringList qsoFieldTypes;
+ */
+class EditQsoDelegate : public QSqlRelationalDelegate {
+    Q_OBJECT
+public:
+    EditQsoDelegate(QObject *parent = 0);
+    void setQsoFieldTypes(QStringList);
+    ~EditQsoDelegate();
+    QWidget* createEditor(QWidget * parent, const QStyleOptionViewItem & option, const QModelIndex & index) const;
+    void setEditorData(QWidget * editor, const QModelIndex & index) const;
+    void setModelData(QWidget * editor, QAbstractItemModel * model, const QModelIndex & index) const;
+private:
+    QStringList qsoFieldTypes;
 
 private slots:
-void CloseEditor();
+    void CloseEditor();
 
 };
 
