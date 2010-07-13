@@ -347,14 +347,15 @@ void LinLogBook::closeEvent(QCloseEvent *)
 void LinLogBook::createQSOTable()
 {
   QSqlQuery qy;
+  qy.setForwardOnly(true);
 
   qy.exec(QLatin1String("select * from LinLogFields"));
-  qy.setForwardOnly(true);
   QString statement(QLatin1String("CREATE TABLE qsos ( Id INTEGER PRIMARY KEY AUTOINCREMENT,"));
   bool first;
   first = true;
   while (qy.next())
   {
+    qDebug("** %s",qPrintable(qy.value(0).toString()));
     databaseFields << qy.value(0).toString();
     fieldsTypes << qy.value(1).toString();
     linlogFields << qy.value(2).toString();
@@ -863,8 +864,8 @@ void LinLogBook::prepareViews()
   databaseFields.clear();
   fieldsTypes.clear();
   linlogFields.clear();
-  qy.exec(QLatin1String("select * from LinLogFields"));
   qy.setForwardOnly(true);
+  qy.exec(QLatin1String("select * from LinLogFields"));
   while (qy.next())
   {
     databaseFields << qy.value(0).toString();
