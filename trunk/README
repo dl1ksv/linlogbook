@@ -3,7 +3,7 @@ LinLogBook is a highly configurable logbook program.
 To build LinLogBook, untar the tar archiv and switch to the LinLog directory.
 
 run:
-qmake -unix -o Makefile linlog.pro
+qmake -o Makefile linlogbook.pro
 make
 The executable linlog is build in the bin subdirectory. Move the binary into prefered location , probably /usr/local/bin
 It is recommended that you create a working directory for LinLog. For instance create .LinLog in your homedirectory and copy the file BaseTables.sql into this working directory.
