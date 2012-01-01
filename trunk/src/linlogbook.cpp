@@ -733,7 +733,8 @@ void LinLogBook::saveInput()
     {
       QModelIndex I = editQso->index(0, col);
       if (editQso->data(I, Qt::DisplayRole).toString().isEmpty())
-        editQso->setData(I, QVariant(QTime::currentTime().toString(QLatin1String("HHmm"))), Qt::EditRole);
+//        editQso->setData(I, QVariant(QTime::currentTime().toString(QLatin1String("HHmm"))), Qt::EditRole);
+      editQso->setData(I, QVariant(QDateTime::currentDateTime().toUTC().time().toString(QLatin1String("HH:mm"))), Qt::EditRole);
     }
 
     if ((ok = editQso->submitAll()))
@@ -876,6 +877,7 @@ void LinLogBook::prepareViews()
     fieldsTypes << qy.value(1).toString();
     linlogFields << qy.value(2).toString();
   }
+//  qy.clear();
   //Prepare default Combo boxes
   j = defaultBand->count();
   if (j > 0)
@@ -889,11 +891,13 @@ void LinLogBook::prepareViews()
   qy.exec(QLatin1String("select Id,BANDValue from BAND"));
   while (qy.next())
     defaultBand->insertItem(qy.value(0).toInt(), qy.value(1).toString(), QVariant(qy.value(0).toInt()));
+//  qy.clear();
   if (defaultBandSet > 0)
     defaultBand->setCurrentIndex(defaultBandSet);
   qy.exec(QLatin1String("select Id,MODEValue from MODE"));
   while (qy.next())
     defaultMode->insertItem(qy.value(0).toInt(), qy.value(1).toString(), QVariant(qy.value(0).toInt()));
+//  qy.clear();
   if (defaultModeSet > 0)
     defaultMode->setCurrentIndex(defaultModeSet);
 
@@ -910,6 +914,7 @@ void LinLogBook::prepareViews()
   qsoTable->setDependency(databaseFields, fieldsTypes);
   qsoTable->setSort(1, Qt::DescendingOrder);
   qsoTable->select();
+//  qsoTable->clear();
   //qDebug ( "Selectstatement %s", qPrintable ( qsoTable->showSelectStatement() ) );
   qsoList->setModel(qsoTable);
   qsoList->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -931,7 +936,7 @@ void LinLogBook::prepareViews()
   editQsoRecord->show();
   qsoList->show();
   clearInput();
-  qy.clear();
+//  qy.clear();
 }
 
 void LinLogBook::startServer()
@@ -1238,8 +1243,9 @@ bool LinLogBook::readTables()
     QMessageBox::critical(0, tr("Open Database"), tr("Could not select status of database: %1 \nPerhaps database destroyed.\n Recreate Databse").arg(dbName), QMessageBox::Ok);
     return false;
   }
-
   dbStatus = qy.value(0).toInt();
+  qy.clear(); // Sometimes database remains locked afterwards; so release lock by clear;
+
   // In some situations readTables might be calle repeatedly
   if (qsoTable == 0)
     qsoTable = new QsoTableModel();
@@ -1267,6 +1273,8 @@ bool LinLogBook::readTables()
   }
   if (dbStatus == 3)
     prepareViews();
+//  qy.exec(QLatin1String("commit")); // Sometimes database remains locked afterwards; so release lock by unneeded commit to release lock
+
   return true;
 }
 
@@ -1409,16 +1417,41 @@ void LinLogBook::importCtyDat()
     QMessageBox::information(0, tr("Import cty.dat"), tr("Could not open file: ") + ctyFileName);
   else
   {
-    QProgressDialog progress(this);
+ //   QProgressDialog progress(this);
 
-    progress.setLabelText(tr("Importing file %1").arg(ctyFileName));
-    progress.setRange(0, importFile.size());
+ //   progress.setLabelText(tr("Importing file %1").arg(ctyFileName));
+ //   progress.setRange(0, importFile.size());
     int bytesRead = 0;
     int count = 0;
+    QProgressDialog progress(tr("Importing file %1").arg(ctyFileName),tr("Cancel Import\nImport will be incomplete"),0,importFile.size(),this);
+    progress.setValue(0);
+    qApp->processEvents();
     QSqlQuery qy;
     // First we drop both required tables
-    qy.exec(QLatin1String("drop table countrylist"));
-    qy.exec(QLatin1String("drop table prefixlist"));
+    ok=qy.exec(QLatin1String("drop table if exists countrylist"));
+    if(!ok)
+    {
+        qsoTable->query().finish();
+        ok=qy.exec(QLatin1String("drop table if exists countrylist"));
+
+    }
+    if(!ok)
+    {
+        QMessageBox::critical(0, tr("Import cty.dat"), tr("Could not drop table countrylist.\nReason: ")+qy.lastError().text(), QMessageBox::Ok);
+        return;
+    }
+    ok=qy.exec(QLatin1String("drop table if exists prefixlist"));
+    if(!ok)
+    {
+        qsoTable->query().finish();
+        ok=qy.exec(QLatin1String("drop table if exists prefixlist"));
+
+    }
+    if(!ok)
+    {
+        QMessageBox::critical(0, tr("Import cty.dat"), tr("Could not drop table prefixlist.\nReason: ")+qy.lastError().text(), QMessageBox::Ok);
+        return;
+    }
     // Now we recrate the tables
     ok = qy.exec(QLatin1String("create table countrylist(mainPrefix PRIMARY KEY not null,countryName not null,continent not null)"));
     if (!ok)
@@ -1432,6 +1465,7 @@ void LinLogBook::importCtyDat()
       QMessageBox::critical(0, tr("Import cty.dat"), tr("Could not create table prefixlist: "), QMessageBox::Ok);
       return;
     }
+    qsoTable->select();
     QTextStream line(&importFile);
     QString countryName, mainPrefix, WAZ, ITU, continent;
     while (!line.atEnd())
@@ -1473,6 +1507,13 @@ void LinLogBook::importCtyDat()
         {
           QString prefix, subWAZ, subITU;
           s = list[i];
+          if(s.contains(QLatin1Char('=')))  // Remove VERSION String or "=" sign
+          {
+              if(s.contains(QLatin1String("VER"),Qt::CaseInsensitive))
+                  s="";
+                else
+              s.remove(QLatin1Char('='));
+          }
           if (!s.isEmpty())
           {
             int len;
@@ -1508,8 +1549,7 @@ void LinLogBook::importCtyDat()
                 return;
               }
               subWAZ = WAZ;
-              subITU = s.mid(pos2, len - pos2);
-              ;
+              subITU = s.mid(pos2, len - pos2);              
             }
             else // pos1 > 0 and pos2 > 0)
             {
@@ -1558,13 +1598,12 @@ void LinLogBook::importCtyDat()
           }
         }
         ok = !s.contains(QLatin1Char(';'));
+        progress.setValue(bytesRead);
+        qApp->processEvents(QEventLoop::AllEvents,100);
       }
       while (ok);
-      progress.setValue(bytesRead);
-      qApp->processEvents();
       if (progress.wasCanceled())
         break;
-
     }
   }
 }
@@ -1588,7 +1627,6 @@ void LinLogBook::displayCallSignInfo(QString callSign, QString hisLocator)
 
 
 }
-//LinLogBook::CallSignInfo LinLogBook::getCallSignInfo ( QString callSign )
 
 CallSignInfo LinLogBook::getCallSignInfo(QString callSign)
 {
@@ -1643,8 +1681,6 @@ CallSignInfo LinLogBook::getCallSignInfo(QString callSign)
         if (!ok)
           return info; // No Match
       }
-      //   else
-      //    return info; // No Match
     }
   }
   info.mainPrefix = qy.value(0).toString();
