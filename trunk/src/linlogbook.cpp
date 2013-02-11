@@ -679,6 +679,7 @@ void LinLogBook::searchCallsign()
   QSqlRecord r = editQso->record(0);
   if (rows == 0)
   {
+    s.clear();
     editQso->insertRow(0);
     column = r.indexOf(QLatin1String("CALL"));
     if (column > 0)
