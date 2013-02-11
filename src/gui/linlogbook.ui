@@ -588,7 +588,7 @@
      <x>0</x>
      <y>0</y>
      <width>892</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
    <property name="defaultUp">
@@ -632,8 +632,8 @@
      <rect>
       <x>161</x>
       <y>112</y>
-      <width>160</width>
-      <height>176</height>
+      <width>174</width>
+      <height>191</height>
      </rect>
     </property>
     <property name="layoutDirection">
