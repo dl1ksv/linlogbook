@@ -1,9 +1,9 @@
 /***************************************************************************
- * File:   detailview.cpp                                     
- *   Created on 5. Dezember 2009, 10:29                                    
- *                                                                        
- *   Copyright (C) 5. Dezember 2009 by Volker Schroer
- *   dl1ksv@gmx.de                                                        
+ * File:   detailview.cpp                                                  *
+ *   Created on 5. Dezember 2009, 10:29                                    *
+ *                                                                         *
+ *   Copyright (C) 5. Dezember 2009 by Volker Schroer                      *
+ *   dl1ksv@gmx.de                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -30,6 +30,7 @@
 #include <QFileDialog>
 #include <QSqlQuery>
 #include <QDate>
+#include <QMessageBox>
 
 extern QString dateFormat;
 
@@ -37,6 +38,7 @@ DetailView::DetailView(QWidget *parent) : QWidget(parent)
 {
   setupUi(this);
   connect(insertCard, SIGNAL(clicked()), this, SLOT(insertCardImage()));
+  connect(deleteCard, SIGNAL(clicked()), this, SLOT(deleteCardImage()));
   key = -1;
 }
 
@@ -125,4 +127,31 @@ void DetailView::setCallsignInfo(CallSignInfo s, QString dist)
   continent->setText(tr("Continent: ") + s.continent);
   distanceValue->setText(dist);
 
+}
+void DetailView::deleteCardImage()
+{
+ bool ok;
+ if( key < 0)  //Nothing selected
+     return;
+ QSqlQuery qy;
+ ok = qy.prepare("select count(*) from qslcards where Id = :id");
+ qy.bindValue(":id",key);
+ ok = qy.exec();
+ if(ok)
+ {
+     if(!qy.next())
+         return;
+     if(qy.value(0).toInt() > 0)
+     {
+         if (QMessageBox::question(0, tr("Delete QSLCard Image"), tr("Do you really want to delete this Card Image ?"),
+                               QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Cancel) == QMessageBox::Ok)
+         {
+             ok = qy.prepare("delete from qslcards where Id = :id");
+            qy.bindValue(":id",key);
+            ok = qy.exec();
+            if(ok)
+              displayCard->setText(QLatin1String("No qsl card available"));
+        }
+     }
+ }
 }
