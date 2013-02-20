@@ -18,3 +18,6 @@ Important!!
 
 If you upgrade from 0.2 modify the file updateBaseTables-0.2-0.2.1.sql by removing the % sign in front of the line that fits to your logbook definition. Then run this file from the edit Menu -> update BaseTables.
 If you don't so , you won't see your qso entries when starting LinLogBook 0.2.1. But the entries are not lost. You will see these data again as soon as you run the update script and restarting LinLogBook.
+
+For the latest documentation get LinLogBook.pdf from the file download page.
+
