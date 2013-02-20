@@ -1,0 +1,347 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{graphicx}
+
+\title{LinLogBook, a hamradio logbook for linux}
+\author{Volker Schroer, DL1KSV}
+\date{February 2013}
+
+\begin{document}
+\begin{titlepage}
+
+
+\maketitle
+\begin{figure}[h]
+	\centering
+\includegraphics[scale=0.33]{pictures/LinlogBook-0_5.png}
+\end{figure}
+\end{titlepage}
+\tableofcontents
+\newpage
+
+
+\section{Features}
+
+LinLogBook is a highly configurable logbook program. It uses sqlite as sql -
+database to store its data.
+You can export your qso data to a file in adif format for uploading to eqsl, LotW
+or you can directly label your qsl cards.
+You can configure LinLogBook by defining some tables and assigning some values during the setup process. For more infomations see chapter \ref{sec:Configuration}.
+LinLogBook supports two modes
+\begin{itemize}
+\item Enter the qso data manually
+\item Run LinLogBook as TCP Logbook server
+\end{itemize}
+You can import and export the data in adif format.
+\section{Requirements}
+LinLogBook was tested with gcc 4.6.3 and uses sqlite as sql- database version
+3.x. It requires qt 4.3 or higher. The latest version was tested with qt 4.8.4
+\section{Installation}
+LinLogBook uses qmake, so the process of building does not use the autoconf
+tools.
+Do the following steps:
+
+\begin{itemize}
+\item Untar the LinLogBook package ( latest version is 0.5)\\
+tar xzf linlogbook-x.x.tar.gz\\
+or get the latest code from svn\\
+svn checkout svn://svn.code.sf.net/p/linlogbook/code/trunk linlogbook
+\item Switch to the linlogbook directory
+\item run:\\
+qmake -unix -o Makefile linlogbook.pro\\
+make
+\item linlogbook is build in the bin subdirectory. Move the binary into your prefered
+location , probably /usr/local/bin
+\item It is recommended that you create a working directory for LinLogBook.
+For instance create .LinLog in your homedirectory and copy the file basetables.sql
+into this working directory.
+\end{itemize}
+Now you can start linlog and choose your personal setup.
+
+\section{For the impatient}
+After the installation start LinLogBook by running linlogbook.\\
+Select File : new Database and select a name for your database.\\
+Select Edit : Create Basetables\\
+Select the file example.sql from the LinLog directory.\\
+Select Edit : Define Database Fields and modify the Column LinLogFields and the column DefaultValue depending on your needs and click OK.\\
+Then select Edit : Create QSo tables\\
+Now your are ready to retrieve qso data.
+
+\section{Configuration}\label{sec:Configuration} 
+Start LinLogBook and go to \textit{Edit} menu. Select \textit{Preferences} and fill out the
+form. The directory entry is relative to your home directory. It is a good idea
+to choose the same directory where you have put basetable.sql.\\
+Select the \textit{File} menu and \textit{create a new database}. Then change to the \textit{Edit} menu
+and create the basetables. You can use the file basetables.sql distributed with
+LinLogBook or you can adjust the tables to your needs by modifying the file
+basetables.sql.\\
+The table ADIF contains the possible entries your logbook could contain. This
+table consists of the columns ADIFName and Type. The ADIFNames are
+taken from the ADIF 2 specifications. (http://www.adif.org/adif218.htm)\\
+You should only use valid adif names, as these names are taken for exporting the
+data. I put some names into the table that I use within my own logbook. But
+there are much more possible entries.\\
+
+LinLogBook uses the following types of the adif specification:
+\begin{itemize}
+  \item String labeled S
+  \item Date labeled D ( You can choose the preferred date format in the Prefer-
+ences panel )
+\item Time (HH:MM) labeled T
+\item Gridsquare labeled G . This labeling is used to be able to check the formal
+syntax of the entered values. If exported in adif format it is outputed as
+string.
+\item Enumeration labeled E. For each enumeration you must setup an extra
+table. See chapter \ref{sec:Tables} .
+\item Number labeled N. At the moment treated as string.
+\item Multiline string labeled as M. At the moment treated as string.
+\end{itemize}
+After the definition of the basetables you can choose the items you wish to use
+in your logbook.
+To do so, select Define Database Fields in the Edit menu and you’ll get the
+following form:\\
+
+\includegraphics[scale=0.33]{pictures/CreateDatabaseFields.png}\linebreak
+
+Select the entries you want to use and move them into the right box. Insert
+an descriptive text in the third column of the right box. This text will be used
+as an column header in your logbook later on. The columns appear in your
+logbook in the same order as the appear in the right box. If you want to change
+the order of your columns , use the up and down arrows beneath the right box.
+You can change the columns and their order as long as you didn’t create the
+qso table.
+You can assign default values to the fields of type ’E’ and the type ’N’. You do
+this by double clicking the corresponding field of the column labeled DefaultValue.
+If you are satisfied with your definitions create the qso table. Again you find
+this topic in the Edit menu.
+Now your logbook is ready to use.
+
+\section{Tables for enumerations}\label{sec:Tables}
+For each entry of type enumeration a table containing the posible values must
+be created. The name of this table must be the name of entry. This table
+contains two columns. The first is named Id and the second comtains the name of the
+table followed by value.
+The following example is taken from the definition of the enumeration of the
+band entry:
+
+\begin{verbatim}
+create table BAND (Id INTEGER PRIMARY KEY AUTOINCREMENT,
+BANDvalue UNIQUE NOT NULL);
+insert into BAND (BANDvalue) values(’160m’);
+insert into BAND (BANDvalue) values(’80m’);
+insert into BAND (BANDvalue) values(’60m’);
+insert into BAND (BANDvalue) values(’40m’);
+insert into BAND (BANDvalue) values(’30m’);
+insert into BAND (BANDvalue) values(’20m’);
+insert into BAND (BANDvalue) values(’17m’);
+insert into BAND (BANDvalue) values(’15m’);
+insert into BAND (BANDvalue) values(’12m’);
+insert into BAND (BANDvalue) values(’10m’);
+insert into BAND (BANDvalue) values(’6m’);
+insert into BAND (BANDvalue) values(’2m’);
+insert into BAND (BANDvalue) values(’70cm’);
+\end{verbatim}
+
+If you ’ll work other bands, too, you can enter these bands into this table.
+Otherwise, if you never operate in some of these bands, you can remove these
+entries. In this way you can configure LinLogBook depending on your needs.
+
+\section{Usage}
+
+Start LinLogBook. Open your database from the File menu. Now you can enter
+your qso data. To make the logging easier, you can select default values for the
+band and the mode.
+You can search in your loogbook for a qso with a special callsign by entering the
+callsign in the callsign field. If you enter only some initial values all callsigns
+starting with these values are looked for and the qsos are listed. If you select one entry by clicking you can select \textit{Details} and you'll get a detail view.\\ \\
+\includegraphics[scale=0.33]{pictures/QSLCard.png}\\
+Here  you can store or delete QSL- card images.\\
+
+\subsection{File Menu}
+\begin{flushleft}
+
+
+\textbf{Open Database}\\
+Here you open an existing database for further processing.\linebreak
+
+\textbf{New Database}\\
+Here you create a new database. If you select the name of an existing one its
+contents will be overwritten.\linebreak
+
+\textbf{Export for EQSL upload}\\
+If the ADIF field EQSL\_QSL\_SENT is used all records having EQSL\_QSL\_SENT
+set to ’R’ will be exported to a file. This file could be uploaded to eqsl.cc for
+instance. While exporting these data the status of the field EQSL\_QSL\_SENT
+is set to yes and if the field EQSL\_QSLSDATE was added to your database
+fields it will be set to the current date.\linebreak
+
+\textbf{Export for LotW upload}\\
+If the ADIF field LOTW\_QSL\_SENT is used all records having LOTW\_QSL\_SENT
+set to ’R’ will be exported to a file. This file is in ADIF format and might
+be a base for an upload to LotW.( You still have to convert the file into
+a digital signed file. ) While exporting these data the status of the field
+LOTW\_QSL\_SENT is set to yes and if the field LOTW\_QSLSDATE was added
+to your database fields it will be set to the current date.\linebreak
+
+\textbf{Print QSL Card}\\
+If the ADIF field QSL\_SENT is used all records having QSL\_SENT set to ’R’
+will be printed. You can choose as destination either a printer or a file. Printing
+to file generates a pdf document. You must define the layout of the print output
+in the QSL Card Setup in the Edit menu. You will be asked if the print was ok.
+If you say yes, QSL\_SENT is set to yes and if the field QSL\_QSLSDATE was
+added to your database fields it will be set to the current date. Otherwise the
+QSL\_SENT and QSL\_QSLSDATE remain unchanged.\linebreak
+
+\textbf{Save Database Definition}\\
+You can save the definitions ( sql statements ) of your logbook as a file.You can
+use this file to setup a new logbook by executing this file in\\
+Edit $\Rightarrow$   Create basetables .\\
+\textbf{Hint:} If you want to modify your logbook, for instance inserting some new
+columns, save your definitions and export all your qso data as an adif file.
+Then setup a new, empty database. Use your stored definitions as basetables.
+Afterwards you can modify your column setup. After creating the new qso table
+you can restore your qso data be importig the saved adif file. Don’t forget to
+save the views, too.\linebreak
+
+\textbf{Save Views}\\
+If you have created views - for instance to calculate some statistics - you can
+save your views to a file, for later use.\linebreak
+
+\textbf{Import cty.dat}\\
+The cty.dat file contains DXCC entities and is maintained by Jim Reisert, AD1C.
+See http://country-files.com for more information and download
+To import the city.dat file just download it and then run Import cty.dat from
+the File menu\linebreak
+
+\textbf{Import Adif File}\\
+You can import adif data from a file into your logbook. Adif fields in your file
+that are not defined in your logbook will be ignored.\linebreak
+
+\textbf{Export Adif File}\\
+You can export all of your logged data into one file. So you can save your data.\linebreak
+\end{flushleft}
+\subsection{Edit Menu}
+\begin{flushleft}
+Here you find the main tasks to configure the appearence and the characteristics
+of your personal logbook.\linebreak
+
+\textbf{Create Baseteables}\\
+If you setup a new logbook first you have to define which elements the logbook
+should possibly contain. This is done by creating the basetables. LinlogBook
+contains a file \textbf{basetables.sql} that contains a set of usefull definitions. These
+definitions are made by sql statements and you can expand them by editing this
+file. For example you can add adif fields by adding values to the ADIF table.
+You can also expand or reduce the list of bands and modes you are working by
+editing this file.\\
+\textbf{You can create these basetables only once !}\linebreak
+
+\textbf{Define Database Fields}\\
+By defining the database fields you select those fields you will actually use in
+your logbook and you label the columns. You can change this selection up to
+the final creating of the qso table.\linebreak
+
+\textbf{Create QSO Table}\\
+Creating the qso table means establishing the logbook. LinLogbook is ready for
+use. After this step you can’t change the defintion of this logbook anymore.\linebreak
+
+\textbf{Update Basetables}\\
+Here you can execute sql statements stored in a file.\\
+Two possible usecases are
+\begin{itemize}
+  \item
+You want to expand the bands or modes that can be assigned in your
+logbook. Write the insert statements into a file and choose this file to
+update your basetables. In the file BaseTables.sql you see the syntax of
+the appropriate sql statements.
+\item 
+You want to expand the bands or modes that can be assigned in your
+logbook. Write the insert statements into a file and choose this file to
+update your basetables. In the file BaseTables.sql you see the syntax of
+the appropriate sql statements.
+If you want to expand the features of your logbook by inserting additional
+columns you did not use up to now, you have to recreate your logbook.
+First you have to save the database definitions and views to files and store
+the entered data into another file by exporting them as adif file.
+Then you can create a new database and load your previous definitions by
+updating the ( at this moment empty ) basetables by the stored database
+definitions.
+After this step the qso table is not defined yet, so you can expand your
+definition by new database fields. If the favoured fields are not in the adif
+field list, you have to update your ADIF table. For more infomations see
+chapter \ref{sec:Configuration} . If the definition fits your needs, create the qso table and create
+the views ( if necessary ) by updating the basetables by running the file
+you saved your views to.
+Now import your saved adif data and your redesigned logbook is ready for
+use.
+\end{itemize}
+\textbf{QSL Card Setup}\\
+Here you define which fields of your logbook will be printed to your qsl card.
+Additionally you have to define the print position in mm and you can choose a font size between 8 and 12 points.
+You are even able to print some text conditionally. I use this to mark either the
+TNX QSL or the PSE QSL text on my qsl card.
+Here is my setup. Have a look at the two entries of QSL\_RCVD\\.
+\vspace*{5mm}
+\includegraphics[scale=0.3]{pictures/QSLCardSetup.png} 
+
+\textbf{Preferences}\\
+At least the database directory, the date format and the separator should be
+set. You have to set the port, if you want to be able to run the linlog server.
+The language selection will not be utilised at the moment and the other fields
+are for later use, too.
+\end{flushleft}
+\subsection{Statistics}
+LinLogBook owns a simple interface to define statistics. It uses the sql table
+statistics which has the following definition:
+create table statistics (MenuText UNIQUE NOT NULL,sql NOT NULL);
+The first column contains the name of entry in the Statistics menu. The second
+entry contains the corresponding sql statement to calculate the desired statistic.
+You find two examples in the file Statistics.sql. The first example counts
+the number of confirmed and unconfirmed qsos for each worked band and mode
+whilst the second example counts the worked and confirmed qsos for each country.
+ This example requires the cty.dat file to be imported.\\
+
+\includegraphics[scale=0.3]{pictures/StatisticQsos.png}
+\includegraphics[scale=0.3]{pictures/StatisticCountries.png}
+\subsection{Server Mode}
+Additionally you can run LinLogBook in server mode. To do so select start
+server in the server menu. A small TCP- server will listen on all interfaces. The
+port is configurable in Preferences in the Edit menu. This feature is intended
+to be used together with programs for digital modes.
+Data have to be sent in adif format on a per line basis. Each adif entry has
+to be one line. Sending <eor> means end of record and leads to storing the
+received data.
+Sending @@@@callsign requests informations on the callsign. LinLogBook
+sends back some country information and if the callsign has already been worked.
+\section{Apendix}
+\subsection{Update to LinLogBook 0.4}
+\begin{itemize}
+  \item Install LinLog 0.4
+  \item For security reasons copy your database file to a new file
+  \item Run LinLog 0.4 and open your database
+  \item Export the database contents using export Adif File in the File Menu
+  \item Save the database definition to an file using the corresponding item in the
+File Menu
+  \item Restart LinLog 0.4 and create a new database. You may use the same
+name for yor database. In this case the old database will be overwritten.
+  \item Run Create Basetables from the Edit menu
+  \item Choose the file you saved your database definitions to.
+  \item Run update BaseTables from the edit Menu and choose\\
+  update\_from\_03\_to 04.sql
+to run.
+  \item Run Define Database Fields from the Edit menu
+At this stage you might change the column names or the default values
+assigned to some columns and add or remove some fields.
+  \item Run Create Qso Table from the Edit menu
+  \item Run Import Adif File from the File menu
+
+\end{itemize}
+\subsection{Update to LinLogBook 0.5}
+\begin{itemize}
+  \item Install LinLogBook 0.5
+  \item Run update BaseTables from the edit Menu and choose\\
+  update\_from\_04\_to\_05.sql
+\end{itemize}
+
+\end{document}
