@@ -46,16 +46,6 @@ public:
     LinLogBook(QWidget* parent = 0, Qt::WFlags fl = 0);
     ~LinLogBook();
 
-        /**
-        struct CallSignInfo {
-            QString mainPrefix;
-            QString wazZone;
-            QString ituZone;
-            QString countryName;
-            QString continent;
-            bool worked;
-        };
-     **/
     struct coordinates {
         double laenge;
         double breite;
@@ -118,6 +108,7 @@ private:
     //  QSqlDatabase db;
     QLabel dbNameMessage;
     bool reopenDb;
+    bool serverAutoStart;
     QString dbName;
     QLabel serverStatus;
     QStringList databaseFields;

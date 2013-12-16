@@ -23,44 +23,43 @@
 
 #include <QDialog>
 #include "ui_setup.h"
+
 class QString;
 
 class Setup : public QDialog, private Ui::Setup
 {
-		Q_OBJECT
+  Q_OBJECT
 
-	public:
-		Setup ( QWidget* parent = 0, Qt::WFlags fl = 0 );
-		~Setup();
-		/*$PUBLIC_FUNCTIONS$*/
-		QString getmyCallsign();
-		QString getmyName();
-		QString getmyCity();
-		QString getmyLocator();
-		QString getDBDirectory();
-		QString getDateFormat();
-//QString getHostName();
-		int getPortNumber();
-		void setmyCallsign ( QString );
-		void setmyName ( QString );
-		void setmyCity ( QString );
-		void setmyLocator ( QString );
-		void setDBDirectory ( QString );
-		void setDateFormat ( QString );
-		void setReopen ( bool );
-		bool reopenLastDB();
+  public:
+    Setup ( QWidget* parent = 0, Qt::WFlags fl = 0 );
+    ~Setup();
+    /*$PUBLIC_FUNCTIONS$*/
+    QString getmyCallsign();
+    QString getmyName();
+    QString getmyCity();
+    QString getmyLocator();
+    QString getDBDirectory();
+    QString getDateFormat();
+    //QString getHostName();
+    int getPortNumber();
+    void setmyCallsign ( QString );
+    void setmyName ( QString );
+    void setmyCity ( QString );
+    void setmyLocator ( QString );
+    void setDBDirectory ( QString );
+    void setDateFormat ( QString );
+    void setReopen ( bool );
+    bool reopenLastDB();
+    void setAutoStart( bool b);
+    bool autoStart();
 //void setHostName(QString);
-		void setPortNumber ( int );
-	public slots:
-		/*$PUBLIC_SLOTS$*/
-
-	protected:
-		/*$PROTECTED_FUNCTIONS$*/
-
-	protected slots:
-		/*$PROTECTED_SLOTS$*/
-		virtual void          reject();
-		virtual void          accept();
+    void setPortNumber ( int );
+  public slots:
+  protected:
+  protected slots:
+  /*$PROTECTED_SLOTS$*/
+  virtual void          reject();
+  virtual void          accept();
 
 };
 

@@ -35,7 +35,6 @@ Setup::Setup ( QWidget* parent, Qt::WFlags fl )
 Setup::~Setup()
 {}
 
-/*$SPECIALIZATION$*/
 QString Setup::getmyCallsign()
 {
 	return myCallsign->text();
@@ -93,6 +92,16 @@ bool Setup::reopenLastDB()
 {
 	return reopenDatabase->isChecked();
 }
+void Setup::setAutoStart( bool b)
+{
+  serverAutoStart->setChecked(b);
+}
+
+bool Setup::autoStart()
+{
+  return serverAutoStart->isChecked();
+}
+
 QString Setup::getDateFormat()
 {
 	QString s = dateOrder->currentText();
