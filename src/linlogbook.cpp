@@ -71,9 +71,12 @@ LinLogBook::LinLogBook(QWidget* parent, Qt::WFlags fl)
   else
     enableMenuEntries();
   statusBar()->addWidget(&dbNameMessage);
-  serverStatus.setText(tr("Server is not running"));
-  statusBar()->addPermanentWidget(&serverStatus);
+  if(serverAutoStart)
+    startServer();
+  else
+    serverStatus.setText(tr("Server is not running"));
 
+  statusBar()->addPermanentWidget(&serverStatus);
   /** File **/
   connect(actionNewDatabase, SIGNAL(triggered()), this, SLOT(newDB()));
   connect(actionOpenDatabase, SIGNAL(triggered()), this, SLOT(openDB()));
@@ -137,6 +140,7 @@ void LinLogBook::setup()
   s->setmyCity(myCity);
   s->setmyLocator(myLocator);
   s->setReopen(reopenDb);
+  s->setAutoStart(serverAutoStart);
   s->setDateFormat(dateFormat);
   s->setPortNumber(portNumber);
   if (!myLinLogBookDirectory.isNull())
@@ -149,6 +153,7 @@ void LinLogBook::setup()
     myCity = s->getmyCity();
     myLinLogBookDirectory = s->getDBDirectory();
     reopenDb = s->reopenLastDB();
+    serverAutoStart=s->autoStart();
     dateFormat = s->getDateFormat();
     //hostName=s->getHostName();
     portNumber = s->getPortNumber();
@@ -167,6 +172,7 @@ void LinLogBook::readSettings()
   myLinLogBookDirectory = settings.value(QLatin1String("LinLogBookDirectory")).toString();
   reopenDb = settings.value(QLatin1String("reopenDb"), QVariant(false)).toBool();
   dbName = settings.value(QLatin1String("lastUsedDb")).toString();
+  serverAutoStart=settings.value(QLatin1String("serverAutoStart"),QVariant(false)).toBool();
   dateFormat = settings.value(QLatin1String("dateFormat")).toString();
   if (dateFormat.isEmpty())
     dateFormat = QLatin1String("dd.MM.yyyy");
@@ -183,6 +189,7 @@ void LinLogBook::saveSettings()
   settings.setValue(QLatin1String("myLocator"), myLocator);
   settings.setValue(QLatin1String("LinLogBookDirectory"), myLinLogBookDirectory);
   settings.setValue(QLatin1String("reopenDb"), reopenDb);
+  settings.setValue(QLatin1String("serverAutoStart"),serverAutoStart);
   settings.setValue(QLatin1String("lastUsedDb"), dbName);
   settings.setValue(QLatin1String("dateFormat"), dateFormat);
   settings.setValue(QLatin1String("portNumer"), portNumber);
@@ -668,7 +675,7 @@ void LinLogBook::clearInput()
 void LinLogBook::searchCallsign()
 {
   int column;
-  if (editQso <= 0)
+  if (editQso <= NULL)
     return;
   QString s = QLatin1String("CALL like '") + findCallsign->text() + QLatin1String("%'");
   editQso->setFilter(s);
@@ -708,7 +715,7 @@ void LinLogBook::searchCallsign()
 void LinLogBook::saveInput()
 {
   bool ok;
-  if (editQso <= 0)
+  if (editQso <= NULL)
     return;
   int rows = editQso->rowCount();
   if (rows == 0)
@@ -825,7 +832,7 @@ void LinLogBook::deleteAllEntries()
 {
   QSqlQuery qy;
 
-  if (editQso <= 0)
+  if (editQso <= NULL)
     return;
   int rows = editQso->rowCount();
   if (rows <= 0)
@@ -942,7 +949,7 @@ void LinLogBook::prepareViews()
 
 void LinLogBook::startServer()
 {
-  if (qsoServer <= 0)
+  if (qsoServer <= NULL)
   {
     qsoServer = new LinLogBookServer;
     connect(qsoServer, SIGNAL(qsoElement(QString)), this, SLOT(setDataFromServer(QString)));
@@ -959,7 +966,7 @@ void LinLogBook::startServer()
 
 void LinLogBook::stopServer()
 {
-  if (qsoServer > 0)
+  if (qsoServer > NULL)
   {
     qsoServer->close();
     serverStatus.setText(tr("Server is not running"));
