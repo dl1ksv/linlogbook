@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=LinLogbook
+GenericName=A hamradio logbook 
+Comment=A highliy configurable logbook
+# FIXME add comments in other languages
+Exec=linlogbook
+Categories=Qt;HamRadio;
+Terminal=false
+Icon=linlogbook
+Keywords=Radio;HAM;
