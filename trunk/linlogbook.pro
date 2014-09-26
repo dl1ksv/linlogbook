@@ -65,3 +65,10 @@ SOURCES += src/createdatabasefields.cpp \
            src/setupqslcard.cpp \
            src/statisticstotal.cpp
 RESOURCES += src/application.qrc
+desktop.path=/usr/share/applications
+desktop.files=data/linlogbook.desktop
+images.path=/usr/share/pixmaps
+images.files=images/linlogbook.png
+
+INSTALLS +=desktop
+INSTALLS +=images
