@@ -1204,21 +1204,23 @@ void LinLogBook::saveDatabaseDefinion()
         //    out << "BEGIN TRANSACTION;" << endl;
         out << qy.value(0).toString() << QLatin1Char(';') << endl;
         qy.exec(QLatin1String("select * from ") + s);
-        while (qy.next())
+        if ((s != QLatin1String("qslcards") && (s != QLatin1String("countrylist")) && (s != QLatin1String("prefixlist")))) // Only create content for definition tables
         {
-          int count = qy.record().count();
-          out << "INSERT INTO " << s << " VALUES(";
-          int col;
-          for (col = 0; col < (count - 1); col++)
+          while (qy.next())
           {
+            int count = qy.record().count();
+            out << "INSERT INTO " << s << " VALUES(";
+            int col;
+            for (col = 0; col < (count - 1); col++)
+            {
+              value = qy.value(col).toString();
+              value.replace(QLatin1Char('\''), QLatin1String("''"));
+              out << "'" << value << "',";
+            }
             value = qy.value(col).toString();
             value.replace(QLatin1Char('\''), QLatin1String("''"));
-            out << "'" << value << "',";
+            out << "'" << value << "');" << endl;
           }
-          value = qy.value(col).toString();
-          value.replace(QLatin1Char('\''), QLatin1String("''"));
-          out << "'" << value << "');" << endl;
-
         }
         //    out << "COMMIT;" << endl;
       }
@@ -1363,7 +1365,7 @@ void LinLogBook::createBaseTables()
   QProgressBar progress(this);
   progress.setMinimum(0);
   progress.setMaximum(0);
-  progress.setGeometry(width() / 2, height() / 4, 50, 20);
+  progress.setGeometry(width() / 2, height() / 4, 200, 20);
 
   QDir dir(myLinLogBookDirectory);
   QString s = QDir::homePath();

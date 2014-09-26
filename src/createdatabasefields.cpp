@@ -36,8 +36,6 @@ CreateDatabaseFields::CreateDatabaseFields ( QWidget* parent, Qt::WFlags fl )
 {
 	QSqlRecord r;
 	setupUi ( this );
-//	linLogFields = new QSqlTableModel();
-
 	linLogFields = new DefineTablesModel();
 	linLogFields->setEditStrategy ( QSqlTableModel::OnManualSubmit );
 	linLogFields->setTable ( QLatin1String ( "LinLogFields" ) );
@@ -47,9 +45,9 @@ CreateDatabaseFields::CreateDatabaseFields ( QWidget* parent, Qt::WFlags fl )
  r=linLogFields->record();
 	int index = r.indexOf ( QLatin1String ( "DefaultValue" ) );
 	if ( index >= 0 )
-qsoTableFields->setItemDelegate(new DefineTablesItem(index));
+    qsoTableFields->setItemDelegate(new DefineTablesItem(index));
 	qsoTableFields->setSelectionBehavior ( QAbstractItemView::SelectItems );
-qsoTableFields->resizeColumnsToContents();
+  qsoTableFields->resizeColumnsToContents();
 	qsoTableFields->show();
 	adifFields = new QSqlQueryModel();
 	adifFields->setQuery ( QLatin1String ( "select * from ADIF" ) );
@@ -92,9 +90,9 @@ void CreateDatabaseFields::accept()
 	{
 		r = linLogFields->record ( i );
 
-		if ( r.isNull ( index ) || r.field ( index ).value().toString().isEmpty() )
+    if ( (!qsoTableFields->isRowHidden ( i )) && ( r.isNull ( index ) || r.field ( index ).value().toString().isEmpty()) )
 		{
-			QMessageBox::critical ( 0, tr ( "Create Databasefields" ), tr ( "Name of LinLogField not set.\nPlease complete name" ), QMessageBox::Ok );
+      QMessageBox::critical ( 0, tr ( "Create Databasefields" ), tr ( "Name of LinLogField not set.\nPlease complete name" ), QMessageBox::Ok );
 			qsoTableFields->setCurrentIndex ( linLogFields->index ( i, index ) );
 			qsoTableFields->edit ( linLogFields->index ( i, index ) );
 			return;
