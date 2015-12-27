@@ -1,5 +1,5 @@
 LinLogBook is a highly configurable logbook program.
-
+Attention: LinLogBook uses now qt5 instead of qt4 !
 To build LinLogBook, untar the tar archiv and switch to the LinLog directory.
 
 run:
