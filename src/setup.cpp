@@ -22,7 +22,7 @@
 #include "setup.h"
 #include <QRegExpValidator>
 
-Setup::Setup ( QWidget* parent, Qt::WFlags fl )
+Setup::Setup (QWidget* parent, Qt::WindowFlags fl )
 		: QDialog ( parent, fl )
 {
 	setupUi ( this );

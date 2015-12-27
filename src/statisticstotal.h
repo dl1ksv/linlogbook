@@ -31,7 +31,7 @@ class StatisticsTotal : public QDialog, private Ui::StatisticsTotal
   Q_OBJECT
 
 public:
-  StatisticsTotal(const QString ,QWidget* parent = 0, Qt::WFlags fl = 0 );
+  StatisticsTotal(const QString ,QWidget* parent = 0, Qt::WindowFlags fl = 0 );
   ~StatisticsTotal();
 
 public slots:

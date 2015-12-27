@@ -26,7 +26,7 @@
 #include "qslcardinfo.h"
 #include "integeritemdelegate.h"
 
-SetupQslCard::SetupQslCard ( QWidget* parent, Qt::WFlags fl )
+SetupQslCard::SetupQslCard (QWidget* parent, Qt::WindowFlags fl )
 		: QDialog ( parent, fl )
 {
 	setupUi ( this );

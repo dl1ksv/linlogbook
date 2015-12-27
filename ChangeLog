@@ -1,6 +1,13 @@
+LinLogBook 0.5.5
+
+Now LinLogBook builds against qt5.
+Compiler warnings are fixed.
+Builds now in build directory.
+
 LinLogBook 0.5
 
-Regexp for time value changed, leading zero now required, corresponding to adif spezification
+Regexp for time value changed, leading zero now required, corresponding to
+adif spezification.
 Printing of qsl cards now respects printer resolution.
 Time of qso was not printed any longer on qsl card. ( Due to changes in qt ? ). Now fixed.
 

@@ -75,10 +75,11 @@ void DetailView::showDetail(QSqlRecord r, QStringList qsoFieldTypes, QStringList
   detailList->setMaximumWidth(detailList->columnWidth(0) + detailList->columnWidth(1) + 25);
   if (key >= 0)
   {
-    bool ok;
+//    bool ok;
     QString statement = QString("select card from qslcards where Id= %1").arg(key);
     QSqlQuery qy;
-    ok = qy.exec(statement);
+//    ok = qy.exec(statement);
+    qy.exec(statement);
     if (!qy.next())
     {
       displayCard->setText(QLatin1String("No qsl card available"));

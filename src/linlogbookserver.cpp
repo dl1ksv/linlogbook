@@ -28,7 +28,7 @@ LinLogBookServer::LinLogBookServer ( QObject *parent )
 void LinLogBookServer::createWorker()
 {
 	QTcpSocket *p = nextPendingConnection();
-	qDebug ( "New worker, descriptor %d", p->socketDescriptor() );
+//	qDebug ( "New worker, descriptor %d", p->socketDescriptor() );
 	qsoServer = new QsoServerThread ( p, this );
 	connect ( qsoServer, SIGNAL ( finished() ), qsoServer, SLOT ( deleteLater() ) );
 	connect ( qsoServer, SIGNAL ( qsoElement ( QString ) ), this, SIGNAL ( qsoElement ( QString ) ) );

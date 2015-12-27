@@ -27,7 +27,7 @@ QsoServerThread::QsoServerThread ( QTcpSocket *p, QObject *parent )
 		: QThread ( parent )
 {
 	tcpSocket = p ;
-	qDebug ( "Incoming Connection, descriptor %d ", tcpSocket->socketDescriptor() );
+//	qDebug ( "Incoming Connection, descriptor %d ", tcpSocket->socketDescriptor() );
 
 }
 
@@ -65,7 +65,7 @@ s.clear();
 }
 void QsoServerThread::save()
 {
-	qDebug ( "Finished %d", tcpSocket->socketDescriptor() );
+//	qDebug ( "Finished %d", tcpSocket->socketDescriptor() );
 	tcpSocket->close();
 	quit();
 	tcpSocket->deleteLater();

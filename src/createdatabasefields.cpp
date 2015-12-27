@@ -31,7 +31,7 @@
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlField>
-CreateDatabaseFields::CreateDatabaseFields ( QWidget* parent, Qt::WFlags fl )
+CreateDatabaseFields::CreateDatabaseFields (QWidget* parent, Qt::WindowFlags fl )
 		: QDialog ( parent, fl )
 {
 	QSqlRecord r;
@@ -123,14 +123,16 @@ void CreateDatabaseFields::accept()
 
 void CreateDatabaseFields::insertDatabaseField()
 {
-	bool ok;
+//	bool ok;
 	int adifTableRow = adifTable->currentIndex().row();
 	int col;
 
 	QModelIndex qsoTableFieldsIndex = qsoTableFields->currentIndex();
 	int qsoTableFieldsRow = qsoTableFieldsIndex.row() + 1;
-	ok = linLogFields->insertRow ( qsoTableFieldsRow );
-	ok = linLogFields->setRecord ( qsoTableFieldsRow,  adifFields->record ( adifTableRow ) );
+//	ok = linLogFields->insertRow ( qsoTableFieldsRow );
+	linLogFields->insertRow ( qsoTableFieldsRow );
+//	ok = linLogFields->setRecord ( qsoTableFieldsRow,  adifFields->record ( adifTableRow ) );
+	linLogFields->setRecord ( qsoTableFieldsRow,  adifFields->record ( adifTableRow ) );
 	col = linLogFields->record().indexOf ( QLatin1String ( "LinLogName" ) );
 	qsoTableFields->setCurrentIndex ( linLogFields->index ( qsoTableFieldsRow, col ) );
 	qsoTableFields->edit ( linLogFields->index ( qsoTableFieldsRow, col ) );
@@ -169,22 +171,24 @@ void CreateDatabaseFields::up()
 }
 void CreateDatabaseFields::down()
 {
-	int row = qsoTableFields->currentIndex().row();
-	int rows = linLogFields->rowCount();
-	int i;
-if(row < (rows-1) )
+  int row = qsoTableFields->currentIndex().row();
+  int rows = linLogFields->rowCount();
+  int i;
+  if(row < (rows-1) )
+    {
 	for ( i = row + 1;i < rows;i++ ) // Find visible row below ! Unvisible rows are treated as deleted
 		if ( !qsoTableFields->isRowHidden ( i ) )
 			break;
 	if ( i >= rows )
 		return; // It was already the last row , nothing to do !
-// we have to change the values of the reocords  row and i
+	// we have to change the values of the reocords  row and i
 	QSqlRecord r1, r2;
 	r1 = linLogFields->record ( row );
 	r2 = linLogFields->record ( i );
 	linLogFields->setRecord ( row, r2 );
 	linLogFields->setRecord ( i, r1 );
 	qsoTableFields->reset(); // Makes the changes visible
+    }
 }
 
 

@@ -43,7 +43,7 @@ class LinLogBook : public QMainWindow, private Ui::MainWindow {
     Q_OBJECT
 
 public:
-    LinLogBook(QWidget* parent = 0, Qt::WFlags fl = 0);
+    LinLogBook(QWidget* parent = 0, Qt::WindowFlags fl = 0);
     ~LinLogBook();
 
     struct coordinates {

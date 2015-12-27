@@ -31,7 +31,7 @@ class Setup : public QDialog, private Ui::Setup
   Q_OBJECT
 
   public:
-    Setup ( QWidget* parent = 0, Qt::WFlags fl = 0 );
+    Setup ( QWidget* parent = 0, Qt::WindowFlags fl = 0 );
     ~Setup();
     /*$PUBLIC_FUNCTIONS$*/
     QString getmyCallsign();

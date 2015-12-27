@@ -18,7 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#define VERSION "LinLogBook 0.5"
+#define VERSION "LinLogBook 0.5.5"
 
 #include "linlogbook.h"
 #include "setup.h"
@@ -52,7 +52,7 @@
 
 QString dateFormat = QLatin1String("dd.MM.yyyy");
 
-LinLogBook::LinLogBook(QWidget* parent, Qt::WFlags fl)
+LinLogBook::LinLogBook(QWidget* parent, Qt::WindowFlags fl)
 : QMainWindow(parent, fl)
 {
   setupUi(this);
@@ -199,14 +199,18 @@ void LinLogBook::saveSettings()
 void LinLogBook::newDB()
 {
   QString dbname;
-  bool ok;
+//  bool ok;
   QDir dir(myLinLogBookDirectory);
   QString s = QDir::homePath();
-  ok = dir.cd(s);
+//  ok = dir.cd(s);
+  dir.cd(s);
   if (!dir.exists())
-    ok = dir.mkpath(myLinLogBookDirectory);
-  ok = dir.cd(myLinLogBookDirectory);
-  ok = dir.makeAbsolute();
+//    ok = dir.mkpath(myLinLogBookDirectory);
+      dir.mkpath(myLinLogBookDirectory);
+//  ok = dir.cd(myLinLogBookDirectory);
+//  ok = dir.makeAbsolute();
+  dir.cd(myLinLogBookDirectory);
+  dir.makeAbsolute();
   s = dir.path();
   QFileDialog dbOpenDialog(this, tr("Create a new Database"), s, tr("DB files (*.dblog)"));
   if (dbOpenDialog.exec() == QDialog::Accepted)
@@ -251,14 +255,18 @@ void LinLogBook::newDB()
 
 void LinLogBook::openDB()
 {
-  bool ok;
+//  bool ok;
   QDir dir(myLinLogBookDirectory);
   QString s = QDir::homePath();
-  ok = dir.cd(s);
+//  ok = dir.cd(s);
+  dir.cd(s);
   if (!dir.exists())
-    ok = dir.mkpath(myLinLogBookDirectory);
-  ok = dir.cd(myLinLogBookDirectory);
-  ok = dir.makeAbsolute();
+//    ok = dir.mkpath(myLinLogBookDirectory);
+    dir.mkpath(myLinLogBookDirectory);
+//  ok = dir.cd(myLinLogBookDirectory);
+  dir.cd(myLinLogBookDirectory);
+//  ok = dir.makeAbsolute();
+  dir.makeAbsolute();
   s = dir.path();
   QFileDialog dbOpenDialog(this, tr("Open an existing Database"), s, tr("DB files (*.dblog)"));
   dbOpenDialog.setAcceptMode(QFileDialog::AcceptOpen);
@@ -415,7 +423,7 @@ void LinLogBook::createQSOTable()
 
 void LinLogBook::importAdifFile()
 {
-  bool ok;
+//  bool ok;
 
   State Status;
   int pos, valueLength;
@@ -428,9 +436,13 @@ void LinLogBook::importAdifFile()
   QDir dir;
   QString adifFileName;
   QString s = QDir::homePath();
-  ok = dir.cd(s);
-  ok = dir.makeAbsolute();
+//  ok = dir.cd(s);
+  dir.cd(s);
+//  ok = dir.makeAbsolute();
+  dir.makeAbsolute();
   s = dir.path();
+  pos=0;
+  valueLength=0;
   QFileDialog AdifOpenDialog(this, tr("Import Adif File"), s, tr("Adif files (*.adi)"));
   if (AdifOpenDialog.exec() == QDialog::Accepted)
   {
@@ -586,8 +598,10 @@ void LinLogBook::exportAdifFile()
   QFile exportFile;
   QString adifFileName;
   QString s = QDir::homePath();
-  bool ok = dir.cd(s);
-  ok = dir.makeAbsolute();
+//  bool ok = dir.cd(s);
+  dir.cd(s);
+//  ok = dir.makeAbsolute();
+  dir.makeAbsolute();
   s = dir.path();
   QFileDialog fileOpenDialog(this, tr("Export Data to Adif File"), s, tr("Adif Files (*.adi)"));
   if (fileOpenDialog.exec() == QDialog::Accepted)
@@ -818,8 +832,10 @@ void LinLogBook::deleteEntry()
   int i = editQsoRecord->currentIndex().row();
   if (i >= 0)
   {
-    bool ok = editQso->removeRow(editQsoRecord->currentIndex().row());
-    ok = editQso->submitAll();
+//   bool ok = editQso->removeRow(editQsoRecord->currentIndex().row());
+    editQso->removeRow(editQsoRecord->currentIndex().row());
+//    ok = editQso->submitAll();
+    editQso->submitAll();
     qsoTable->select();
     clearInput();
   }
@@ -843,10 +859,12 @@ void LinLogBook::deleteAllEntries()
       return;
   }
 
-  bool ok;
+//  bool ok;
   for (int i = 0; i < rows; i++)
-    ok = editQso->removeRow(i);
-  ok = editQso->submitAll();
+//    ok = editQso->removeRow(i);
+    editQso->removeRow(i);
+//  ok = editQso->submitAll();
+  editQso->submitAll();
   qsoTable->select();
   clearInput();
 }
@@ -869,7 +887,8 @@ void LinLogBook::prepareViews()
   int defaultBandSet, defaultModeSet, i, j;
 
   // Look for Header,Type, and ADIF Field
-
+  defaultBandSet = 0;
+  defaultModeSet = 0;
   databaseFields.clear();
   fieldsTypes.clear();
   linlogFields.clear();
@@ -1065,8 +1084,10 @@ void LinLogBook::exportForEQSLUpload()
   QFile exportFile;
   QString adifFileName;
   QString s = QDir::homePath();
-  bool ok = dir.cd(s);
-  ok = dir.makeAbsolute();
+//  bool ok = dir.cd(s);
+  dir.cd(s);
+//  ok = dir.makeAbsolute();
+  dir.makeAbsolute();
   s = dir.path();
   QFileDialog fileOpenDialog(this, tr("Export Data to Adif File"), s, tr("Adif Files (*.adi)"));
   if (fileOpenDialog.exec() == QDialog::Accepted)
@@ -1105,7 +1126,8 @@ void LinLogBook::exportForEQSLUpload()
   s.append(" where eqsl_qsl_sent=(select id from eqsl_qsl_sent where eqsl_qsl_sentvalue='R')");
   qDebug("Query String %s", qPrintable(s));
 
-  ok = qy.exec(s);
+//  ok = qy.exec(s);
+  qy.exec(s);
   QMessageBox::information(0, tr("Export for Eqsl Upload"), tr(" %1 Qso records writen  to file %2 for eQsl upload").arg(count).arg(exportFile.fileName()));
   qsoTable->select();
 }
@@ -1155,11 +1177,15 @@ void LinLogBook::saveDatabaseDefinion()
   QFile exportFile;
   QDir dir(myLinLogBookDirectory);
   s = QDir::homePath();
-  bool ok = dir.cd(s);
+//  bool ok = dir.cd(s);
+  dir.cd(s);
   if (!dir.exists())
-    ok = dir.mkpath(myLinLogBookDirectory);
-  ok = dir.cd(myLinLogBookDirectory);
-  ok = dir.makeAbsolute();
+//    ok = dir.mkpath(myLinLogBookDirectory);
+    dir.mkpath(myLinLogBookDirectory);
+//  ok = dir.cd(myLinLogBookDirectory);
+  dir.cd(myLinLogBookDirectory);
+//  ok = dir.makeAbsolute();
+  dir.makeAbsolute();
   s = dir.path();
   QFileDialog fileOpenDialog(this, tr("Save Databasedefinitons"), s, tr("Databasedefinitions (*.sql)"));
   if (fileOpenDialog.exec() == QDialog::Accepted)
@@ -1737,11 +1763,15 @@ void LinLogBook::saveViews()
   QFile exportFile;
   QDir dir(myLinLogBookDirectory);
   s = QDir::homePath();
-  bool ok = dir.cd(s);
+//  bool ok = dir.cd(s);
+  dir.cd(s);
   if (!dir.exists())
-    ok = dir.mkpath(myLinLogBookDirectory);
-  ok = dir.cd(myLinLogBookDirectory);
-  ok = dir.makeAbsolute();
+//    ok = dir.mkpath(myLinLogBookDirectory);
+    dir.mkpath(myLinLogBookDirectory);
+//  ok = dir.cd(myLinLogBookDirectory);
+  dir.cd(myLinLogBookDirectory);
+//  ok = dir.makeAbsolute();
+  dir.makeAbsolute();
   s = dir.path();
   QFileDialog fileOpenDialog(this, tr("Save Views"), s, tr("Views (*.sql)"));
   if (fileOpenDialog.exec() == QDialog::Accepted)
@@ -2032,8 +2062,10 @@ void LinLogBook::exportForLotWUpload()
   QFile exportFile;
   QString adifFileName;
   QString s = QDir::homePath();
-  bool ok = dir.cd(s);
-  ok = dir.makeAbsolute();
+//  bool ok = dir.cd(s);
+  dir.cd(s);
+//  ok = dir.makeAbsolute();
+  dir.makeAbsolute();
   s = dir.path();
   QFileDialog fileOpenDialog(this, tr("Export Data to Adif File for LotW"), s, tr("Adif Files (*.adi)"));
   if (fileOpenDialog.exec() == QDialog::Accepted)
@@ -2095,9 +2127,9 @@ QString LinLogBook::calculateDistance(QString myLocator, QString hisLocator)
 LinLogBook::coordinates LinLogBook::loc2coordinates(const QChar *l)
 {
   coordinates c;
-  c.laenge = (20. * (l[0].toAscii() - 'A') + 2. * (l[2].toAscii() - '0') + (1. / 12.) * (l[4].toAscii() - 'A') + 1. / 24.);
+  c.laenge = (20. * (l[0].toLatin1() - 'A') + 2. * (l[2].toLatin1() - '0') + (1. / 12.) * (l[4].toLatin1() - 'A') + 1. / 24.);
   c.laenge *= M_PI / 180.;
-  c.breite = 90. - (10. * (l[1].toAscii() - 'A') + 1. * (l[3].toAscii() - '0') + (1. / 24.) * (l[5].toAscii() - 'A') + 1. / 48.);
+  c.breite = 90. - (10. * (l[1].toLatin1() - 'A') + 1. * (l[3].toLatin1() - '0') + (1. / 24.) * (l[5].toLatin1() - 'A') + 1. / 48.);
   c.breite *= M_PI / 180.;
   return c;
 }

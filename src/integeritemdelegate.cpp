@@ -34,7 +34,7 @@ IntegerItemDelegate::~IntegerItemDelegate()
 {
 }
 **/
-QWidget * IntegerItemDelegate::createEditor(QWidget *parent,const QStyleOptionViewItem &option, const QModelIndex &index) const
+QWidget * IntegerItemDelegate::createEditor(QWidget *parent,const QStyleOptionViewItem &, const QModelIndex &) const
 {
 
 QSpinBox *editor=new QSpinBox(parent);
