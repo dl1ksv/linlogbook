@@ -29,10 +29,12 @@
 #include <QVariant>
 #include <QSqlDatabase>
 #include <QSqlRecord>
+#include <QDate>
 #include "common.h"
 
 class QsoTableModel;
 class QSqlTableModel;
+class QTableView;
 class LinLogBookServer;
 class QSqlQuery;
 class QFile;
@@ -61,6 +63,7 @@ protected:
 protected slots:
     /*$PROTECTED_SLOTS$*/
     void setup();
+    void editOperatorData();
     void newDB();
     void openDB();
     void saveDatabaseDefinion();
@@ -93,6 +96,8 @@ protected slots:
     void printQSLCard();
     void viewChanged(int);
     void saveIndex(QModelIndex);
+    void setOpCallsign(int);
+    void setOpFilter(bool pressed);
 
 private:
 
@@ -103,10 +108,16 @@ private:
     QString myCall;
     QString myName;
     QString myCity;
+    QDate validFrom;
+    QDate validTo;
+    int opId;
+
     QString language;
     QString myLinLogBookDirectory;
     //  QSqlDatabase db;
     QLabel dbNameMessage;
+    QLabel OpCall;
+    QLabel qsosLogged;
     bool reopenDb;
     bool serverAutoStart;
     QString dbName;
@@ -114,8 +125,13 @@ private:
     QStringList databaseFields;
     QStringList fieldsTypes;
     QStringList linlogFields;
+    QStringList restrictEqslExport;
+
     QsoTableModel *qsoTable;
     QsoTableModel *editQso;
+    QsoTableModel *operatorTable;
+    QTableView *opCallsignView;
+
     int prepareItem(QString, QString *, QString *);
     int writeAdif(QSqlQuery, QFile *);
     LinLogBookServer *qsoServer;
@@ -124,7 +140,7 @@ private:
     // -1 no db selected
     // 0 new db
     // 1 Basetables created
-    // 2 qso tabe fields created
+    // 2 qso table fields created
     // 3 qso table created
     int dbStatus;
     void readSettings();
@@ -135,6 +151,7 @@ private:
     bool dateType(QString);
     QString getKey(QString, QString);
     void enableMenuEntries();
+    void configureOpHandling();
     QString calculateDistance(QString myLoc, QString hisLoc);
     coordinates loc2coordinates(const QChar *l);
     QSqlRecord selectedRecord;

@@ -38,23 +38,23 @@ void EditQsoView::keyPressEvent ( QKeyEvent * event )
 	int key = event->key();
 	if ( ( key ==  Qt::Key_Enter ) || ( key == Qt::Key_Return ) )
 	{
-		bool lastentry;
-		lastentry = false;
-		QModelIndex index = currentIndex();
-		QModelIndex i;
-		int column = index.column();
-		if ( column < numberOfColumns )
-			i = model()->index ( 0, column + 1 );
-		else
-		{
-			i = model()->index ( 0, 1 );
-			lastentry = true;
-		}
-event->accept();
-		selectionModel()->setCurrentIndex ( i, QItemSelectionModel::NoUpdate );
-setFocus();
-		if ( lastentry )
-			emit qsoDataComplete();
+	  bool lastentry;
+	  lastentry = false;
+	  QModelIndex index = currentIndex();
+	  QModelIndex i;
+	  int column = index.column();
+	  if ( column < numberOfColumns )
+	    i = model()->index ( 0, column + 1 );
+	  else
+	    {
+		i = model()->index ( 0, 1 );
+		lastentry = true;
+	    }
+	  event->accept();
+	  selectionModel()->setCurrentIndex ( i, QItemSelectionModel::NoUpdate );
+	  setFocus();
+	  if ( lastentry )
+	    emit qsoDataComplete();
 
 	}
 	else

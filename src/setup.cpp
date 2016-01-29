@@ -21,36 +21,62 @@
 
 #include "setup.h"
 #include <QRegExpValidator>
+//#include "qsotablemodel.h"
+//#include "editqsoview.h"
+//#include <QTableView>
 
-Setup::Setup (QWidget* parent, Qt::WindowFlags fl )
+Setup::Setup ( QWidget* parent, Qt::WindowFlags fl )
 		: QDialog ( parent, fl )
 {
 	setupUi ( this );
-	QRegExp rx ( QLatin1String ( "^[A-R][A-R][0-9][0-9][A-X][A-X]$" ) );
-	QValidator *validator = new QRegExpValidator ( rx, this );
-	myLocator->setValidator ( validator );
+//	cols=0;
+//	opDataView=0;
 	portNumber->setInputMask ( QLatin1String ( "000009" ) );
+	/**
+	if (dbstatus >= 1)  // Basetables are created, that is operator table exists.
+	  {
+	    operatorTableFieldsTypes << "S" << "S" << "G" << "S" << "D" << "D";
+	    QsoTableModel *cols=new QsoTableModel();
+	    cols->setTable(QLatin1String("operator"));
+	    cols->setQsoFieldTypes(operatorTableFieldsTypes);
+	    cols->setReadOnly(true);
+
+	    cols->setHeaderData(1,Qt::Horizontal,tr("Op callsign"));
+	    cols->setHeaderData(2,Qt::Horizontal,tr("Op\'s name"));
+	    cols->setHeaderData(3,Qt::Horizontal,tr("Op\'s locator"));
+	    cols->setHeaderData(4,Qt::Horizontal,tr("City"));
+	    cols->setHeaderData(5,Qt::Horizontal,tr("Valid from"));
+	    cols->setHeaderData(6,Qt::Horizontal,tr("Valid to"));
+	    cols->select();
+
+	    selectActiveOp->setModel(cols);
+	    opDataView=new QTableView();
+	    opDataView->setModel(cols);
+	    opDataView->hideColumn(0); // Hide index column
+	    opDataView->verticalHeader()->hide();
+
+            opDataView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOn);      //fine tuning of some options
+            opDataView->setSelectionMode(QAbstractItemView::SingleSelection);
+            opDataView->setSelectionBehavior(QAbstractItemView::SelectRows);
+            opDataView->resizeColumnsToContents();
+
+	    selectActiveOp->setView(opDataView);
+	    selectActiveOp->setModelColumn(1);
+	    selectActiveOp->show();
+	  }
+	else
+	  selectActiveOp->hide();
+	  **/
 }
 
 Setup::~Setup()
-{}
+{
+/**  if( cols != 0)
+    delete  cols;
+  if(opDataView != 0)
+    delete opDataView; **/
+}
 
-QString Setup::getmyCallsign()
-{
-	return myCallsign->text();
-}
-QString Setup::getmyLocator()
-{
-	return myLocator->text();
-}
-QString Setup::getmyName()
-{
-	return myName->text();
-}
-QString Setup::getmyCity()
-{
-	return myCity->text();
-}
 
 QString Setup::getDBDirectory()
 {
@@ -64,22 +90,7 @@ void Setup::accept()
 {
 	QDialog::accept();
 }
-void Setup::setmyCallsign ( QString s )
-{
-	myCallsign->setText ( s );
-}
-void Setup::setmyName ( QString s )
-{
-	myName->setText ( s );
-}
-void Setup::setmyCity ( QString s )
-{
-	myCity->setText ( s );
-}
-void Setup::setmyLocator ( QString s )
-{
-	myLocator->setText ( s );
-}
+
 void Setup::setDBDirectory ( QString s )
 {
 	dbDirectory->setText ( s );

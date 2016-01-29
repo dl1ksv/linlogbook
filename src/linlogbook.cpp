@@ -22,9 +22,9 @@
 
 #include "linlogbook.h"
 #include "setup.h"
+#include "operatorsetup.h"
 #include "createdatabasefields.h"
 #include "qsotablemodel.h"
-#include "editqsoview.h"
 #include "linlogbookserver.h"
 #include "statisticstotal.h"
 #include "setupqslcard.h"
@@ -55,6 +55,7 @@ QString dateFormat = QLatin1String("dd.MM.yyyy");
 LinLogBook::LinLogBook(QWidget* parent, Qt::WindowFlags fl)
 : QMainWindow(parent, fl)
 {
+
   setupUi(this);
   setWindowTitle(QLatin1String(VERSION));
   setWindowIcon(QIcon(":/images/linlogbook.png"));
@@ -62,15 +63,24 @@ LinLogBook::LinLogBook(QWidget* parent, Qt::WindowFlags fl)
   dbStatus = -1;
   editQso = 0;
   qsoTable = 0;
+
   qsoServer = 0;
+  opCallsignView=new QTableView();
   bool ok = false;
+  qsosLogged.setText(tr("No qsos logged"));
   if (reopenDb && !dbName.isEmpty())
     ok = openSelectedDb(dbName);
+  if (opId <0)
+      OpCall.setText("No callsign set");
   if (!ok)
-    dbNameMessage.setText(tr("No Database"));
+    {
+     dbNameMessage.setText(tr("No Database"));
+    }
   else
     enableMenuEntries();
   statusBar()->addWidget(&dbNameMessage);
+  statusBar()->addWidget(&OpCall);
+  statusBar()->addWidget(&qsosLogged);
   if(serverAutoStart)
     startServer();
   else
@@ -90,7 +100,7 @@ LinLogBook::LinLogBook(QWidget* parent, Qt::WindowFlags fl)
   connect(actionPrintQSLCard, SIGNAL(triggered()), this, SLOT(printQSLCard()));
   // Preferences
   connect(actionGeneralSettings, SIGNAL(triggered()), this, SLOT(setup()));
-
+  connect(actionEditOperatorData,SIGNAL(triggered()), this, SLOT(editOperatorData()));
   connect(actionQuit, SIGNAL(triggered()), this, SLOT(close()));
   /** Statistic **/
   connect(menuStatistics, SIGNAL(triggered(QAction *)), this, SLOT(showStatistic(QAction *)));
@@ -124,21 +134,19 @@ LinLogBook::LinLogBook(QWidget* parent, Qt::WindowFlags fl)
   /** For detailview selection **/
   connect(differentViews, SIGNAL(currentChanged(int)), this, SLOT(viewChanged(int)));
   connect(editQsoRecord, SIGNAL(clicked(QModelIndex)), this, SLOT(saveIndex(QModelIndex)));
+  connect(opCallsign,SIGNAL(currentIndexChanged(int)),this,SLOT(setOpCallsign(int)));
+  connect(showAllQsos,SIGNAL(clicked(bool)),this,SLOT(setOpFilter(bool)));
+  //Adif fields, eqsl interprets
+  restrictEqslExport << "QSO_DATE" << "TIME_ON" <<"CALL" <<"MODE" <<"BAND" << "FREQ" <<"PROP_MODE" <<"QSLMSG" << "RST_SENT";
 }
 
 LinLogBook::~LinLogBook()
 {
 }
 
-/*$SPECIALIZATION$*/
-
 void LinLogBook::setup()
 {
   Setup *s = new Setup();
-  s->setmyCallsign(myCall);
-  s->setmyName(myName);
-  s->setmyCity(myCity);
-  s->setmyLocator(myLocator);
   s->setReopen(reopenDb);
   s->setAutoStart(serverAutoStart);
   s->setDateFormat(dateFormat);
@@ -147,10 +155,6 @@ void LinLogBook::setup()
     s->setDBDirectory(myLinLogBookDirectory);
   if (s->exec() == QDialog::Accepted)
   {
-    myLocator = s->getmyLocator();
-    myCall = s->getmyCallsign();
-    myName = s->getmyName();
-    myCity = s->getmyCity();
     myLinLogBookDirectory = s->getDBDirectory();
     reopenDb = s->reopenLastDB();
     serverAutoStart=s->autoStart();
@@ -161,15 +165,28 @@ void LinLogBook::setup()
   }
   delete s;
 }
+void LinLogBook::editOperatorData()
+{
+  opId=opCallsign->currentIndex();
+  operatorTable->setReadOnly(false);
+  OperatorSetup *ed = new OperatorSetup(operatorTable);
+  if( ed->exec() == QDialog::Accepted)
+    {
+
+      opCallsign->clear();
+      operatorTable->select();
+      opCallsign->setCurrentIndex(opId);
+   }
+  delete ed;
+  operatorTable->setReadOnly(true);
+}
 
 void LinLogBook::readSettings()
 {
   QSettings settings(QLatin1String("DL1KSV"), QLatin1String("LinLogBook"));
-  myCall = settings.value(QLatin1String("myCall")).toString();
-  myName = settings.value(QLatin1String("myName")).toString();
-  myCity = settings.value(QLatin1String("myCity")).toString();
-  myLocator = settings.value(QLatin1String("myLocator")).toString();
+  opId= settings.value(QLatin1String("opId"),-1).toInt();
   myLinLogBookDirectory = settings.value(QLatin1String("LinLogBookDirectory")).toString();
+  detailView->setLastDirectory(settings.value(QLatin1String("LastCardDirectory"),QVariant(QLatin1String("."))).toString());
   reopenDb = settings.value(QLatin1String("reopenDb"), QVariant(false)).toBool();
   dbName = settings.value(QLatin1String("lastUsedDb")).toString();
   serverAutoStart=settings.value(QLatin1String("serverAutoStart"),QVariant(false)).toBool();
@@ -183,11 +200,13 @@ void LinLogBook::readSettings()
 void LinLogBook::saveSettings()
 {
   QSettings settings(QLatin1String("DL1KSV"), QLatin1String("LinLogBook"));
-  settings.setValue(QLatin1String("myCall"), myCall);
-  settings.setValue(QLatin1String("myName"), myName);
-  settings.setValue(QLatin1String("myCity"), myCity);
-  settings.setValue(QLatin1String("myLocator"), myLocator);
+  //settings.setValue(QLatin1String("myCall"), myCall);
+  //settings.setValue(QLatin1String("myName"), myName);
+  //settings.setValue(QLatin1String("myCity"), myCity);
+  //settings.setValue(QLatin1String("myLocator"), myLocator);
+  settings.setValue(QLatin1String("opId"),opId);
   settings.setValue(QLatin1String("LinLogBookDirectory"), myLinLogBookDirectory);
+  settings.setValue(QLatin1String("LastCardDirectory"),detailView->getLastDirectory());
   settings.setValue(QLatin1String("reopenDb"), reopenDb);
   settings.setValue(QLatin1String("serverAutoStart"),serverAutoStart);
   settings.setValue(QLatin1String("lastUsedDb"), dbName);
@@ -678,6 +697,18 @@ void LinLogBook::clearInput()
       editQso->setData(I, QVariant(s), Qt::DisplayRole);
     }
   }
+  if (opId >= 0)
+  {
+    s = opCallsign->currentText();
+    col = databaseFields.indexOf(QRegExp(QLatin1String("OPERATOR"))) + 1;
+    if (col > 0)
+    {
+      QModelIndex I = editQso->index(0, col);
+      //QComboBox index may be different from database index.
+      editQso->setData(I, QVariant(operatorTable->data(operatorTable->index(opId,0),Qt::DisplayRole).toInt()), Qt::EditRole);
+      editQso->setData(I, QVariant(s), Qt::DisplayRole);
+    }
+  }
 
   QModelIndex i = editQsoRecord->model()->index(0, 1);
 
@@ -765,7 +796,7 @@ void LinLogBook::saveInput()
       clearInput();
       int count = qsoTable->rowCount(); //There should be at least one record in the table, but if just the first record was inserted
       //this record will not be shown ( Error in qt ?? )
-      //After reasigning the table the record is now found
+      //After reasigning the table the record is now foundqsoTable->setTable(QLatin1String("orderedqsos"));
       // But we have to define the whole table again
       if (count == 0)
       {
@@ -777,6 +808,7 @@ void LinLogBook::saveInput()
         count = qsoTable->rowCount();
 
       }
+
     }
     else
     {
@@ -927,9 +959,12 @@ void LinLogBook::prepareViews()
 //  qy.clear();
   if (defaultModeSet > 0)
     defaultMode->setCurrentIndex(defaultModeSet);
+  qsoTable->clear();
 
   qsoTable->setReadOnly(true);
   qsoTable->setTable(QLatin1String("orderedqsos"));
+  qsoTable->setQsoFieldTypes(fieldsTypes);
+  qsoTable->setDependency(databaseFields, fieldsTypes);
   editQso->setTable(QLatin1String("qsos"));
 
   for (int i = 0; i < linlogFields.size(); i++)
@@ -937,17 +972,17 @@ void LinLogBook::prepareViews()
     editQso->setHeaderData(i + 1, Qt::Horizontal, linlogFields[i]);
     qsoTable->setHeaderData(i + 1, Qt::Horizontal, linlogFields[i]);
   }
-  qsoTable->setQsoFieldTypes(fieldsTypes);
-  qsoTable->setDependency(databaseFields, fieldsTypes);
-  qsoTable->setSort(1, Qt::DescendingOrder);
+
+  //qsoTable->setSort(1, Qt::DescendingOrder);
   qsoTable->select();
-//  qsoTable->clear();
-  //qDebug ( "Selectstatement %s", qPrintable ( qsoTable->showSelectStatement() ) );
+  qsosLogged.setText(tr("%1 qsos logged").arg(qsoTable->rowCount()));
+  //qDebug ( "Selectstatement view qso %s", qPrintable ( qsoTable->showSelectStatement() ) );
+  //qDebug ("Selectstatement1 %s", qPrintable ( editQso->showSelectStatement() ));
   qsoList->setModel(qsoTable);
   qsoList->setSelectionBehavior(QAbstractItemView::SelectRows);
-  qsoList->verticalHeader()->hide();
+  //qsoList->verticalHeader()->hide();
   qsoList->resizeColumnsToContents();
-  qsoList->hideColumn(0); // Don't show the index column
+  //qsoList->hideColumn(0); // Don't show the index column
   qsoList->show();
   editQso->setQsoFieldTypes(fieldsTypes);
   editQso->setDependency(databaseFields, fieldsTypes);
@@ -956,10 +991,10 @@ void LinLogBook::prepareViews()
   editQsoRecord->setNumberOfColumns(databaseFields.size());
   connect(editQsoRecord, SIGNAL(qsoDataComplete()), this, SLOT(saveInput()));
   editQsoRecord->setQsoFieldTypes(fieldsTypes);
-  editQsoRecord->verticalHeader()->hide();
+  //editQsoRecord->verticalHeader()->hide();
   editQsoRecord->setHorizontalScrollMode(QAbstractItemView::ScrollPerItem);
   editQsoRecord->setSelectionMode(QAbstractItemView::NoSelection);
-  editQsoRecord->hideColumn(0);
+  //editQsoRecord->hideColumn(0);
   editQsoRecord->show();
   qsoList->show();
   clearInput();
@@ -1075,6 +1110,11 @@ bool LinLogBook::openSelectedDb(QString dbname)
     QMessageBox::warning(0, tr("Open Database"), tr("Could not open Database %1\n").arg(dbname) + db.lastError().text(), QMessageBox::Ok);
     return false;
   }
+  operatorTable = new QsoTableModel();
+  operatorTable->setReadOnly(true);
+  operatorTable->setQsoFieldTypes(QStringList() << "S" << "S" << "G" << "S" << "D" << "D");
+  if(db.tables().contains(QLatin1String("OPERATOR"),Qt::CaseInsensitive))
+   configureOpHandling();
   return readTables();
 }
 
@@ -1084,9 +1124,7 @@ void LinLogBook::exportForEQSLUpload()
   QFile exportFile;
   QString adifFileName;
   QString s = QDir::homePath();
-//  bool ok = dir.cd(s);
   dir.cd(s);
-//  ok = dir.makeAbsolute();
   dir.makeAbsolute();
   s = dir.path();
   QFileDialog fileOpenDialog(this, tr("Export Data to Adif File"), s, tr("Adif Files (*.adi)"));
@@ -1113,20 +1151,28 @@ void LinLogBook::exportForEQSLUpload()
     return;
   }
   // Menu is only visible if EQSL_QSL_SENT field is present
-  QSqlQuery qy(QLatin1String("select ") + databaseFields.join(QLatin1String(",")) + QLatin1String(" from qsos where EQSL_QSL_SENT= (select id from EQSL_QSL_SENT where EQSL_QSL_SENTvalue='R') "));
+  QString selectString=QLatin1String("select ") + databaseFields.join(QLatin1String(",")) + QLatin1String(" from qsos where EQSL_QSL_SENT= (select id from EQSL_QSL_SENT where EQSL_QSL_SENTvalue='R') ");
+  if(databaseFields.contains(QLatin1String("OPERATOR"),Qt::CaseInsensitive)  ) // Restrict to operator !!!
+      selectString = selectString + QString(" and OPERATOR=%1").arg(operatorTable->data(operatorTable->index(opId,0),Qt::DisplayRole).toInt());
+  QSqlQuery qy(selectString);
   int count = writeAdif(qy, &exportFile);
   exportFile.close();
+
   s = QLatin1String("update qsos set EQSL_QSL_SENT=(select Id from EQSL_QSL_SENT where EQSL_QSL_SENTvalue='Y') ");
-  if (databaseFields.contains(QLatin1String("EQSL_QSLSDATE")))
+  if (databaseFields.contains(QLatin1String("EQSL_QSLSDATE"),Qt::CaseInsensitive))
   {
     s.append(",EQSL_QSLSDATE='");
     s.append(QDate::currentDate().toString(QLatin1String("yyyy-MM-dd")));
     s.append("' ");
   }
-  s.append(" where eqsl_qsl_sent=(select id from eqsl_qsl_sent where eqsl_qsl_sentvalue='R')");
-  qDebug("Query String %s", qPrintable(s));
 
-//  ok = qy.exec(s);
+  s.append(" where eqsl_qsl_sent=(select id from eqsl_qsl_sent where eqsl_qsl_sentvalue='R'");
+  if(databaseFields.contains(QLatin1String("OPERATOR"),Qt::CaseInsensitive)  )
+   s.append(QString(" and OPERATOR=%1)").arg(operatorTable->data(operatorTable->index(opId,0),Qt::DisplayRole).toInt()));
+  else
+   s.append(')');
+  //qDebug("Query String %s", qPrintable(s));
+
   qy.exec(s);
   QMessageBox::information(0, tr("Export for Eqsl Upload"), tr(" %1 Qso records writen  to file %2 for eQsl upload").arg(count).arg(exportFile.fileName()));
   qsoTable->select();
@@ -1147,21 +1193,26 @@ int LinLogBook::writeAdif(QSqlQuery qy, QFile *exportFile)
   {
     for (int i = 0; i < databaseFields.size(); i++)
     {
-      if (fieldsTypes[i] == QLatin1String("E"))
-      {
-        QSqlQuery qydepend;
-        QString s1 = QString(QLatin1String("select %1value from %1 where Id = %2")).arg(databaseFields[i]).arg(qy.value(i).toString());
-        qydepend.exec(s1);
-        if (qydepend.next())
-          s = qydepend.value(0).toString();
-        else s.clear();
-      }
-      else
-        s = qy.value(i).toString();
-      if (fieldsTypes[i] == QLatin1String("D"))
-        s.remove(QLatin1Char('-'));
-      if (!s.isEmpty())
-        out << "<" << databaseFields[i] << ":" << s.size() << ">" << s;
+      if(restrictEqslExport.contains(databaseFields[i],Qt::CaseInsensitive))
+       {
+        if (fieldsTypes[i] == QLatin1String("E"))
+        {
+         QSqlQuery qydepend;
+         QString s1 = QString(QLatin1String("select %1value from %1 where Id = %2")).arg(databaseFields[i]).arg(qy.value(i).toString());
+         qydepend.exec(s1);
+         if (qydepend.next())
+           s = qydepend.value(0).toString();
+         else s.clear();
+        }
+        else
+         s = qy.value(i).toString();
+        if (fieldsTypes[i] == QLatin1String("D"))
+         s.remove(QLatin1Char('-'));
+        if((fieldsTypes[i] == QLatin1String("T")) && (s.size() == 3) ) // time in adif requires four digits
+         s.prepend(QLatin1String("0"));
+        if (!s.isEmpty())
+         out << "<" << databaseFields[i] << ":" << s.size() << ">" << s;
+       }
     }
     out << "<EOR>" << endl;
     count++;
@@ -1285,7 +1336,7 @@ bool LinLogBook::readTables()
   // In some situations readTables might be calle repeatedly
   if (qsoTable == 0)
     qsoTable = new QsoTableModel();
-  if (editQso == 0)
+   if (editQso == 0)
     editQso = new QsoTableModel();
   if ((dbStatus > 0) && (dbStatus < 3))
   {
@@ -1309,6 +1360,7 @@ bool LinLogBook::readTables()
   }
   if (dbStatus == 3)
     prepareViews();
+
 //  qy.exec(QLatin1String("commit")); // Sometimes database remains locked afterwards; so release lock by unneeded commit to release lock
 
   return true;
@@ -1349,6 +1401,8 @@ void LinLogBook::updateBaseTables()
   ok = dir.cd(myLinLogBookDirectory);
   ok = dir.makeAbsolute();
   s = dir.path();
+  QSqlDatabase db = QSqlDatabase::database();
+  bool opTableChange=!db.tables(QSql::Tables).contains(QLatin1String("OPERATOR"),Qt::CaseInsensitive);
   QFileDialog basetableOpenDialog(this, tr("Opens an existing File with sql commands"), s, tr("Command files (*.sql)"));
   if (basetableOpenDialog.exec() == QDialog::Accepted)
   {
@@ -1361,7 +1415,6 @@ void LinLogBook::updateBaseTables()
     }
     else
     {
-      QSqlDatabase db = QSqlDatabase::database();
       ok = db.transaction();
       if (!ok)
         qDebug("Transaction Error %s", qPrintable(db.lastError().text()));
@@ -1371,12 +1424,17 @@ void LinLogBook::updateBaseTables()
         ok = db.commit();
         if (!ok)
           qDebug("Commit Error %s", qPrintable(db.lastError().text()));
-
-        readTables();
       }
       else
         ok = db.rollback();
     }
+    readTables();
+    opTableChange = opTableChange && db.tables(QSql::Tables).contains(QLatin1String("OPERATOR"),Qt::CaseInsensitive);
+    if(opTableChange)
+     {
+      configureOpHandling();
+      QMessageBox::information(0, tr("Update Basetables"), tr("Please restart LinLogbook to make changes take place.\n"));
+     }
 
     enableMenuEntries();
 
@@ -1675,6 +1733,7 @@ CallSignInfo LinLogBook::getCallSignInfo(QString callSign)
   info.ituZone.clear();
   info.countryName.clear();
   info.continent.clear();
+  info.workingLocator.clear();
   info.worked = false;
   if (callSign.isEmpty())
     return info;
@@ -1684,10 +1743,18 @@ CallSignInfo LinLogBook::getCallSignInfo(QString callSign)
   else
     s = callSign.toUpper();
   // Check, if already worked
-  ok = qy.exec(QString(QString(QLatin1String("select call from qsos where CALL='%1'")).arg(s)));
+  ok = qy.exec(QString(QLatin1String("select operator from qsos where CALL='%1'")).arg(s));
   if (!ok)
     qDebug("Error in qsosearch %s", qPrintable(s));
   info.worked = qy.next();
+  if(info.worked)
+   {
+    ok= qy.exec(QString(QLatin1String("select MY_GRIDSQUARE from OPERATOR where ID=%1")).arg(qy.value(0).toInt()));
+    if (ok)
+     qy.next();
+     info.workingLocator=qy.value(0).toString();
+     myLocator = info.workingLocator;
+   }
   ok = qy.exec(QString(QLatin1String("select mainPrefix,WAZ,ITU from prefixlist where prefix='%1'")).arg(s));
   if (!ok)
     qDebug("Error in prefixsearch");
@@ -1831,6 +1898,7 @@ void LinLogBook::printQSLCard()
 
   QString s(QLatin1String("select "));
   QString whereClause(QLatin1String(" where qsl_sent=(select id from qsl_sent where qsl_sentvalue='R')"));
+
   QStringList fromClause;
   fromClause << QLatin1String("qsos");
   QStringList *fields;
@@ -1868,10 +1936,13 @@ void LinLogBook::printQSLCard()
     }
 
   }
+  if(databaseFields.contains(QLatin1String("OPERATOR"),Qt::CaseInsensitive)  )
+   whereClause.append(QString(" and OPERATOR=%1").arg(operatorTable->data(operatorTable->index(opId,0),Qt::DisplayRole).toInt()));
   s.append(QLatin1String(" from "));
   s.append(fromClause.join(QLatin1String(",")));
   s.append(whereClause);
 
+  qDebug("%s", qPrintable(s));
   bool ok = qy.exec(s);
   if (!ok)
     qDebug("%s", qPrintable(s));
@@ -1965,7 +2036,9 @@ void LinLogBook::printQSLCard()
       s.append("' ");
     }
     s.append(" where qsl_sent=(select id from qsl_sent where qsl_sentvalue='R')");
-    //qDebug("Query String %s",qPrintable(s));
+    if(databaseFields.contains(QLatin1String("OPERATOR"),Qt::CaseInsensitive)  )
+     s.append(QString(" and OPERATOR=%1").arg(operatorTable->data(operatorTable->index(opId,0),Qt::DisplayRole).toInt()));
+//    qDebug("Query String %s",qPrintable(s));
     ok = qy.exec(s);
     if (ok)
       qsoTable->select();
@@ -1975,10 +2048,13 @@ void LinLogBook::printQSLCard()
 
 void LinLogBook::enableMenuEntries()
 {
+  QSqlDatabase db = QSqlDatabase::database();
+  bool hasOpTable=db.tables(QSql::Tables).contains(QLatin1String("OPERATOR"),Qt::CaseInsensitive);
   if (dbStatus == 0)
   {
     actionNewDatabase->setEnabled(false);
     actionOpenDatabase->setEnabled(false);
+    actionEditOperatorData->setEnabled(false);
     actionImportCtyDat->setEnabled(true);
     actionUpdateBaseTables->setEnabled(true);
     actionCreateBaseTables->setEnabled(true);
@@ -1991,6 +2067,8 @@ void LinLogBook::enableMenuEntries()
     actionDefineDatabaseFields->setEnabled(true);
     actionCreateBaseTables->setEnabled(false);
     actionUpdateBaseTables->setEnabled(true);
+    if(hasOpTable)
+     actionEditOperatorData->setEnabled(true);
   }
   if (dbStatus == 2)
   {
@@ -2000,6 +2078,8 @@ void LinLogBook::enableMenuEntries()
     actionDefineDatabaseFields->setEnabled(true);
     actionCreateQSOTable->setEnabled(true);
     actionUpdateBaseTables->setEnabled(true);
+    if(hasOpTable)
+     actionEditOperatorData->setEnabled(true);
   }
   if (dbStatus == 3)
   {
@@ -2010,6 +2090,8 @@ void LinLogBook::enableMenuEntries()
     actionDefineDatabaseFields->setEnabled(false);
     actionCreateQSOTable->setEnabled(false);
     actionUpdateBaseTables->setEnabled(true);
+    if(hasOpTable)
+     actionEditOperatorData->setEnabled(true);
 
     clearRecord->setEnabled(true);
     saveRecord->setEnabled(true);
@@ -2049,11 +2131,20 @@ void LinLogBook::enableMenuEntries()
       while (qy.next())
         menuStatistics->addAction(qy.value(0).toString());
     }
-    QSqlDatabase db = QSqlDatabase::database();
-    QStringList tables = db.tables(QSql::Views);
-    if (tables.size() > 1)
+    //QSqlDatabase db = QSqlDatabase::database();
+    if (db.tables(QSql::Views).size() > 1)
       actionSaveViews->setEnabled(true);
   }
+  if( (dbStatus > 0) && hasOpTable)
+   {
+    opCallsign->setEnabled(true);
+    showAllQsos->setEnabled(true);
+   }
+  else
+   {
+    opCallsign->setEnabled(false);
+    showAllQsos->setEnabled(false);
+   }
 }
 
 void LinLogBook::exportForLotWUpload()
@@ -2091,7 +2182,11 @@ void LinLogBook::exportForLotWUpload()
     return;
   }
   // Menu is only visible if EQSL_QSL_SENT field is present
-  QSqlQuery qy(QLatin1String("select ") + databaseFields.join(QLatin1String(",")) + QLatin1String(" from qsos where LOTW_QSL_SENT= (select id from LOTW_QSL_SENT where LOTW_QSL_SENTvalue='R') "));
+  QString selectString=QLatin1String("select ") + databaseFields.join(QLatin1String(",")) + QLatin1String(" from qsos where LOTW_QSL_SENT= (select id from LOTW_QSL_SENT where LOTW_QSL_SENTvalue='R') ");
+  if(databaseFields.contains(QLatin1String("OPERATOR"),Qt::CaseInsensitive)  ) // Restrict to operator !!!
+      selectString = selectString + QString(" and OPERATOR=%1").arg(operatorTable->data(operatorTable->index(opId,0),Qt::DisplayRole).toInt());
+  //qDebug("Query String %s", qPrintable(selectString));
+  QSqlQuery qy(selectString);
   int count = writeAdif(qy, &exportFile);
   exportFile.close();
   s = QLatin1String("update qsos set LOTW_QSL_SENT=(select Id from LOTW_QSL_SENT where LOTW_QSL_SENTvalue='Y') ");
@@ -2101,8 +2196,14 @@ void LinLogBook::exportForLotWUpload()
     s.append(QDate::currentDate().toString(QLatin1String("yyyy-MM-dd")));
     s.append("' ");
   }
-  s.append(" where lotw_qsl_sent=(select id from lotw_qsl_sent where lotw_qsl_sentvalue='R')");
-  qDebug("Query String %s", qPrintable(s));
+  s.append(" where lotw_qsl_sent=(select id from lotw_qsl_sent where lotw_qsl_sentvalue='R'");
+
+
+  if(databaseFields.contains(QLatin1String("OPERATOR"),Qt::CaseInsensitive)  )
+   s.append(QString(" and OPERATOR=%1)").arg(operatorTable->data(operatorTable->index(opId,0),Qt::DisplayRole).toInt()));
+  else
+   s.append(')');
+  //qDebug("Query String %s", qPrintable(s));
 
   qy.exec(s);
   QMessageBox::information(0, tr("Export for LotW Upload"), tr(" %1 Qso records writen  to file %2 for LotW upload").arg(count).arg(exportFile.fileName()));
@@ -2152,4 +2253,72 @@ void LinLogBook::saveIndex(QModelIndex i)
   displayCallSignInfo(call,locator);
   if (differentViews->currentIndex() == 1)
     viewChanged(1);
+
+}
+void LinLogBook::setOpCallsign(int id)
+{
+ opId=id;
+ OpCall.setText(tr("Operator: ")+operatorTable->data(operatorTable->index(opId,1),Qt::DisplayRole).toString());
+ myLocator=operatorTable->data(operatorTable->index(opId,3),Qt::DisplayRole).toString();
+ setOpFilter(showAllQsos->isChecked());
+}
+void LinLogBook::setOpFilter(bool pressed)
+{
+ QString s;
+ if( dbStatus <=0)
+  return;
+  if(pressed)
+   {
+    s=QString("OPERATOR=%1").arg(operatorTable->data(operatorTable->index(opId,0),Qt::DisplayRole).toInt());
+    qsoTable->setFilter(s);
+    qsoTable->select();
+//    qDebug ( "SelectstatementN %s", qPrintable ( qsoTable->showSelectStatement() ) );
+   }
+  else
+   {
+
+    qsoTable->setFilter(QLatin1String(""));
+    qsoTable->select();
+//    qDebug ( "SelectstatementO %s", qPrintable ( qsoTable->showSelectStatement() ) );
+   }
+  qsosLogged.setText(tr("%1 qsos logged").arg(qsoTable->rowCount()));
+}
+void LinLogBook::configureOpHandling()
+{
+ operatorTable->setTable(QLatin1String("OPERATOR"));
+ operatorTable->setHeaderData(1,Qt::Horizontal,tr("Operators call"));
+ operatorTable->setHeaderData(2,Qt::Horizontal,tr("Operators name"));
+ operatorTable->setHeaderData(3,Qt::Horizontal,tr("Locator"));
+ operatorTable->setHeaderData(4,Qt::Horizontal,tr("City"));
+ operatorTable->setHeaderData(5,Qt::Horizontal,tr("Valid from"));
+ operatorTable->setHeaderData(6,Qt::Horizontal,tr("Valid to"));
+
+ operatorTable->select();
+
+ opCallsign->clear();
+ if(opId <0)
+   opId=0;
+ int saveOpId= opId; // Set Model will change the current Index and that changes opId
+                     // so we have to restore it afterwards
+
+ opCallsign->setModel(operatorTable);
+ opCallsign->setModelColumn(1);
+ opCallsignView->setModel(operatorTable);
+ opCallsignView->hideColumn(0);
+ opCallsignView->verticalHeader()->hide();
+ opCallsign->setView(opCallsignView);
+ opCallsign->setCurrentIndex(saveOpId);
+ opCallsign->show();
+
+ OpCall.setText(tr("Operator: ")+operatorTable->data(operatorTable->index(opId,1),Qt::DisplayRole).toString());
+/**
+if(operatorTable->select()) {
+   qDebug("Selection was OK");
+   qDebug("Table contains %d rows",operatorTable->rowCount());
+   }
+ else {
+     qDebug("Selection was not OK");
+     qDebug("Error was: %s", qPrintable(operatorTable->lastError().text()));
+   }
+ **/
 }

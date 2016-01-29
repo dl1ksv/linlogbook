@@ -92,15 +92,16 @@ void DetailView::showDetail(QSqlRecord r, QStringList qsoFieldTypes, QStringList
     displayCard->adjustSize();
   }
 }
-
+void setLastDirectory(QString dir);
 void DetailView::insertCardImage()
 {
-  QFileDialog cardDialog(this, tr("Import Qsl Card Image"), QDir::homePath(), tr("QSL- Card (*.jpg *.jpeg)"));
+  QFileDialog cardDialog(this, tr("Import Qsl Card Image"), lastDirectory, tr("QSL- Card (*.jpg *.jpeg)"));
   if (cardDialog.exec() == QDialog::Accepted)
   {
     bool ok;
     QString cardName = cardDialog.selectedFiles().at(0);
     QFile f(cardName);
+    lastDirectory= cardDialog.directory().absolutePath();
     ok = f.open(QIODevice::ReadOnly);
     QByteArray data = f.readAll();
     QSqlQuery qy;
@@ -155,4 +156,12 @@ void DetailView::deleteCardImage()
         }
      }
  }
+}
+void DetailView::setLastDirectory(QString dir)
+{
+  lastDirectory=dir;
+}
+QString DetailView::getLastDirectory()
+{
+  return lastDirectory;
 }

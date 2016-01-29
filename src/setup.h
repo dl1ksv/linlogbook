@@ -25,27 +25,24 @@
 #include "ui_setup.h"
 
 class QString;
+//class QsoTableModel;
+//class EditQsoView;
+//class QTableView;
 
 class Setup : public QDialog, private Ui::Setup
 {
   Q_OBJECT
 
   public:
-    Setup ( QWidget* parent = 0, Qt::WindowFlags fl = 0 );
+    Setup (QWidget* parent = 0, Qt::WindowFlags fl = 0 );
     ~Setup();
     /*$PUBLIC_FUNCTIONS$*/
-    QString getmyCallsign();
-    QString getmyName();
-    QString getmyCity();
-    QString getmyLocator();
+
     QString getDBDirectory();
     QString getDateFormat();
     //QString getHostName();
     int getPortNumber();
-    void setmyCallsign ( QString );
-    void setmyName ( QString );
-    void setmyCity ( QString );
-    void setmyLocator ( QString );
+//    void setmyCallsign ( QString );
     void setDBDirectory ( QString );
     void setDateFormat ( QString );
     void setReopen ( bool );
@@ -60,6 +57,12 @@ class Setup : public QDialog, private Ui::Setup
   /*$PROTECTED_SLOTS$*/
   virtual void          reject();
   virtual void          accept();
+
+  private:
+//    QsoTableModel *cols;
+//    QStringList operatorTableFieldsTypes;
+//    EditQsoView *opDataView;
+//    QTableView *opDataView;
 
 };
 

@@ -47,8 +47,10 @@ QVariant QsoTableModel::data ( const QModelIndex &index, int role ) const
 	}
 	if ( value.isValid() && role == Qt::DisplayRole )
 	{
-		if ( ( qsoFieldTypes[column ] == QLatin1String ( "S" ) ) || ( qsoFieldTypes[column ] == QLatin1String ( "E" ) ) || ( qsoFieldTypes[column ] == QLatin1String ( "G" ) ) || ( qsoFieldTypes[column ] == QLatin1String ( "N" ) ) )
-//   return value.toString();
+		if ( ( qsoFieldTypes[column ] == QLatin1String ( "S" ) )
+		     || ( qsoFieldTypes[column ] == QLatin1String ( "E" ) )
+		     || ( qsoFieldTypes[column ] == QLatin1String ( "G" ) )
+		     || ( qsoFieldTypes[column ] == QLatin1String ( "N" ) ) )
 			return value;
 		else
 			if ( qsoFieldTypes[column ] == QLatin1String ( "D" ) )
@@ -71,6 +73,11 @@ void QsoTableModel::setQsoFieldTypes ( QStringList s )
 {
 	qsoFieldTypes = s;
 }
+QStringList QsoTableModel::getQsoFieldTypes()
+{
+  return qsoFieldTypes;
+}
+
 void QsoTableModel::setReadOnly ( bool s )
 {
 	ReadOnly = s;

@@ -1,6 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Volker Schroer   *
- *   dl1ksv@gmx.de   *
+ *   Copyright (C) 2016 by Volker Schroer, DL1KSV                          *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,34 +16,29 @@
  *   Free Software Foundation, Inc.,                                       *
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
-#ifndef QSOTABLEVIEW_H
-#define QSOTABLEVIEW_H
+#ifndef OPERATORSETUP_H
+#define OPERATORSETUP_H
 
-#include <QSqlRelationalTableModel>
-#include <QModelIndex>
-#include <QStringList>
-#include <QString>
-/**
- @author Volker Schroer <dl1ksv@gmx.de>
-*/
+#include <QDialog>
+#include "qsotablemodel.h"
 
+#include "ui_operatorsetup.h"
 
-
-class QsoTableModel : public QSqlRelationalTableModel
+class OperatorSetup : public QDialog, private Ui::OperatorSetup
 {
-	public:
-		QsoTableModel ( QObject *parent = 0 );
-		QVariant data ( const QModelIndex &item, int role ) const;
-		bool setData ( const QModelIndex & index, const QVariant & value, int role = Qt::EditRole );
-		void setQsoFieldTypes ( QStringList );
-		QStringList getQsoFieldTypes();
-		void setReadOnly ( bool );
-		Qt::ItemFlags flags ( const QModelIndex &index ) const;
-		void setDependency ( QStringList , QStringList );
-		QString showSelectStatement();
-	private:
-		QStringList qsoFieldTypes;
-		bool ReadOnly;
+  Q_OBJECT
+
+  public:
+    explicit OperatorSetup(QsoTableModel *op , QWidget *parent = 0);
+    ~OperatorSetup();
+
+  private:
+    QsoTableModel *dataTable;
+    int newRow;
+protected slots:
+  virtual void reject();
+  virtual void accept();
+  void additionalRow();
 };
 
-#endif
+#endif // OPERATORSETUP_H

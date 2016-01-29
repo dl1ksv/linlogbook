@@ -32,6 +32,7 @@
         QString ituZone;
         QString countryName;
         QString continent;
+        QString workingLocator;
         bool worked;
     };
 

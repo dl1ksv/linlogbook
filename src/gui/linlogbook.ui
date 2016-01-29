@@ -7,8 +7,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>892</width>
-    <height>626</height>
+    <width>893</width>
+    <height>583</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -34,8 +34,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff/>
-   </iconset>
+    <normaloff>.</normaloff>.</iconset>
   </property>
   <property name="animated">
    <bool>true</bool>
@@ -56,8 +55,26 @@
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
      <widget class="QSplitter" name="splitter">
+      <property name="cursor">
+       <cursorShape>ArrowCursor</cursorShape>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::NoFrame</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Plain</enum>
+      </property>
+      <property name="lineWidth">
+       <number>1</number>
+      </property>
+      <property name="midLineWidth">
+       <number>0</number>
+      </property>
       <property name="orientation">
        <enum>Qt::Vertical</enum>
+      </property>
+      <property name="handleWidth">
+       <number>5</number>
       </property>
       <property name="childrenCollapsible">
        <bool>false</bool>
@@ -65,7 +82,7 @@
       <widget class="QWidget" name="layoutWidget">
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <layout class="QHBoxLayout">
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
           <item>
            <widget class="QLabel" name="label">
             <property name="sizePolicy">
@@ -81,7 +98,7 @@
              </size>
             </property>
             <property name="text">
-             <string>Callsign</string>
+             <string>Search callsign</string>
             </property>
             <property name="textFormat">
              <enum>Qt::PlainText</enum>
@@ -102,6 +119,12 @@
           </item>
           <item>
            <widget class="QLineEdit" name="findCallsign">
+            <property name="minimumSize">
+             <size>
+              <width>100</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="maximumSize">
              <size>
               <width>150</width>
@@ -111,13 +134,55 @@
            </widget>
           </item>
           <item>
+           <widget class="QLabel" name="label_2">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Default Band</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="defaultBand">
+            <property name="minimumSize">
+             <size>
+              <width>80</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="sizeAdjustPolicy">
+             <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_3">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Default Mode</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="defaultMode"/>
+          </item>
+          <item>
            <spacer>
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>451</width>
+              <width>13</width>
               <height>20</height>
              </size>
             </property>
@@ -308,40 +373,6 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
-           <widget class="QPushButton" name="clearRecord">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-            <property name="sizeIncrement">
-             <size>
-              <width>0</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="baseSize">
-             <size>
-              <width>40</width>
-              <height>20</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Clear</string>
-            </property>
-           </widget>
-          </item>
-          <item>
            <widget class="QPushButton" name="saveRecord">
             <property name="enabled">
              <bool>false</bool>
@@ -381,6 +412,40 @@
             </property>
             <property name="shortcut">
              <string>Alt+S</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="clearRecord">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="sizeIncrement">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="baseSize">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Clear</string>
             </property>
            </widget>
           </item>
@@ -447,72 +512,64 @@
             </property>
            </widget>
           </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="layoutWidget">
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
           <item>
-           <spacer>
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>30</width>
-              <height>20</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_2">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
+           <widget class="QLabel" name="localOp">
             <property name="text">
-             <string>Default Band</string>
+             <string>Operator</string>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="defaultBand"/>
-          </item>
-          <item>
-           <spacer name="horizontalSpacer">
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
+           <widget class="QComboBox" name="opCallsign">
+            <property name="minimumSize">
              <size>
-              <width>40</width>
-              <height>20</height>
+              <width>200</width>
+              <height>0</height>
              </size>
             </property>
-           </spacer>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_3">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
+            <property name="maximumSize">
+             <size>
+              <width>620</width>
+              <height>16777215</height>
+             </size>
             </property>
-            <property name="text">
-             <string>Default Mode</string>
+            <property name="sizeAdjustPolicy">
+             <enum>QComboBox::AdjustToContents</enum>
+            </property>
+            <property name="minimumContentsLength">
+             <number>100</number>
             </property>
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="defaultMode"/>
+           <widget class="QRadioButton" name="showAllQsos">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="toolTip">
+             <string>Shows all / only selected Ops qsos</string>
+            </property>
+            <property name="text">
+             <string>Show Operator's qsos only</string>
+            </property>
+           </widget>
           </item>
           <item>
-           <spacer>
+           <spacer name="horizontalSpacer_2">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
-              <width>40</width>
+              <width>10</width>
               <height>20</height>
              </size>
             </property>
@@ -520,63 +577,65 @@
           </item>
          </layout>
         </item>
-       </layout>
-      </widget>
-      <widget class="QTabWidget" name="differentViews">
-       <property name="currentIndex">
-        <number>0</number>
-       </property>
-       <widget class="QWidget" name="widget">
-        <attribute name="title">
-         <string>Overview</string>
-        </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout">
-         <item>
-          <widget class="QTableView" name="qsoList">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-             <horstretch>2</horstretch>
-             <verstretch>1</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>200</height>
-            </size>
-           </property>
-           <property name="sizeIncrement">
-            <size>
-             <width>10</width>
-             <height>10</height>
-            </size>
-           </property>
-           <property name="baseSize">
-            <size>
-             <width>580</width>
-             <height>150</height>
-            </size>
-           </property>
-           <property name="sortingEnabled">
+        <item>
+         <widget class="QTabWidget" name="differentViews">
+          <property name="currentIndex">
+           <number>0</number>
+          </property>
+          <widget class="QWidget" name="widget2">
+           <attribute name="title">
+            <string>Overview</string>
+           </attribute>
+           <layout class="QVBoxLayout" name="verticalLayout">
+            <item>
+             <widget class="QTableView" name="qsoList">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>2</horstretch>
+                <verstretch>1</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>200</height>
+               </size>
+              </property>
+              <property name="sizeIncrement">
+               <size>
+                <width>10</width>
+                <height>10</height>
+               </size>
+              </property>
+              <property name="baseSize">
+               <size>
+                <width>580</width>
+                <height>150</height>
+               </size>
+              </property>
+              <property name="sortingEnabled">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="tab2">
+           <property name="enabled">
             <bool>true</bool>
            </property>
+           <attribute name="title">
+            <string>Details</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_2">
+            <item row="0" column="0">
+             <widget class="DetailView" name="detailView" native="true"/>
+            </item>
+           </layout>
           </widget>
-         </item>
-        </layout>
-       </widget>
-       <widget class="QWidget" name="tab2">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <attribute name="title">
-         <string>Details</string>
-        </attribute>
-        <layout class="QGridLayout" name="gridLayout_2">
-         <item row="0" column="0">
-          <widget class="DetailView" name="detailView" native="true"/>
-         </item>
-        </layout>
-       </widget>
+         </widget>
+        </item>
+       </layout>
       </widget>
      </widget>
     </item>
@@ -587,8 +646,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>892</width>
-     <height>22</height>
+     <width>893</width>
+     <height>19</height>
     </rect>
    </property>
    <property name="defaultUp">
@@ -630,10 +689,10 @@
    <widget class="QMenu" name="menuSettings">
     <property name="geometry">
      <rect>
-      <x>161</x>
-      <y>112</y>
-      <width>174</width>
-      <height>191</height>
+      <x>252</x>
+      <y>156</y>
+      <width>201</width>
+      <height>184</height>
      </rect>
     </property>
     <property name="layoutDirection">
@@ -642,15 +701,23 @@
     <property name="title">
      <string>Edit</string>
     </property>
+    <widget class="QMenu" name="menuPreferences">
+     <property name="title">
+      <string>Preferences</string>
+     </property>
+     <addaction name="actionEditOperatorData"/>
+     <addaction name="actionGeneralSettings"/>
+    </widget>
     <addaction name="actionCreateBaseTables"/>
     <addaction name="actionDefineDatabaseFields"/>
     <addaction name="actionCreateQSOTable"/>
+    <addaction name="separator"/>
     <addaction name="separator"/>
     <addaction name="actionUpdateBaseTables"/>
     <addaction name="separator"/>
     <addaction name="actionQSLCardSetup"/>
     <addaction name="separator"/>
-    <addaction name="actionGeneralSettings"/>
+    <addaction name="menuPreferences"/>
    </widget>
    <widget class="QMenu" name="menuServer">
     <property name="enabled">
@@ -686,17 +753,6 @@
    </property>
    <property name="statusTip">
     <string>Opens an existing Database</string>
-   </property>
-  </action>
-  <action name="actionGeneralSettings">
-   <property name="text">
-    <string>Preferences</string>
-   </property>
-   <property name="statusTip">
-    <string>Make general settings</string>
-   </property>
-   <property name="menuRole">
-    <enum>QAction::NoRole</enum>
    </property>
   </action>
   <action name="actionDefineDatabaseFields">
@@ -912,6 +968,27 @@
     <bool>false</bool>
    </property>
   </action>
+  <action name="actionEditOperatorData">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Edit Operator data</string>
+   </property>
+  </action>
+  <action name="actionGeneralSettings">
+   <property name="text">
+    <string>General Settings</string>
+   </property>
+  </action>
+  <action name="actionDefine_eqsl_export_fields">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Select eqsl export fields</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -930,7 +1007,6 @@
   <tabstop>findCallsign</tabstop>
   <tabstop>saveRecord</tabstop>
   <tabstop>deleteRecord</tabstop>
-  <tabstop>clearRecord</tabstop>
  </tabstops>
  <resources/>
  <connections/>

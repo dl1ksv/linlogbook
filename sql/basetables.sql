@@ -1,3 +1,6 @@
+create table OPERATOR(Id INTEGER PRIMARY KEY,OPERATORValue,MY_NAME,MY_GRIDSQUARE,MY_CITY,VALID_FROM,VALID_TO);
+insert into OPERATOR values(0,'None',NULL,NULL,NULL,'1900-01-01','2099-12-31');
+
 create table ADIF (ADIFName UNIQUE NOT NULL, Type NOT NULL);
 insert into ADIF values('BAND','E');
 insert into ADIF values('CALL','S');
@@ -30,6 +33,8 @@ insert into ADIF values('EQSL_QSL_RCVD','E');
 insert into ADIF values('EQSL_QSL_SENT','E');
 insert into ADIF values('LOTW_QSL_RCVD','E');
 insert into ADIF values('LOTW_QSL_SENT','E');
+insert into ADIF values('OPERATOR','E');
+
 
 Create table LinLogFields (ADIFName UNIQUE Not NULL,Type,LinLogName UNIQUE Not NULL,DefaultValue );
 

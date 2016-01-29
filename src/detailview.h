@@ -27,6 +27,7 @@
 
 #include "ui_detailview.h"
 #include "common.h"
+#include <QString>
 
 class QSqlRecord;
 class QStringList;
@@ -39,12 +40,15 @@ public:
     void showDetail(QSqlRecord r, QStringList databaseFields, QStringList displayName);
     void setCallsignInfo(CallSignInfo s);
     void setCallsignInfo(CallSignInfo s,QString dist);
+    void setLastDirectory(QString dir);
+    QString getLastDirectory();
 
 private slots:
     void insertCardImage();
     void deleteCardImage();
 private:
     int key;
+    QString lastDirectory;
 
 };
 
