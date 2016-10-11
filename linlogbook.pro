@@ -11,7 +11,7 @@ UI_DIR= ./.tmp/ui_tmp
 MOC_DIR= ./.tmp
 
 TEMPLATE = app
-TARGET = linlogbook
+target.path = /usr/local/bin
 DEPENDPATH += . src src/gui
 INCLUDEPATH += . src
 
@@ -71,6 +71,7 @@ images.files=images/linlogbook.png
 
 INSTALLS +=desktop
 INSTALLS +=images
+INSTALLS +=target
 
 DISTFILES += \
     sql/basetables.sql \

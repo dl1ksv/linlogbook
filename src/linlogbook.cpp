@@ -1,6 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Volker Schroer   *
- *   dl1ksv@gmx.de   *
+ *   Copyright (C) 2007 - 2016 by Volker Schroer, DL1KSV                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -274,17 +273,12 @@ void LinLogBook::newDB()
 
 void LinLogBook::openDB()
 {
-//  bool ok;
   QDir dir(myLinLogBookDirectory);
   QString s = QDir::homePath();
-//  ok = dir.cd(s);
   dir.cd(s);
   if (!dir.exists())
-//    ok = dir.mkpath(myLinLogBookDirectory);
     dir.mkpath(myLinLogBookDirectory);
-//  ok = dir.cd(myLinLogBookDirectory);
   dir.cd(myLinLogBookDirectory);
-//  ok = dir.makeAbsolute();
   dir.makeAbsolute();
   s = dir.path();
   QFileDialog dbOpenDialog(this, tr("Open an existing Database"), s, tr("DB files (*.dblog)"));
@@ -975,14 +969,21 @@ void LinLogBook::prepareViews()
 
   //qsoTable->setSort(1, Qt::DescendingOrder);
   qsoTable->select();
-  qsosLogged.setText(tr("%1 qsos logged").arg(qsoTable->rowCount()));
+//  qsosLogged.setText(tr("%1 qsos logged").arg(qsoTable->rowCount()));
+  qy.clear();
+  if(showAllQsos->isChecked())
+   qy.exec(QString("select count(*) from orderedqsos where operator = %1").arg(operatorTable->data(operatorTable->index(opId,0),Qt::DisplayRole).toInt()));
+  else
+   qy.exec(QLatin1String("select count(*) from orderedqsos"));
+  if( qy.next())
+   qsosLogged.setText(tr("%1 qsos logged").arg(qy.value(0).toString()));
   //qDebug ( "Selectstatement view qso %s", qPrintable ( qsoTable->showSelectStatement() ) );
   //qDebug ("Selectstatement1 %s", qPrintable ( editQso->showSelectStatement() ));
   qsoList->setModel(qsoTable);
   qsoList->setSelectionBehavior(QAbstractItemView::SelectRows);
-  //qsoList->verticalHeader()->hide();
+  qsoList->verticalHeader()->hide();
   qsoList->resizeColumnsToContents();
-  //qsoList->hideColumn(0); // Don't show the index column
+  qsoList->hideColumn(0); // Don't show the index column
   qsoList->show();
   editQso->setQsoFieldTypes(fieldsTypes);
   editQso->setDependency(databaseFields, fieldsTypes);
@@ -991,10 +992,10 @@ void LinLogBook::prepareViews()
   editQsoRecord->setNumberOfColumns(databaseFields.size());
   connect(editQsoRecord, SIGNAL(qsoDataComplete()), this, SLOT(saveInput()));
   editQsoRecord->setQsoFieldTypes(fieldsTypes);
-  //editQsoRecord->verticalHeader()->hide();
+  editQsoRecord->verticalHeader()->hide();
   editQsoRecord->setHorizontalScrollMode(QAbstractItemView::ScrollPerItem);
   editQsoRecord->setSelectionMode(QAbstractItemView::NoSelection);
-  //editQsoRecord->hideColumn(0);
+  editQsoRecord->hideColumn(0);
   editQsoRecord->show();
   qsoList->show();
   clearInput();
@@ -1074,7 +1075,9 @@ int LinLogBook::prepareItem(QString s, QString *s1, QString *s2)
   pos = valueLength + 1;
   actLine = actLine.mid(pos);
   // Check , if supported by LinLogBook
-  if (paramName.toUpper() == QLatin1String("EOR"))
+  if(paramName.toUpper() == QLatin1String("SOR"))  //Start of record
+    clearInput();
+  else if (paramName.toUpper() == QLatin1String("EOR"))
   {
     saveInput();
     return -1;
@@ -2264,6 +2267,7 @@ void LinLogBook::setOpCallsign(int id)
 }
 void LinLogBook::setOpFilter(bool pressed)
 {
+ QSqlQuery qy;
  QString s;
  if( dbStatus <=0)
   return;
@@ -2272,16 +2276,21 @@ void LinLogBook::setOpFilter(bool pressed)
     s=QString("OPERATOR=%1").arg(operatorTable->data(operatorTable->index(opId,0),Qt::DisplayRole).toInt());
     qsoTable->setFilter(s);
     qsoTable->select();
-//    qDebug ( "SelectstatementN %s", qPrintable ( qsoTable->showSelectStatement() ) );
+    //qDebug ( "SelectstatementN %s", qPrintable ( qsoTable->showSelectStatement() ) );
+    qy.exec(QString("select count(*) from orderedqsos where ") + s);
+    if( qy.next())
+     qsosLogged.setText(tr("%1 qsos logged for operator").arg(qy.value(0).toString()));
    }
   else
    {
 
     qsoTable->setFilter(QLatin1String(""));
     qsoTable->select();
-//    qDebug ( "SelectstatementO %s", qPrintable ( qsoTable->showSelectStatement() ) );
+    qy.exec(QString("select count(*) from orderedqsos"));
+    if(qy.next())
+     qsosLogged.setText(tr("%1 qsos logged").arg(qy.value(0).toString()));
+    //qDebug ( "SelectstatementO %s", qPrintable ( qsoTable->showSelectStatement() ) );
    }
-  qsosLogged.setText(tr("%1 qsos logged").arg(qsoTable->rowCount()));
 }
 void LinLogBook::configureOpHandling()
 {

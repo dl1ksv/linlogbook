@@ -1,6 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Volker Schroer   *
- *   dl1ksv@gmx.de   *
+ *   Copyright (C) 2007 - 2016 by Volker Schroer, DL1KSV                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
