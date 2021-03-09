@@ -26,8 +26,8 @@
 #include "qslcardinfo.h"
 #include "integeritemdelegate.h"
 
-SetupQslCard::SetupQslCard (QWidget* parent, Qt::WindowFlags fl )
-		: QDialog ( parent, fl )
+SetupQslCard::SetupQslCard (QWidget* parent)
+        : QDialog ( parent)
 {
 	setupUi ( this );
 	model = new QSqlQueryModel;

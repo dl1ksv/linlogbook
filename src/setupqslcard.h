@@ -32,7 +32,7 @@ class SetupQslCard : public QDialog, private Ui::SetupQslCard
   Q_OBJECT
 
 public:
-  SetupQslCard(QWidget* parent = 0, Qt::WindowFlags fl = 0 );
+  SetupQslCard(QWidget* parent = 0);
   ~SetupQslCard();
   /*$PUBLIC_FUNCTIONS$*/
 

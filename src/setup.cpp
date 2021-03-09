@@ -21,16 +21,11 @@
 
 #include "setup.h"
 #include <QRegExpValidator>
-//#include "qsotablemodel.h"
-//#include "editqsoview.h"
-//#include <QTableView>
 
-Setup::Setup ( QWidget* parent, Qt::WindowFlags fl )
-		: QDialog ( parent, fl )
+Setup::Setup ( QWidget* parent)
+        : QDialog ( parent)
 {
 	setupUi ( this );
-//	cols=0;
-//	opDataView=0;
 	portNumber->setInputMask ( QLatin1String ( "000009" ) );
 	/**
 	if (dbstatus >= 1)  // Basetables are created, that is operator table exists.

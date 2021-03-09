@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2007 - 2016 by Volker Schroer, DL1KSV                   *
+ *   Copyright (C) 2007 - 2021 by Volker Schroer, DL1KSV                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,7 +17,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#define VERSION "LinLogBook 0.5.5"
+#define VERSION "LinLogBook 0.6.0"
 
 #include "linlogbook.h"
 #include "setup.h"
@@ -51,8 +51,8 @@
 
 QString dateFormat = QLatin1String("dd.MM.yyyy");
 
-LinLogBook::LinLogBook(QWidget* parent, Qt::WindowFlags fl)
-: QMainWindow(parent, fl)
+LinLogBook::LinLogBook(QWidget* parent)
+: QMainWindow(parent)
 {
 
   setupUi(this);
@@ -60,10 +60,10 @@ LinLogBook::LinLogBook(QWidget* parent, Qt::WindowFlags fl)
   setWindowIcon(QIcon(":/images/linlogbook.png"));
   readSettings();
   dbStatus = -1;
-  editQso = 0;
-  qsoTable = 0;
+  editQso = nullptr;
+  qsoTable = nullptr;
 
-  qsoServer = 0;
+  qsoServer = nullptr;
   opCallsignView=new QTableView();
   bool ok = false;
   qsosLogged.setText(tr("No qsos logged"));
@@ -714,7 +714,7 @@ void LinLogBook::clearInput()
 void LinLogBook::searchCallsign()
 {
   int column;
-  if (editQso <= NULL)
+  if (editQso == nullptr)
     return;
   QString s = QLatin1String("CALL like '") + findCallsign->text() + QLatin1String("%'");
   editQso->setFilter(s);
@@ -754,7 +754,7 @@ void LinLogBook::searchCallsign()
 void LinLogBook::saveInput()
 {
   bool ok;
-  if (editQso <= NULL)
+  if (editQso == nullptr)
     return;
   int rows = editQso->rowCount();
   if (rows == 0)
@@ -874,7 +874,7 @@ void LinLogBook::deleteAllEntries()
 {
   QSqlQuery qy;
 
-  if (editQso <= NULL)
+  if (editQso == nullptr)
     return;
   int rows = editQso->rowCount();
   if (rows <= 0)
@@ -1004,7 +1004,7 @@ void LinLogBook::prepareViews()
 
 void LinLogBook::startServer()
 {
-  if (qsoServer <= NULL)
+  if (qsoServer == nullptr)
   {
     qsoServer = new LinLogBookServer;
     connect(qsoServer, SIGNAL(qsoElement(QString)), this, SLOT(setDataFromServer(QString)));
@@ -1021,7 +1021,7 @@ void LinLogBook::startServer()
 
 void LinLogBook::stopServer()
 {
-  if (qsoServer > NULL)
+  if (qsoServer != nullptr)
   {
     qsoServer->close();
     serverStatus.setText(tr("Server is not running"));
@@ -1185,11 +1185,11 @@ int LinLogBook::writeAdif(QSqlQuery qy, QFile *exportFile)
 {
   QTextStream out(exportFile);
   QString s;
-  out << "ADIF v2.0 export from " << VERSION << endl;
-  out << "Generated on " << QDateTime::currentDateTime().toUTC().toString() << " UTC" << endl;
-  out << "<PROGRAMID:10>LinLogBook" << endl;
-  out << "<ADIF_Ver:1>2" << endl;
-  out << "<EOH>" << endl;
+  out << "ADIF v2.0 export from " << VERSION << Qt::endl;
+  out << "Generated on " << QDateTime::currentDateTime().toUTC().toString() << " UTC" << Qt::endl;
+  out << "<PROGRAMID:10>LinLogBook" << Qt::endl;
+  out << "<ADIF_Ver:1>2" << Qt::endl;
+  out << "<EOH>" << Qt::endl;
   qy.exec();
   int count = 0;
   while (qy.next())
@@ -1217,7 +1217,7 @@ int LinLogBook::writeAdif(QSqlQuery qy, QFile *exportFile)
          out << "<" << databaseFields[i] << ":" << s.size() << ">" << s;
        }
     }
-    out << "<EOR>" << endl;
+    out << "<EOR>" << Qt::endl;
     count++;
   }
   return count;
@@ -1282,7 +1282,7 @@ void LinLogBook::saveDatabaseDefinion()
       if (qy.next())
       {
         //    out << "BEGIN TRANSACTION;" << endl;
-        out << qy.value(0).toString() << QLatin1Char(';') << endl;
+        out << qy.value(0).toString() << QLatin1Char(';') << Qt::endl;
         qy.exec(QLatin1String("select * from ") + s);
         if ((s != QLatin1String("qslcards") && (s != QLatin1String("countrylist")) && (s != QLatin1String("prefixlist")))) // Only create content for definition tables
         {
@@ -1299,7 +1299,7 @@ void LinLogBook::saveDatabaseDefinion()
             }
             value = qy.value(col).toString();
             value.replace(QLatin1Char('\''), QLatin1String("''"));
-            out << "'" << value << "');" << endl;
+            out << "'" << value << "');" << Qt::endl;
           }
         }
         //    out << "COMMIT;" << endl;
@@ -1311,7 +1311,7 @@ void LinLogBook::saveDatabaseDefinion()
     out << dbStatus;
   else
     out << "2";
-  out << ";" << endl;
+  out << ";" << Qt::endl;
 
   exportFile.close();
   QMessageBox::information(0, tr("Save Databasedefinition"), tr("Definitions of database %1 successfully saved to file %2").arg(dbName).arg(exportFile.fileName()));
@@ -1755,8 +1755,8 @@ CallSignInfo LinLogBook::getCallSignInfo(QString callSign)
     ok= qy.exec(QString(QLatin1String("select MY_GRIDSQUARE from OPERATOR where ID=%1")).arg(qy.value(0).toInt()));
     if (ok)
      qy.next();
-     info.workingLocator=qy.value(0).toString();
-     myLocator = info.workingLocator;
+    info.workingLocator=qy.value(0).toString();
+    myLocator = info.workingLocator;
    }
   ok = qy.exec(QString(QLatin1String("select mainPrefix,WAZ,ITU from prefixlist where prefix='%1'")).arg(s));
   if (!ok)
@@ -1879,7 +1879,7 @@ void LinLogBook::saveViews()
       {
         qy.exec(QLatin1String("select sql from sqlite_master where type='view' and name='") + s + QLatin1String("'"));
         if (qy.next())
-          out << qy.value(0).toString() << QLatin1Char(';') << endl;
+          out << qy.value(0).toString() << QLatin1Char(';') << Qt::endl;
       }
     }
   }
@@ -2271,7 +2271,7 @@ void LinLogBook::setOpFilter(bool pressed)
  QString s;
  if( dbStatus <=0)
   return;
-  if(pressed)
+ if(pressed)
    {
     s=QString("OPERATOR=%1").arg(operatorTable->data(operatorTable->index(opId,0),Qt::DisplayRole).toInt());
     qsoTable->setFilter(s);

@@ -31,8 +31,8 @@
 #include <QMessageBox>
 #include <QSqlError>
 #include <QSqlField>
-CreateDatabaseFields::CreateDatabaseFields (QWidget* parent, Qt::WindowFlags fl )
-		: QDialog ( parent, fl )
+CreateDatabaseFields::CreateDatabaseFields (QWidget* parent)
+        : QDialog ( parent)
 {
 	QSqlRecord r;
 	setupUi ( this );

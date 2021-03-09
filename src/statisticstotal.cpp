@@ -25,8 +25,8 @@
 #include <QMessageBox>
 #include <QHeaderView>
 
-StatisticsTotal::StatisticsTotal(const QString MenuText, QWidget* parent, Qt::WindowFlags fl)
-: QDialog( parent, fl ), Ui::StatisticsTotal()
+StatisticsTotal::StatisticsTotal(const QString MenuText, QWidget* parent)
+: QDialog( parent), Ui::StatisticsTotal()
 {
 	setupUi(this);
 QSqlQuery qy;
