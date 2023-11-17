@@ -183,6 +183,8 @@ void LinLogBook::editOperatorData()
 void LinLogBook::readSettings()
 {
   QSettings settings(QLatin1String("DL1KSV"), QLatin1String("LinLogBook"));
+  restoreGeometry(settings.value("geometry").toByteArray());
+  restoreState(settings.value("windowState").toByteArray());
   opId= settings.value(QLatin1String("opId"),-1).toInt();
   myLinLogBookDirectory = settings.value(QLatin1String("LinLogBookDirectory")).toString();
   detailView->setLastDirectory(settings.value(QLatin1String("LastCardDirectory"),QVariant(QLatin1String("."))).toString());
@@ -203,6 +205,8 @@ void LinLogBook::saveSettings()
   //settings.setValue(QLatin1String("myName"), myName);
   //settings.setValue(QLatin1String("myCity"), myCity);
   //settings.setValue(QLatin1String("myLocator"), myLocator);
+  settings.setValue("geometry",saveGeometry());
+  settings.setValue("windowState",saveState());
   settings.setValue(QLatin1String("opId"),opId);
   settings.setValue(QLatin1String("LinLogBookDirectory"), myLinLogBookDirectory);
   settings.setValue(QLatin1String("LastCardDirectory"),detailView->getLastDirectory());
