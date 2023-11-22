@@ -7,8 +7,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>893</width>
-    <height>583</height>
+    <width>996</width>
+    <height>621</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -155,7 +155,7 @@
              </size>
             </property>
             <property name="sizeAdjustPolicy">
-             <enum>QComboBox::AdjustToMinimumContentsLength</enum>
+             <enum>QComboBox::AdjustToContents</enum>
             </property>
            </widget>
           </item>
@@ -516,7 +516,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="layoutWidget">
+      <widget class="QWidget" name="layoutWidget1">
        <layout class="QVBoxLayout" name="verticalLayout_3">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -529,15 +529,21 @@
           </item>
           <item>
            <widget class="QComboBox" name="opCallsign">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>10</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="minimumSize">
              <size>
-              <width>200</width>
+              <width>50</width>
               <height>0</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>620</width>
+              <width>300</width>
               <height>16777215</height>
              </size>
             </property>
@@ -646,8 +652,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>893</width>
-     <height>19</height>
+     <width>996</width>
+     <height>23</height>
     </rect>
    </property>
    <property name="defaultUp">
@@ -691,8 +697,8 @@
      <rect>
       <x>252</x>
       <y>156</y>
-      <width>201</width>
-      <height>184</height>
+      <width>191</width>
+      <height>216</height>
      </rect>
     </property>
     <property name="layoutDirection">

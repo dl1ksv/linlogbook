@@ -145,6 +145,7 @@ private:
     int dbStatus;
     void readSettings();
     void saveSettings();
+    void readTableSettings();
     bool openSelectedDb(QString);
     bool readTables();
     bool foreignKey(QString);

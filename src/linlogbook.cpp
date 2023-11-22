@@ -1,5 +1,5 @@
 /***************************************************************************
- *   Copyright (C) 2007 - 2021 by Volker Schroer, DL1KSV                   *
+ *   Copyright (C) 2007 - 2023 by Volker Schroer, DL1KSV                   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -17,7 +17,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 
-#define VERSION "LinLogBook 0.6.0"
+#define VERSION "LinLogBook 0.6.1"
 
 #include "linlogbook.h"
 #include "setup.h"
@@ -32,6 +32,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QFile>
+#include <QFileInfo>
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QDir>
@@ -48,6 +49,14 @@
 #include <QPainter>
 #include <math.h>
 #include <QPrintDialog>
+
+#include <QtGlobal>
+
+#if QT_VERSION >= QT_VERSION_CHECK(5,14,0)
+#define ENDL Qt::endl
+#else
+#define ENDL endl
+#endif
 
 QString dateFormat = QLatin1String("dd.MM.yyyy");
 
@@ -137,6 +146,7 @@ LinLogBook::LinLogBook(QWidget* parent)
   connect(showAllQsos,SIGNAL(clicked(bool)),this,SLOT(setOpFilter(bool)));
   //Adif fields, eqsl interprets
   restrictEqslExport << "QSO_DATE" << "TIME_ON" <<"CALL" <<"MODE" <<"BAND" << "FREQ" <<"PROP_MODE" <<"QSLMSG" << "RST_SENT";
+  readTableSettings();
 }
 
 LinLogBook::~LinLogBook()
@@ -198,13 +208,26 @@ void LinLogBook::readSettings()
   splitter->restoreState(settings.value(QLatin1String("splitterSizes")).toByteArray());
 }
 
+void LinLogBook::readTableSettings()
+{
+  if ( dbStatus < 3 )
+    return;
+  
+  QSettings settings(QLatin1String("DL1KSV"), QLatin1String("LinLogBook"));
+  settings.beginGroup(QFileInfo(dbName).fileName());
+  qsoList->restoreGeometry(settings.value(QLatin1String("qsoList")).toByteArray());
+  qsoList->horizontalHeader()->restoreGeometry(settings.value(QLatin1String("qsoListHeader")).toByteArray());
+  qsoList->horizontalHeader()->restoreState(settings.value(QLatin1String("qsoListHeaderState")).toByteArray());
+  editQsoRecord->restoreGeometry(settings.value(QLatin1String("editQsoRecord")).toByteArray());
+  editQsoRecord->horizontalHeader()->restoreGeometry(settings.value(QLatin1String("editQsoRecordHeader")).toByteArray());
+  editQsoRecord->horizontalHeader()->restoreState(settings.value(QLatin1String("editQsoRecordHeaderState")).toByteArray());
+  settings.endGroup();
+
+}
+
 void LinLogBook::saveSettings()
 {
   QSettings settings(QLatin1String("DL1KSV"), QLatin1String("LinLogBook"));
-  //settings.setValue(QLatin1String("myCall"), myCall);
-  //settings.setValue(QLatin1String("myName"), myName);
-  //settings.setValue(QLatin1String("myCity"), myCity);
-  //settings.setValue(QLatin1String("myLocator"), myLocator);
   settings.setValue("geometry",saveGeometry());
   settings.setValue("windowState",saveState());
   settings.setValue(QLatin1String("opId"),opId);
@@ -216,6 +239,18 @@ void LinLogBook::saveSettings()
   settings.setValue(QLatin1String("dateFormat"), dateFormat);
   settings.setValue(QLatin1String("portNumer"), portNumber);
   settings.setValue(QLatin1String("splitterSizes"), splitter->saveState());
+  if ( dbStatus > 2 )
+  {
+    settings.beginGroup(QFileInfo(dbName).fileName());
+    settings.setValue(QLatin1String("qsoList"), qsoList->saveGeometry());
+    settings.setValue(QLatin1String("qsoListHeader"), qsoList->horizontalHeader()->saveGeometry());
+    settings.setValue(QLatin1String("qsoListHeaderState"), qsoList->horizontalHeader()->saveState());
+    settings.setValue(QLatin1String("editQsoRecord"), editQsoRecord->saveGeometry());
+    settings.setValue(QLatin1String("editQsoRecordHeader"), editQsoRecord->horizontalHeader()->saveGeometry());
+    settings.setValue(QLatin1String("editQsoRecordHeaderState"),editQsoRecord->horizontalHeader()->saveState());
+    settings.endGroup();
+
+  }
 }
 
 void LinLogBook::newDB()
@@ -296,6 +331,7 @@ void LinLogBook::openDB()
       enableMenuEntries();
 
   }
+  readTableSettings();
 }
 
 void LinLogBook::defineQsoTableFields()
@@ -757,7 +793,6 @@ void LinLogBook::searchCallsign()
 
 void LinLogBook::saveInput()
 {
-  bool ok;
   if (editQso == nullptr)
     return;
   int rows = editQso->rowCount();
@@ -788,7 +823,7 @@ void LinLogBook::saveInput()
       editQso->setData(I, QVariant(QDateTime::currentDateTime().toUTC().time().toString(QLatin1String("HH:mm"))), Qt::EditRole);
     }
 
-    if ((ok = editQso->submitAll()))
+    if (editQso->submitAll() == true)
     {
       qsoTable->select();
       clearInput();
@@ -1189,11 +1224,11 @@ int LinLogBook::writeAdif(QSqlQuery qy, QFile *exportFile)
 {
   QTextStream out(exportFile);
   QString s;
-  out << "ADIF v2.0 export from " << VERSION << Qt::endl;
-  out << "Generated on " << QDateTime::currentDateTime().toUTC().toString() << " UTC" << Qt::endl;
-  out << "<PROGRAMID:10>LinLogBook" << Qt::endl;
-  out << "<ADIF_Ver:1>2" << Qt::endl;
-  out << "<EOH>" << Qt::endl;
+  out << "ADIF v2.0 export from " << VERSION << ENDL;
+  out << "Generated on " << QDateTime::currentDateTime().toUTC().toString() << " UTC" << ENDL;
+  out << "<PROGRAMID:10>LinLogBook" << ENDL;
+  out << "<ADIF_Ver:1>2" << ENDL;
+  out << "<EOH>" << ENDL;
   qy.exec();
   int count = 0;
   while (qy.next())
@@ -1221,7 +1256,7 @@ int LinLogBook::writeAdif(QSqlQuery qy, QFile *exportFile)
          out << "<" << databaseFields[i] << ":" << s.size() << ">" << s;
        }
     }
-    out << "<EOR>" << Qt::endl;
+    out << "<EOR>" << ENDL;
     count++;
   }
   return count;
@@ -1286,7 +1321,7 @@ void LinLogBook::saveDatabaseDefinion()
       if (qy.next())
       {
         //    out << "BEGIN TRANSACTION;" << endl;
-        out << qy.value(0).toString() << QLatin1Char(';') << Qt::endl;
+        out << qy.value(0).toString() << QLatin1Char(';') << ENDL;
         qy.exec(QLatin1String("select * from ") + s);
         if ((s != QLatin1String("qslcards") && (s != QLatin1String("countrylist")) && (s != QLatin1String("prefixlist")))) // Only create content for definition tables
         {
@@ -1303,7 +1338,7 @@ void LinLogBook::saveDatabaseDefinion()
             }
             value = qy.value(col).toString();
             value.replace(QLatin1Char('\''), QLatin1String("''"));
-            out << "'" << value << "');" << Qt::endl;
+            out << "'" << value << "');" << ENDL;
           }
         }
         //    out << "COMMIT;" << endl;
@@ -1315,7 +1350,7 @@ void LinLogBook::saveDatabaseDefinion()
     out << dbStatus;
   else
     out << "2";
-  out << ";" << Qt::endl;
+  out << ";" << ENDL;
 
   exportFile.close();
   QMessageBox::information(0, tr("Save Databasedefinition"), tr("Definitions of database %1 successfully saved to file %2").arg(dbName).arg(exportFile.fileName()));
@@ -1883,7 +1918,7 @@ void LinLogBook::saveViews()
       {
         qy.exec(QLatin1String("select sql from sqlite_master where type='view' and name='") + s + QLatin1String("'"));
         if (qy.next())
-          out << qy.value(0).toString() << QLatin1Char(';') << Qt::endl;
+          out << qy.value(0).toString() << QLatin1Char(';') << ENDL;
       }
     }
   }
@@ -2324,7 +2359,7 @@ void LinLogBook::configureOpHandling()
  opCallsign->show();
 
  OpCall.setText(tr("Operator: ")+operatorTable->data(operatorTable->index(opId,1),Qt::DisplayRole).toString());
-/**
+
 if(operatorTable->select()) {
    qDebug("Selection was OK");
    qDebug("Table contains %d rows",operatorTable->rowCount());
@@ -2333,5 +2368,4 @@ if(operatorTable->select()) {
      qDebug("Selection was not OK");
      qDebug("Error was: %s", qPrintable(operatorTable->lastError().text()));
    }
- **/
 }
