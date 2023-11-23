@@ -1,3 +1,10 @@
+LinLogBook 0.6.1
+
+Handling Qt::endl depending on the Qt Version
+There are differences between  <=5.14 and 5.15
+
+Save and restore the geometry of the main window, qso table and the search window.
+
 LinLogBook 0.5.5
 
 Now LinLogBook builds against qt5.
@@ -12,7 +19,7 @@ Printing of qsl cards now respects printer resolution.
 Time of qso was not printed any longer on qsl card. ( Due to changes in qt ? ). Now fixed.
 
 You can store now eQsl cards in your database.
-Fixed tow format bugs in date and time format.
+Fixed two format bugs in date and time format.
 
 LinLogBook 0.4
 As in the meantime the ADIF specification  distinguishes between the different ways  ( bureau, eqs, lotw )  sending qsl, LinLogBook is able to keep track of these ways.

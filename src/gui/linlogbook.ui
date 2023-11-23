@@ -522,6 +522,12 @@
          <layout class="QHBoxLayout" name="horizontalLayout_3">
           <item>
            <widget class="QLabel" name="localOp">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
             <property name="text">
              <string>Operator</string>
             </property>
@@ -530,7 +536,7 @@
           <item>
            <widget class="QComboBox" name="opCallsign">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+             <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
               <horstretch>10</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -538,7 +544,7 @@
             <property name="minimumSize">
              <size>
               <width>50</width>
-              <height>0</height>
+              <height>30</height>
              </size>
             </property>
             <property name="maximumSize">
@@ -559,6 +565,18 @@
            <widget class="QRadioButton" name="showAllQsos">
             <property name="enabled">
              <bool>false</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
             </property>
             <property name="toolTip">
              <string>Shows all / only selected Ops qsos</string>
