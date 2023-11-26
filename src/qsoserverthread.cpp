@@ -19,7 +19,7 @@
 #include "qsoserverthread.h"
 #include <QDataStream>
 #include <QSqlQuery>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QVariant>
 
 QsoServerThread::QsoServerThread ( QTcpSocket *p, QObject *parent )
@@ -128,7 +128,7 @@ CallSignInfo QsoServerThread::getCallSignInfo ( QString callSign )
 	ok = qy.next();
 	if ( !ok )
 	{
-		pos = s.indexOf ( QRegExp ( QLatin1String ( "[0-9]" ) ), 1 );
+                pos = s.indexOf ( QRegularExpression ( QLatin1String ( "[0-9]" ) ), 1 );
 		s = s.left ( pos + 1 );
 		ok = qy.exec ( QString ( QLatin1String ( "select mainPrefix,WAZ,ITU from prefixlist where prefix='%1'" ) ).arg ( s ) );
 		if ( !ok )

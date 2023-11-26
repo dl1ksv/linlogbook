@@ -4,6 +4,11 @@ Handling Qt::endl depending on the Qt Version
 There are differences between  <=5.14 and 5.15
 
 Save and restore the geometry of the main window, qso table and the search window.
+Switch from QRegExp to QRegularExpression
+Same for validator
+
+Checking if operator dependency is required when exporting qsl data
+
 
 LinLogBook 0.5.5
 

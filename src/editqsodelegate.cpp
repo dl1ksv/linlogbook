@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Volker Schroer   *
- *   dl1ksv@gmx.de   *
+ *   Copyright (C) 2007 -2023 by Volker Schroer                            *
+ *   dl1ksv@gmx.de                                                         *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -21,7 +21,6 @@
 #include <QDateEdit>
 #include <QTimeEdit>
 #include <QLineEdit>
-#include "enumerationeditor.h"
 EditQsoDelegate::EditQsoDelegate ( QObject *parent )
 		: QSqlRelationalDelegate ( parent )
 {}
@@ -47,57 +46,32 @@ QWidget * EditQsoDelegate::createEditor ( QWidget * parent, const QStyleOptionVi
 		column--;
 		if ( qsoFieldTypes[column ] == QLatin1String ( "D" ) )
 		{
-			/**
-			  QDateEdit *editor = new QDateEdit (QDate::currentDate(), parent );
-
-			editor->setDisplayFormat(QString("dd.MM.yyyy"));
-			**/
 			QLineEdit *ed = new QLineEdit ( parent );
-			QRegExp rx (QLatin1String( "^(([0][1-9]|[12][0-9])[.]([0][1-9]|[1][0-2])|([3][0-1][.](([0]([1]|[3]|[5]|[7]|[8])|([1]([0]|[2]))))))[.][0-9][0-9][0-9][0-9]$" ));
-			QValidator *validator = new QRegExpValidator ( rx , ed );
+                        QRegularExpression rx (QLatin1String( "^(([0][1-9]|[12][0-9])[.]([0][1-9]|[1][0-2])|([3][0-1][.](([0]([1]|[3]|[5]|[7]|[8])|([1]([0]|[2]))))))[.][0-9][0-9][0-9][0-9]$" ));
+                        QValidator *validator = new QRegularExpressionValidator ( rx , ed );
 			ed->setValidator ( validator );
 
 			editor = ed;
 		}
 		else if ( qsoFieldTypes[column ] == QLatin1String ( "T" ) )
 		{
-			/**
-			  QTimeEdit *editor = new QTimeEdit (QTime::currentTime(), parent );
-			editor->setDisplayFormat(QString("hh:mm"));
-			**/
 			QLineEdit *ed = new QLineEdit ( parent );
-			QRegExp rx (QLatin1String( "^([01][0-9]|2[0-4]):[0-5][0-9]$") );
-			QValidator *validator = new QRegExpValidator ( rx , ed );
+                        QRegularExpression rx (QLatin1String( "^([01][0-9]|2[0-4]):[0-5][0-9]$") );
+                        QValidator *validator = new QRegularExpressionValidator ( rx , ed );
 			ed->setValidator ( validator );
-//return ed
 			editor = ed;
 		}
 		else if ( qsoFieldTypes[column ] == QLatin1String ( "G" ) )
 		{
 			QLineEdit *ed = new QLineEdit ( parent );
-			QRegExp rx (QLatin1String ("^[A-R][A-R][0-9][0-9][A-X][A-X]$" ));
-			QValidator *validator = new QRegExpValidator ( rx , ed );
+                        QRegularExpression rx (QLatin1String ("^[A-R][A-R][0-9][0-9][A-X][A-X]$" ));
+                        QValidator *validator = new QRegularExpressionValidator ( rx , ed );
 			ed->setValidator ( validator );
-//  return ed;
 			editor = ed;
 		}
-		/**
-		else if ( qsoFieldTypes[column ] == QString ( 'E' ) )
-		{
-		 EnumerationEditor *ed =new EnumerationEditor(parent);
-		 const QSqlRelationalTableModel *sqlModel = qobject_cast<const QSqlRelationalTableModel *>(index.model());
-		 QSqlTableModel *childModel=sqlModel->relationModel(index.column());
-		 ed->setModel(childModel);
-		 ed->setModelColumn(childModel->fieldIndex(sqlModel->relation(index.column()).displayColumn()));
-
-		 editor=ed;
-		}
-		**/
 		else
 			editor = QSqlRelationalDelegate::createEditor ( parent,  option,  index );
 	}
-//connect(editor,SIGNAL(editingFinished()),this,SLOT(CloseEditor()));
-
 	return editor;
 }
 

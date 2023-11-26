@@ -269,7 +269,8 @@ void LinLogBook::newDB()
   dir.cd(myLinLogBookDirectory);
   dir.makeAbsolute();
   s = dir.path();
-  QFileDialog dbOpenDialog(this, tr("Create a new Database"), s, tr("DB files (*.dblog)"));
+  QFileDialog dbOpenDialog(nullptr, tr("Create a new Database"), s, tr("DB files (*.dblog)"));
+  dbOpenDialog.setMaximumHeight(500);
   if (dbOpenDialog.exec() == QDialog::Accepted)
   {
     dbname = dbOpenDialog.selectedFiles().at(0);
@@ -321,6 +322,7 @@ void LinLogBook::openDB()
   dir.makeAbsolute();
   s = dir.path();
   QFileDialog dbOpenDialog(this, tr("Open an existing Database"), s, tr("DB files (*.dblog)"));
+  dbOpenDialog.setFileMode(QFileDialog::ExistingFile);
   dbOpenDialog.setAcceptMode(QFileDialog::AcceptOpen);
   if (dbOpenDialog.exec() == QDialog::Accepted)
   {
@@ -554,7 +556,7 @@ void LinLogBook::importAdifFile()
             }
             break;
           case adifName:
-            pos = actLine.indexOf(QRegExp(QLatin1String(":|>")));
+            pos = actLine.indexOf(QRegularExpression(QLatin1String(":|>")));
             paramName = actLine.left(pos);
             if (paramName.toUpper() == QLatin1String("EOR"))
               Status = insertRecord;
@@ -564,7 +566,7 @@ void LinLogBook::importAdifFile()
                 qDebug("Falscher Aufbau");
               pos++;
               actLine = actLine.mid(pos);
-              pos = actLine.indexOf(QRegExp(QLatin1String(":|>")));
+              pos = actLine.indexOf(QRegularExpression(QLatin1String(":|>")));
               valueLength = actLine.left(pos).toInt();
               actLine = actLine.mid(pos);
               pos = actLine.indexOf(QLatin1Char('>'));
@@ -711,7 +713,7 @@ void LinLogBook::clearInput()
   if (cind >= 0)
   {
     s = defaultBand->currentText();
-    col = databaseFields.indexOf(QRegExp(QLatin1String("BAND"))) + 1;
+    col = databaseFields.indexOf(QRegularExpression(QLatin1String("BAND"))) + 1;
     if (col > 0)
     {
       QModelIndex I = editQso->index(0, col);
@@ -723,7 +725,7 @@ void LinLogBook::clearInput()
   if (cind >= 0)
   {
     s = defaultMode->currentText();
-    col = databaseFields.indexOf(QRegExp(QLatin1String("MODE"))) + 1;
+    col = databaseFields.indexOf(QRegularExpression(QLatin1String("MODE"))) + 1;
     if (col > 0)
     {
       QModelIndex I = editQso->index(0, col);
@@ -734,7 +736,7 @@ void LinLogBook::clearInput()
   if (opId >= 0)
   {
     s = opCallsign->currentText();
-    col = databaseFields.indexOf(QRegExp(QLatin1String("OPERATOR"))) + 1;
+    col = databaseFields.indexOf(QRegularExpression(QLatin1String("OPERATOR"))) + 1;
     if (col > 0)
     {
       QModelIndex I = editQso->index(0, col);
@@ -806,7 +808,7 @@ void LinLogBook::saveInput()
     (editQsoRecord->selectionModel())->setCurrentIndex(i, QItemSelectionModel::NoUpdate);
     editQsoRecord->setFocus(); // To avoid segfault if enter was not pressed before
     //Check if QSO_DATE is set
-    int col = databaseFields.indexOf(QRegExp(QLatin1String("QSO_DATE"))) + 1;
+    int col = databaseFields.indexOf(QRegularExpression(QLatin1String("QSO_DATE"))) + 1;
     if (col >= 1)
     {
       QModelIndex I = editQso->index(0, col);
@@ -814,7 +816,7 @@ void LinLogBook::saveInput()
         editQso->setData(I, QVariant(QDate::currentDate().toString(dateFormat)), Qt::EditRole);
     }
     //Check if TIME_* is set
-    col = databaseFields.indexOf(QRegExp(QLatin1String("TIME_.+"))) + 1;
+    col = databaseFields.indexOf(QRegularExpression(QLatin1String("TIME_.+"))) + 1;
     if (col >= 1)
     {
       QModelIndex I = editQso->index(0, col);
@@ -853,7 +855,7 @@ void LinLogBook::saveInput()
 
 bool LinLogBook::foreignKey(QString s)
 {
-  int key = databaseFields.indexOf(QRegExp(s));
+  int key = databaseFields.indexOf(QRegularExpression(s));
   if (key < 0)
     return false;
   if (fieldsTypes[key] == QLatin1String("E"))
@@ -936,7 +938,7 @@ void LinLogBook::deleteAllEntries()
 
 bool LinLogBook::dateType(QString s)
 {
-  int key = databaseFields.indexOf(QRegExp(s));
+  int key = databaseFields.indexOf(QRegularExpression(s));
   if (key < 0)
     return false;
   if (fieldsTypes[key] == QLatin1String("D"))
@@ -1095,7 +1097,7 @@ int LinLogBook::prepareItem(QString s, QString *s1, QString *s2)
   if (!actLine.startsWith(QLatin1Char('<')))
     return -1;
   actLine = actLine.mid(1);
-  pos = actLine.indexOf(QRegExp(QLatin1String(":|>")));
+  pos = actLine.indexOf(QRegularExpression(QLatin1String(":|>")));
   paramName = actLine.left(pos);
   if (pos < 0)
   {
@@ -1104,7 +1106,7 @@ int LinLogBook::prepareItem(QString s, QString *s1, QString *s2)
   }
   pos++;
   actLine = actLine.mid(pos);
-  pos = actLine.indexOf(QRegExp(QLatin1String(":|>")));
+  pos = actLine.indexOf(QRegularExpression(QLatin1String(":|>")));
   valueLength = actLine.left(pos).toInt();
   actLine = actLine.mid(pos);
   pos = actLine.indexOf(QLatin1Char('>'));
@@ -1123,7 +1125,7 @@ int LinLogBook::prepareItem(QString s, QString *s1, QString *s2)
   }
   if (databaseFields.contains(paramName))
   {
-    int col = databaseFields.indexOf(QRegExp(paramName));
+    int col = databaseFields.indexOf(QRegularExpression(paramName));
     if (col >= 0)
       col++;
     *s1 = paramValue;
@@ -1194,7 +1196,8 @@ void LinLogBook::exportForEQSLUpload()
   }
   // Menu is only visible if EQSL_QSL_SENT field is present
   QString selectString=QLatin1String("select ") + databaseFields.join(QLatin1String(",")) + QLatin1String(" from qsos where EQSL_QSL_SENT= (select id from EQSL_QSL_SENT where EQSL_QSL_SENTvalue='R') ");
-  if(databaseFields.contains(QLatin1String("OPERATOR"),Qt::CaseInsensitive)  ) // Restrict to operator !!!
+  if( showAllQsos->isChecked())
+      if(databaseFields.contains(QLatin1String("OPERATOR"),Qt::CaseInsensitive) ) // Restrict to operator !!!
       selectString = selectString + QString(" and OPERATOR=%1").arg(operatorTable->data(operatorTable->index(opId,0),Qt::DisplayRole).toInt());
   QSqlQuery qy(selectString);
   int count = writeAdif(qy, &exportFile);
@@ -1413,7 +1416,7 @@ void LinLogBook::setDefaultBand(int cind)
   if (cind >= 0)
   {
     QString s = defaultBand->currentText();
-    int col = databaseFields.indexOf(QRegExp(QLatin1String("BAND"))) + 1;
+    int col = databaseFields.indexOf(QRegularExpression(QLatin1String("BAND"))) + 1;
     QModelIndex I = editQso->index(0, col);
     editQso->setData(I, QVariant(defaultBand->itemData(cind).toInt()), Qt::EditRole);
     editQso->setData(I, QVariant(s), Qt::DisplayRole);
@@ -1425,7 +1428,7 @@ void LinLogBook::setDefaultMode(int cind)
   if (cind >= 0)
   {
     QString s = defaultMode->currentText();
-    int col = databaseFields.indexOf(QRegExp(QLatin1String("MODE"))) + 1;
+    int col = databaseFields.indexOf(QRegularExpression(QLatin1String("MODE"))) + 1;
     QModelIndex I = editQso->index(0, col);
     editQso->setData(I, QVariant(defaultMode->itemData(cind).toInt()), Qt::EditRole);
     editQso->setData(I, QVariant(s), Qt::DisplayRole);
@@ -1553,10 +1556,6 @@ void LinLogBook::importCtyDat()
     QMessageBox::information(0, tr("Import cty.dat"), tr("Could not open file: ") + ctyFileName);
   else
   {
- //   QProgressDialog progress(this);
-
- //   progress.setLabelText(tr("Importing file %1").arg(ctyFileName));
- //   progress.setRange(0, importFile.size());
     int bytesRead = 0;
     int count = 0;
     QProgressDialog progress(tr("Importing file %1").arg(ctyFileName),tr("Cancel Import\nImport will be incomplete"),0,importFile.size(),this);
@@ -1803,7 +1802,7 @@ CallSignInfo LinLogBook::getCallSignInfo(QString callSign)
   ok = qy.next();
   if (!ok)
   {
-    pos = s.indexOf(QRegExp(QLatin1String("[0-9]")), 1);
+    pos = s.indexOf(QRegularExpression(QLatin1String("[0-9]")), 1);
     s = s.left(pos + 1);
     ok = qy.exec(QString(QLatin1String("select mainPrefix,WAZ,ITU from prefixlist where prefix='%1'")).arg(s));
     if (!ok)
@@ -2225,7 +2224,8 @@ void LinLogBook::exportForLotWUpload()
   }
   // Menu is only visible if EQSL_QSL_SENT field is present
   QString selectString=QLatin1String("select ") + databaseFields.join(QLatin1String(",")) + QLatin1String(" from qsos where LOTW_QSL_SENT= (select id from LOTW_QSL_SENT where LOTW_QSL_SENTvalue='R') ");
-  if(databaseFields.contains(QLatin1String("OPERATOR"),Qt::CaseInsensitive)  ) // Restrict to operator !!!
+  if( showAllQsos->isChecked())
+      if(databaseFields.contains(QLatin1String("OPERATOR"),Qt::CaseInsensitive)  ) // Restrict to operator !!!
       selectString = selectString + QString(" and OPERATOR=%1").arg(operatorTable->data(operatorTable->index(opId,0),Qt::DisplayRole).toInt());
   //qDebug("Query String %s", qPrintable(selectString));
   QSqlQuery qy(selectString);
