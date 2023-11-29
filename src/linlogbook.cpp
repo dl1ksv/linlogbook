@@ -2352,6 +2352,7 @@ void LinLogBook::configureOpHandling()
  opCallsign->setModel(operatorTable);
  opCallsign->setModelColumn(1);
  opCallsignView->setModel(operatorTable);
+ opCallsignView->resizeColumnsToContents();
  opCallsignView->hideColumn(0);
  opCallsignView->verticalHeader()->hide();
  opCallsign->setView(opCallsignView);

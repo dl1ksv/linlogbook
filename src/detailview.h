@@ -30,7 +30,6 @@
 #include <QString>
 
 class QSqlRecord;
-class QStringList;
 class DetailView : public QWidget , private Ui::DetailView
 {
     Q_OBJECT
